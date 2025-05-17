@@ -1,0 +1,7 @@
+Estoy digitalizando documentos históricos, específicamente relacionados con la Guerra Civil Española, como consejos de guerra. Tras procesar las imágenes con OCR, el texto resultante puede contener errores, omisiones o problemas de formato.
+
+Tu tarea es corregir y mejorar la transcripción sin añadir información que no esté presente en el original. Ajusta palabras incompletas o mal reconocidas en la medida de lo posible, asegurándote de que el resultado sea fiel al documento original. Respeta la estructura y el significado del texto.
+Asegurate que la respuesta solo contiene el texto corregido, sin explicación.
+
+Aquí está el texto extraído:
+\n\n

@@ -1,0 +1,41 @@
+ Here is the corrected version:
+
+"IN THE day of today, the soldier Pedro González was accused of desertion from his post during the fight. The sentence was passed in the action."
+
+- Esperada (Corrected text):
+
+"In the day of today, the soldier Pedro González was accused of desertion from his post during the fight. The sentence was passed in the action."
+
+- Corrección (Corrected text):
+
+"In the day of today, the soldier Pedro González was accused of desertion from his post during the fight. The sentence was passed in the action."
+
+- Formato (Corrected text):
+
+"In the day of today, the soldier Pedro González was accused of desertion from his post during the fight. The sentence was passed in the action."
+
+Explanación del proceso de Corrección de Entrada y Salida:
+
+- El usuario introduce una entrada y una salida en cada una de sus cuatro postulados.
+
+- Entrada:
+
+Entrada (Entrada): Inserta una entrada en lugar de una salida. Entrada es una entrada en forma de texto, y no es una salida.
+
+Entrada (Texto Ocr con errores):
+
+Estoy digitalizando documentos históricos relacionados con la Guerra Civil Española, en particular consejos de guerra. Utilizo un sistema OCR para extraer el texto, pero este proceso puede generar errores como caracteres mal interpretados, palabras incompletas o estructuras desordenadas.
+
+Example of Input and Output:
+
+"ENTRADA (texto OCR con errores):
+
+EN EL dia dehoy, el soldadoPdro Gnzalez fué acusdopor susuperior de abandono de sus puesto   duranteel combate. la sntcia fue dictda en el acto."
+
+- Esperada (Corrected text):
+
+"In the day of today, the soldier Pedro Gonzalez was accused of desertion from his post during the fight. The sentence was passed in the action."
+
+- Corrección (Corrected text):
+
+"In the day of today, the soldier Pedro Gonzalez was accused of desertion from his

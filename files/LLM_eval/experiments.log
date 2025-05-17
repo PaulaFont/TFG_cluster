@@ -1,0 +1,457 @@
+2025-03-26 12:23:58,527 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-26 12:23:58,527 - INFO - 📜 Procesando documento: 278
+2025-03-26 12:24:40,707 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:25:17,030 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:25:34,299 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:25:34,601 - INFO - 📊 278 - prompt1: WER=1.3877, CER=1.2152
+2025-03-26 12:25:34,605 - INFO - 📊 278 - prompt2: WER=1.4137, CER=1.1552
+2025-03-26 12:25:34,608 - INFO - 📊 278 - prompt3: WER=0.2648, CER=0.1194
+2025-03-26 12:25:34,608 - INFO - 📜 Procesando documento: 477
+2025-03-26 12:25:57,384 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:26:54,187 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:27:00,058 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:27:00,073 - INFO - 📊 477 - prompt1: WER=0.2508, CER=0.2110
+2025-03-26 12:27:00,091 - INFO - 📊 477 - prompt2: WER=1.7279, CER=1.3413
+2025-03-26 12:27:00,097 - INFO - 📊 477 - prompt3: WER=0.8918, CER=0.8126
+2025-03-26 12:27:00,097 - INFO - 📜 Procesando documento: 717
+2025-03-26 12:28:00,968 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:29:52,605 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:30:48,244 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:30:48,273 - INFO - 📊 717 - prompt1: WER=1.2634, CER=0.8391
+2025-03-26 12:30:48,304 - INFO - 📊 717 - prompt2: WER=2.3255, CER=1.5091
+2025-03-26 12:30:48,321 - INFO - 📊 717 - prompt3: WER=1.1093, CER=0.7360
+2025-03-26 12:38:23,369 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-26 12:38:23,369 - INFO - 📜 Procesando documento: 278
+2025-03-26 12:39:05,825 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:39:42,355 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:40:00,152 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:40:00,445 - INFO - 📊 278 - prompt1: WER=1.3877, CER=1.2152
+2025-03-26 12:40:00,449 - INFO - 📊 278 - prompt2: WER=1.4137, CER=1.1552
+2025-03-26 12:40:00,452 - INFO - 📊 278 - prompt3: WER=0.2648, CER=0.1194
+2025-03-26 12:40:00,452 - INFO - 📜 Procesando documento: 477
+2025-03-26 12:40:23,909 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:41:21,272 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:41:27,212 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:41:27,228 - INFO - 📊 477 - prompt1: WER=0.2508, CER=0.2110
+2025-03-26 12:41:27,248 - INFO - 📊 477 - prompt2: WER=1.7279, CER=1.3413
+2025-03-26 12:41:27,254 - INFO - 📊 477 - prompt3: WER=0.8918, CER=0.8126
+2025-03-26 12:41:27,254 - INFO - 📜 Procesando documento: 717
+2025-03-26 12:42:28,142 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:44:18,187 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:45:13,401 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:45:13,429 - INFO - 📊 717 - prompt1: WER=1.2634, CER=0.8391
+2025-03-26 12:45:13,460 - INFO - 📊 717 - prompt2: WER=2.3255, CER=1.5091
+2025-03-26 12:45:13,477 - INFO - 📊 717 - prompt3: WER=1.1093, CER=0.7360
+2025-03-26 12:45:13,478 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt1', 0.25081967213114753, 0.21098265895953758, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_477.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt3', 0.2647754137115839, 0.11938202247191011, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_278.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt3', 0.8918032786885246, 0.8126204238921002, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_477.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt3', 1.1093167701863353, 0.736036866359447, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_717.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt1', 1.2633540372670808, 0.8390783410138248, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_717.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt1', 1.387706855791962, 1.2152387640449438, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_278.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt2', 1.41371158392435, 1.1551966292134832, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_278.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt2', 1.7278688524590164, 1.341281310211946, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_477.txt']
+2025-03-26 12:45:13,478 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt2', 2.325465838509317, 1.5091244239631336, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_717.txt']
+2025-03-26 12:52:35,286 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-26 12:52:35,287 - INFO - 📜 Procesando documento: 278
+2025-03-26 12:54:28,611 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-26 12:54:28,611 - INFO - 📜 Procesando documento: 278
+2025-03-26 12:54:49,198 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:55:06,239 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:55:23,015 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:55:23,321 - INFO - 📊 278 - prompt1: WER=0.1962, CER=0.0660
+2025-03-26 12:55:23,324 - INFO - 📊 278 - prompt2: WER=0.2530, CER=0.1046
+2025-03-26 12:55:23,326 - INFO - 📊 278 - prompt3: WER=0.2222, CER=0.0853
+2025-03-26 12:55:23,326 - INFO - 📜 Procesando documento: 477
+2025-03-26 12:55:48,058 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:56:12,594 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:56:37,807 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 12:56:37,820 - INFO - 📊 477 - prompt1: WER=0.2574, CER=0.1941
+2025-03-26 12:56:37,827 - INFO - 📊 477 - prompt2: WER=0.2656, CER=0.1876
+2025-03-26 12:56:37,834 - INFO - 📊 477 - prompt3: WER=0.2689, CER=0.1761
+2025-03-26 12:56:37,835 - INFO - 📜 Procesando documento: 717
+2025-03-26 12:57:18,527 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:07:03,142 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:07:57,216 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:07:57,241 - INFO - 📊 717 - prompt1: WER=0.9602, CER=0.7449
+2025-03-26 13:07:57,258 - INFO - 📊 717 - prompt2: WER=0.8857, CER=0.8114
+2025-03-26 13:07:57,274 - INFO - 📊 717 - prompt3: WER=1.0733, CER=0.7053
+2025-03-26 13:07:57,275 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt1', 0.19621749408983452, 0.06601123595505617, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_278.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt3', 0.2222222222222222, 0.08532303370786516, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_278.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt2', 0.25295508274231676, 0.10463483146067416, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_278.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt1', 0.2573770491803279, 0.1941233140655106, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_477.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt2', 0.26557377049180325, 0.18762042389210018, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_477.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt3', 0.26885245901639343, 0.1760597302504817, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_477.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt2', 0.8857142857142857, 0.8114285714285714, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_717.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt1', 0.9602484472049689, 0.7448847926267281, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_717.txt']
+2025-03-26 13:07:57,275 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt3', 1.0732919254658384, 0.7052534562211982, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_717.txt']
+2025-03-26 13:18:14,709 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-26 13:18:14,709 - INFO - 📜 Procesando documento: 278
+2025-03-26 13:18:35,275 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:18:52,591 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:19:09,537 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:19:09,765 - INFO - 📊 278 - prompt1: WER=0.1962, CER=0.0660
+2025-03-26 13:19:09,768 - INFO - 📊 278 - prompt2: WER=0.2530, CER=0.1046
+2025-03-26 13:19:09,771 - INFO - 📊 278 - prompt3: WER=0.2222, CER=0.0853
+2025-03-26 13:19:09,771 - INFO - 📜 Procesando documento: 477
+2025-03-26 13:19:34,737 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:19:59,411 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:20:24,560 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:20:24,568 - INFO - 📊 477 - prompt1: WER=0.2574, CER=0.1941
+2025-03-26 13:20:24,573 - INFO - 📊 477 - prompt2: WER=0.2656, CER=0.1876
+2025-03-26 13:20:24,577 - INFO - 📊 477 - prompt3: WER=0.2689, CER=0.1761
+2025-03-26 13:20:24,577 - INFO - 📜 Procesando documento: 717
+2025-03-26 13:21:05,579 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:30:53,429 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:31:48,792 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:31:48,810 - INFO - 📊 717 - prompt1: WER=0.9602, CER=0.7449
+2025-03-26 13:31:48,821 - INFO - 📊 717 - prompt2: WER=0.8857, CER=0.8114
+2025-03-26 13:31:48,837 - INFO - 📊 717 - prompt3: WER=1.0733, CER=0.7053
+2025-03-26 13:31:48,837 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt1', 0.19621749408983452, 0.06601123595505617, 20.5781, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_278.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt3', 0.2222222222222222, 0.08532303370786516, 16.9456, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_278.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '278', 'prompt2', 0.25295508274231676, 0.10463483146067416, 17.3045, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_278.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt1', 0.2573770491803279, 0.1941233140655106, 24.9668, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_477.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt2', 0.26557377049180325, 0.18762042389210018, 24.6739, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_477.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '477', 'prompt3', 0.26885245901639343, 0.1760597302504817, 25.1493, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_477.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt2', 0.8857142857142857, 0.8114285714285714, 587.8512, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt2_717.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt1', 0.9602484472049689, 0.7448847926267281, 41.0025, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt1_717.txt']
+2025-03-26 13:31:48,837 - INFO - ['mistralai/Mistral-7B-Instruct-v0.3', 0.0, '717', 'prompt3', 1.0732919254658384, 0.7052534562211982, 55.3632, 'data/corrected_texts/Mistral-7B-Instruct-v0_3_prompt3_717.txt']
+2025-03-26 13:40:43,620 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-26 13:40:43,620 - INFO - 📜 Procesando documento: 278
+2025-03-26 13:41:06,836 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:41:26,929 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:41:47,012 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:41:47,240 - INFO - 📊 278 - prompt1: WER=0.2175, CER=0.0699
+2025-03-26 13:41:47,242 - INFO - 📊 278 - prompt2: WER=0.2388, CER=0.0650
+2025-03-26 13:41:47,245 - INFO - 📊 278 - prompt3: WER=0.2080, CER=0.0534
+2025-03-26 13:41:47,245 - INFO - 📜 Procesando documento: 477
+2025-03-26 13:42:12,915 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:42:39,133 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:43:07,789 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:43:07,795 - INFO - 📊 477 - prompt1: WER=0.2180, CER=0.2194
+2025-03-26 13:43:07,800 - INFO - 📊 477 - prompt2: WER=0.2197, CER=0.2235
+2025-03-26 13:43:07,804 - INFO - 📊 477 - prompt3: WER=0.1885, CER=0.1891
+2025-03-26 13:43:07,804 - INFO - 📜 Procesando documento: 717
+2025-03-26 13:43:29,262 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:43:47,249 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:44:01,420 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 13:44:01,439 - INFO - 📊 717 - prompt1: WER=0.6807, CER=0.6053
+2025-03-26 13:44:01,448 - INFO - 📊 717 - prompt2: WER=0.7242, CER=0.6599
+2025-03-26 13:44:01,455 - INFO - 📊 717 - prompt3: WER=0.7304, CER=0.6909
+2025-03-26 13:44:01,455 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-26 13:44:01,455 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt3', 0.1885245901639344, 0.1890655105973025, 28.6558, 'data/corrected_texts/phi-4_prompt3_477.txt']
+2025-03-26 13:44:01,455 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt3', 0.20803782505910165, 0.05337078651685393, 20.083, 'data/corrected_texts/phi-4_prompt3_278.txt']
+2025-03-26 13:44:01,455 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt1', 0.21749408983451538, 0.06987359550561797, 23.2199, 'data/corrected_texts/phi-4_prompt1_278.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt1', 0.2180327868852459, 0.21941233140655106, 25.6705, 'data/corrected_texts/phi-4_prompt1_477.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt2', 0.21967213114754097, 0.22350674373795762, 26.2184, 'data/corrected_texts/phi-4_prompt2_477.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt2', 0.23877068557919623, 0.06495786516853932, 20.0893, 'data/corrected_texts/phi-4_prompt2_278.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt1', 0.6807453416149069, 0.6053456221198157, 21.4585, 'data/corrected_texts/phi-4_prompt1_717.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt2', 0.724223602484472, 0.6599078341013825, 17.9872, 'data/corrected_texts/phi-4_prompt2_717.txt']
+2025-03-26 13:44:01,456 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt3', 0.7304347826086957, 0.6908755760368663, 14.1715, 'data/corrected_texts/phi-4_prompt3_717.txt']
+2025-03-26 14:42:45,430 - INFO - Starting experiment with model NousResearch/Nous-Hermes-2-Mistral-7B-DPO and temperature 0.0
+2025-03-26 14:42:45,430 - INFO - 📜 Procesando documento: 278
+2025-03-26 14:43:05,476 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:43:22,688 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:43:38,931 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:43:39,225 - INFO - 📊 278 - prompt1: WER=0.2482, CER=0.0945
+2025-03-26 14:43:39,228 - INFO - 📊 278 - prompt2: WER=0.2790, CER=0.1362
+2025-03-26 14:43:39,231 - INFO - 📊 278 - prompt3: WER=0.3641, CER=0.2180
+2025-03-26 14:43:39,231 - INFO - 📜 Procesando documento: 477
+2025-03-26 14:44:01,861 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:45:09,912 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:45:33,196 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:45:33,209 - INFO - 📊 477 - prompt1: WER=0.3492, CER=0.2553
+2025-03-26 14:45:33,227 - INFO - 📊 477 - prompt2: WER=2.0443, CER=1.8032
+2025-03-26 14:45:33,234 - INFO - 📊 477 - prompt3: WER=0.2557, CER=0.2172
+2025-03-26 14:45:33,234 - INFO - 📜 Procesando documento: 717
+2025-03-26 14:45:45,164 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:45:50,387 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:46:03,580 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:46:03,594 - INFO - 📊 717 - prompt1: WER=0.7876, CER=0.7357
+2025-03-26 14:46:03,599 - INFO - 📊 717 - prompt2: WER=0.8932, CER=0.8787
+2025-03-26 14:46:03,607 - INFO - 📊 717 - prompt3: WER=0.8025, CER=0.7347
+2025-03-26 14:46:03,607 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '278', 'prompt1', 0.24822695035460993, 0.09445224719101124, 20.0553, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt1_278.txt']
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '477', 'prompt3', 0.25573770491803277, 0.2172447013487476, 23.2845, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt3_477.txt']
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '278', 'prompt2', 0.2789598108747045, 0.13623595505617977, 17.2047, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt2_278.txt']
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '477', 'prompt1', 0.34918032786885245, 0.25529865125240847, 22.632, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt1_477.txt']
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '278', 'prompt3', 0.3640661938534279, 0.21804775280898878, 16.2425, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt3_278.txt']
+2025-03-26 14:46:03,607 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '717', 'prompt1', 0.7875776397515528, 0.7356682027649769, 11.9315, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt1_717.txt']
+2025-03-26 14:46:03,608 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '717', 'prompt3', 0.8024844720496894, 0.7347465437788019, 13.1927, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt3_717.txt']
+2025-03-26 14:46:03,608 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '717', 'prompt2', 0.893167701863354, 0.8787096774193548, 5.2234, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt2_717.txt']
+2025-03-26 14:46:03,608 - INFO - ['NousResearch/Nous-Hermes-2-Mistral-7B-DPO', 0.0, '477', 'prompt2', 2.044262295081967, 1.8032273603082851, 68.0502, 'data/corrected_texts/Nous-Hermes-2-Mistral-7B-DPO_prompt2_477.txt']
+2025-03-26 14:49:18,070 - INFO - Starting experiment with model TinyLlama/TinyLlama-1.1B-Chat-v1.0 and temperature 0.0
+2025-03-26 14:49:18,070 - INFO - 📜 Procesando documento: 278
+2025-03-26 14:49:26,902 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:34,160 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:40,132 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:40,397 - INFO - 📊 278 - prompt1: WER=1.0000, CER=0.7588
+2025-03-26 14:49:40,401 - INFO - 📊 278 - prompt2: WER=0.9953, CER=0.7518
+2025-03-26 14:49:40,404 - INFO - 📊 278 - prompt3: WER=0.8440, CER=0.6619
+2025-03-26 14:49:40,404 - INFO - 📜 Procesando documento: 477
+2025-03-26 14:49:44,430 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:46,771 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:54,456 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 14:49:54,467 - INFO - 📊 477 - prompt1: WER=0.9967, CER=0.8314
+2025-03-26 14:49:54,472 - INFO - 📊 477 - prompt2: WER=1.0000, CER=0.8740
+2025-03-26 14:49:54,480 - INFO - 📊 477 - prompt3: WER=0.9180, CER=0.8044
+2025-03-26 14:49:54,480 - INFO - 📜 Procesando documento: 717
+2025-03-26 14:49:54,499 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-03-26 15:03:15,041 - INFO - Starting experiment with model TinyLlama/TinyLlama-1.1B-Chat-v1.0 and temperature 0.0
+2025-03-26 15:03:15,042 - INFO - 📜 Procesando documento: 278
+2025-03-26 15:03:26,014 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:03:26,306 - INFO - 📊 278 - prompt3: WER=0.9905, CER=0.7546
+2025-03-26 15:03:26,306 - INFO - 📜 Procesando documento: 477
+2025-03-26 15:03:33,785 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:03:33,797 - INFO - 📊 477 - prompt3: WER=0.7902, CER=0.7018
+2025-03-26 15:03:33,797 - INFO - 📜 Procesando documento: 717
+2025-03-26 15:03:33,815 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-03-26 15:16:54,338 - INFO - Starting experiment with model AI-Sweden-Models/gpt-sw3-6.7b-v2-instruct and temperature 0.0
+2025-03-26 15:16:54,338 - INFO - 📜 Procesando documento: 278
+2025-03-26 15:17:18,789 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:17:33,598 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:17:59,112 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:17:59,413 - INFO - 📊 278 - prompt1: WER=0.8794, CER=0.7061
+2025-03-26 15:17:59,417 - INFO - 📊 278 - prompt2: WER=0.9622, CER=0.7504
+2025-03-26 15:17:59,420 - INFO - 📊 278 - prompt3: WER=0.4397, CER=0.2827
+2025-03-26 15:17:59,420 - INFO - 📜 Procesando documento: 477
+2025-03-26 15:18:01,500 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-26 15:18:01,533 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-03-26 15:37:16,254 - INFO - Starting experiment with model microsoft/Orca-2-7b and temperature 0.0
+2025-03-26 15:37:16,254 - INFO - 📜 Procesando documento: 278
+2025-03-26 15:37:16,314 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-03-27 11:24:19,781 - INFO - Starting experiment with model meta-llama/Llama-3.2-1B-Instruct and temperature 0.0
+2025-03-27 11:24:19,781 - INFO - 📜 Procesando documento: 278
+2025-03-27 11:25:14,938 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-27 11:25:14,942 - INFO - Retrying request to /chat/completions in 0.442550 seconds
+2025-03-27 11:25:15,387 - INFO - Retrying request to /chat/completions in 0.785792 seconds
+2025-03-27 11:28:39,025 - INFO - Starting experiment with model meta-llama/Llama-3.2-1B-Instruct and temperature 0.0
+2025-03-27 11:28:39,025 - INFO - 📜 Procesando documento: 278
+2025-03-27 11:29:32,548 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-27 11:29:32,549 - INFO - Retrying request to /chat/completions in 0.393943 seconds
+2025-03-27 11:29:32,946 - INFO - Retrying request to /chat/completions in 0.988934 seconds
+2025-03-27 13:10:13,452 - INFO - Starting experiment with model meta-llama/Llama-3.2-1B-Instruct and temperature 0.0
+2025-03-27 13:10:13,453 - INFO - 📜 Procesando documento: 278
+2025-03-27 13:26:03,386 - INFO - Starting experiment with model meta-llama/Llama-3.2-3B-Instruct and temperature 0.0
+2025-03-27 13:26:03,386 - INFO - 📜 Procesando documento: 278
+2025-03-27 13:33:59,614 - INFO - Starting experiment with model meta-llama/Llama-3.2-3B-Instruct and temperature 0.0
+2025-03-27 13:33:59,614 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:40:22,393 - INFO - Starting experiment with model deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B and temperature 0.0
+2025-03-28 13:40:22,393 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:40:22,409 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-03-28 13:41:23,950 - INFO - Starting experiment with model deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B and temperature 0.0
+2025-03-28 13:41:23,950 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:41:27,609 - INFO - HTTP Request: POST http://localhost:8001/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:41:27,610 - INFO - Retrying request to /chat/completions in 0.375250 seconds
+2025-03-28 13:41:28,008 - INFO - HTTP Request: POST http://localhost:8001/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:41:28,009 - INFO - Retrying request to /chat/completions in 0.997339 seconds
+2025-03-28 13:44:53,798 - INFO - Starting experiment with model deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B and temperature 0.0
+2025-03-28 13:44:53,798 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:44:57,347 - INFO - HTTP Request: POST http://localhost:8001/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:44:57,348 - INFO - Retrying request to /chat/completions in 0.436316 seconds
+2025-03-28 13:44:57,808 - INFO - HTTP Request: POST http://localhost:8001/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:44:57,808 - INFO - Retrying request to /chat/completions in 0.899104 seconds
+2025-03-28 13:45:58,909 - INFO - Starting experiment with model deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B and temperature 0.0
+2025-03-28 13:45:58,909 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:45:58,927 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-03-28 13:47:22,407 - INFO - Starting experiment with model deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B and temperature 0.0
+2025-03-28 13:47:22,407 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:47:26,146 - INFO - HTTP Request: POST http://localhost:8005/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:47:26,147 - INFO - Retrying request to /chat/completions in 0.492565 seconds
+2025-03-28 13:47:26,663 - INFO - HTTP Request: POST http://localhost:8005/v1/chat/completions "HTTP/1.1 500 Internal Server Error"
+2025-03-28 13:47:26,664 - INFO - Retrying request to /chat/completions in 0.919148 seconds
+2025-03-28 13:55:56,170 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-28 13:55:56,170 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:55:56,193 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-03-28 13:57:00,893 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-28 13:57:00,894 - INFO - 📜 Procesando documento: 278
+2025-03-28 13:57:00,911 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-03-28 14:13:47,025 - INFO - Starting experiment with model mistralai/Mistral-7B-Instruct-v0.3 and temperature 0.0
+2025-03-28 14:13:47,025 - INFO - 📜 Procesando documento: 278
+2025-03-28 14:13:47,032 - INFO - Retrying request to /chat/completions in 0.427876 seconds
+2025-03-28 14:13:47,462 - INFO - Retrying request to /chat/completions in 0.990496 seconds
+2025-03-31 17:57:51,754 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-31 17:57:51,755 - INFO - 📜 Procesando documento: 278
+2025-03-31 17:58:37,516 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 17:58:57,028 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 17:59:16,784 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 17:59:36,352 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:00:16,447 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:00:35,984 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:00:56,012 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:01:21,890 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:01:43,037 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:01:43,330 - INFO - 📊 278 - prompt2: WER=1.4208, CER=1.3230
+2025-03-31 18:01:43,333 - INFO - 📊 278 - prompt8: WER=0.2530, CER=0.1152
+2025-03-31 18:01:43,336 - INFO - 📊 278 - prompt6: WER=0.2270, CER=0.0846
+2025-03-31 18:01:43,338 - INFO - 📊 278 - prompt1: WER=0.2199, CER=0.0822
+2025-03-31 18:01:43,343 - INFO - 📊 278 - prompt7: WER=1.5626, CER=1.4199
+2025-03-31 18:01:43,346 - INFO - 📊 278 - prompt5: WER=0.2222, CER=0.0688
+2025-03-31 18:01:43,348 - INFO - 📊 278 - prompt1_1: WER=0.2222, CER=0.0562
+2025-03-31 18:01:43,352 - INFO - 📊 278 - prompt4: WER=0.7187, CER=0.6131
+2025-03-31 18:01:43,355 - INFO - 📊 278 - prompt3: WER=0.3617, CER=0.1917
+2025-03-31 18:01:43,355 - INFO - 📜 Procesando documento: 477
+2025-03-31 18:02:10,612 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:02:39,252 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:03:06,550 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:03:50,947 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:04:19,460 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:04:47,806 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:05:15,539 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:05:43,372 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:12:18,420 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:12:18,428 - INFO - 📊 477 - prompt2: WER=0.1902, CER=0.1867
+2025-03-31 18:12:18,434 - INFO - 📊 477 - prompt8: WER=0.2246, CER=0.2122
+2025-03-31 18:12:18,438 - INFO - 📊 477 - prompt6: WER=0.2246, CER=0.2254
+2025-03-31 18:12:18,443 - INFO - 📊 477 - prompt1: WER=0.8033, CER=0.7970
+2025-03-31 18:12:18,447 - INFO - 📊 477 - prompt7: WER=0.2000, CER=0.1987
+2025-03-31 18:12:18,451 - INFO - 📊 477 - prompt5: WER=0.1738, CER=0.1734
+2025-03-31 18:12:18,454 - INFO - 📊 477 - prompt1_1: WER=0.1590, CER=0.1534
+2025-03-31 18:12:18,458 - INFO - 📊 477 - prompt4: WER=0.2115, CER=0.1908
+2025-03-31 18:12:18,519 - INFO - 📊 477 - prompt3: WER=11.8344, CER=12.8208
+2025-03-31 18:12:18,519 - INFO - 📜 Procesando documento: 717
+2025-03-31 18:12:39,807 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:13:05,056 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:13:27,098 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:13:43,781 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:14:10,464 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:14:29,525 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:15:02,756 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:15:20,159 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:21:30,471 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:21:30,488 - INFO - 📊 717 - prompt2: WER=0.6857, CER=0.6162
+2025-03-31 18:21:30,498 - INFO - 📊 717 - prompt8: WER=0.6335, CER=0.5665
+2025-03-31 18:21:30,508 - INFO - 📊 717 - prompt6: WER=0.6857, CER=0.6171
+2025-03-31 18:21:30,517 - INFO - 📊 717 - prompt1: WER=0.7416, CER=0.6712
+2025-03-31 18:21:30,526 - INFO - 📊 717 - prompt7: WER=0.7019, CER=0.6273
+2025-03-31 18:21:30,536 - INFO - 📊 717 - prompt5: WER=0.7839, CER=0.6883
+2025-03-31 18:21:30,550 - INFO - 📊 717 - prompt1_1: WER=0.9056, CER=0.7607
+2025-03-31 18:21:30,558 - INFO - 📊 717 - prompt4: WER=0.7677, CER=0.6986
+2025-03-31 18:21:30,638 - INFO - 📊 717 - prompt3: WER=0.8832, CER=6.8959
+2025-03-31 18:21:30,639 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt1_1', 0.15901639344262294, 0.15342003853564548, 27.7336, 'data/corrected_texts/phi-4_prompt1_1_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt5', 0.1737704918032787, 0.17341040462427745, 28.3454, 'data/corrected_texts/phi-4_prompt5_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt2', 0.1901639344262295, 0.18665703275529866, 27.2592, 'data/corrected_texts/phi-4_prompt2_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt7', 0.2, 0.19869942196531792, 28.5127, 'data/corrected_texts/phi-4_prompt7_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt4', 0.21147540983606558, 0.1907514450867052, 27.8327, 'data/corrected_texts/phi-4_prompt4_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt1', 0.2198581560283688, 0.08216292134831461, 19.5678, 'data/corrected_texts/phi-4_prompt1_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt5', 0.2222222222222222, 0.06882022471910113, 19.5368, 'data/corrected_texts/phi-4_prompt5_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt1_1', 0.2222222222222222, 0.056179775280898875, 20.0284, 'data/corrected_texts/phi-4_prompt1_1_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt8', 0.22459016393442624, 0.2121868978805395, 28.6393, 'data/corrected_texts/phi-4_prompt8_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt6', 0.22459016393442624, 0.2254335260115607, 27.2984, 'data/corrected_texts/phi-4_prompt6_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt6', 0.22695035460992907, 0.08462078651685394, 19.756, 'data/corrected_texts/phi-4_prompt6_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt8', 0.25295508274231676, 0.1151685393258427, 19.5025, 'data/corrected_texts/phi-4_prompt8_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt3', 0.3617021276595745, 0.19171348314606743, 21.1466, 'data/corrected_texts/phi-4_prompt3_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt8', 0.6335403726708074, 0.5664516129032258, 25.2486, 'data/corrected_texts/phi-4_prompt8_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt2', 0.6857142857142857, 0.6162211981566821, 21.2889, 'data/corrected_texts/phi-4_prompt2_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt6', 0.6857142857142857, 0.6171428571428571, 22.0432, 'data/corrected_texts/phi-4_prompt6_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt7', 0.7018633540372671, 0.6272811059907835, 26.683, 'data/corrected_texts/phi-4_prompt7_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt4', 0.7186761229314421, 0.613061797752809, 25.8774, 'data/corrected_texts/phi-4_prompt4_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt1', 0.7416149068322981, 0.6711520737327189, 16.6834, 'data/corrected_texts/phi-4_prompt1_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt4', 0.7677018633540372, 0.6986175115207374, 17.4026, 'data/corrected_texts/phi-4_prompt4_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt5', 0.7838509316770186, 0.688294930875576, 19.0612, 'data/corrected_texts/phi-4_prompt5_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt1', 0.8032786885245902, 0.7969653179190751, 44.3974, 'data/corrected_texts/phi-4_prompt1_477.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt3', 0.8832298136645963, 6.895852534562212, 370.3136, 'data/corrected_texts/phi-4_prompt3_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt1_1', 0.9055900621118013, 0.76073732718894, 33.2308, 'data/corrected_texts/phi-4_prompt1_1_717.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt2', 1.42080378250591, 1.3230337078651686, 45.7729, 'data/corrected_texts/phi-4_prompt2_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt7', 1.5626477541371158, 1.4199438202247192, 40.095, 'data/corrected_texts/phi-4_prompt7_278.txt']
+2025-03-31 18:21:30,639 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt3', 11.834426229508196, 12.820809248554914, 395.0476, 'data/corrected_texts/phi-4_prompt3_477.txt']
+2025-03-31 18:24:32,096 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-31 18:24:32,096 - INFO - 📜 Procesando documento: 278
+2025-03-31 18:24:53,125 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:25:12,481 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:25:31,530 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:25:50,471 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:26:09,933 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:26:29,169 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:26:48,806 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:27:08,277 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:27:57,775 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:28:59,336 - INFO - Starting experiment with model microsoft/phi-4 and temperature 0.0
+2025-03-31 18:28:59,337 - INFO - 📜 Procesando documento: 278
+2025-03-31 18:29:22,678 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:30:11,298 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:30:31,391 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:30:52,736 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:31:12,457 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:31:59,450 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:32:18,996 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:32:38,594 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:32:58,276 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:32:58,511 - INFO - 📊 278 - prompt2: WER=0.3404, CER=0.1766
+2025-03-31 18:32:58,516 - INFO - 📊 278 - prompt8: WER=1.4539, CER=1.3652
+2025-03-31 18:32:58,518 - INFO - 📊 278 - prompt6: WER=0.2340, CER=0.0716
+2025-03-31 18:32:58,521 - INFO - 📊 278 - prompt1: WER=0.3688, CER=0.2079
+2025-03-31 18:32:58,524 - INFO - 📊 278 - prompt7: WER=0.2317, CER=0.0653
+2025-03-31 18:32:58,529 - INFO - 📊 278 - prompt5: WER=1.7163, CER=1.4817
+2025-03-31 18:32:58,532 - INFO - 📊 278 - prompt1_1: WER=0.2080, CER=0.0716
+2025-03-31 18:32:58,534 - INFO - 📊 278 - prompt4: WER=0.2340, CER=0.0878
+2025-03-31 18:32:58,537 - INFO - 📊 278 - prompt3: WER=0.2175, CER=0.0572
+2025-03-31 18:32:58,537 - INFO - 📜 Procesando documento: 477
+2025-03-31 18:33:28,053 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:33:57,769 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:34:27,852 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:34:55,608 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:35:24,576 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:35:52,138 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:36:20,113 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:36:47,374 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:43:23,503 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:43:23,517 - INFO - 📊 477 - prompt2: WER=0.1574, CER=0.1575
+2025-03-31 18:43:23,524 - INFO - 📊 477 - prompt8: WER=0.1984, CER=0.2021
+2025-03-31 18:43:23,531 - INFO - 📊 477 - prompt6: WER=0.2344, CER=0.2257
+2025-03-31 18:43:23,537 - INFO - 📊 477 - prompt1: WER=0.1836, CER=0.1655
+2025-03-31 18:43:23,543 - INFO - 📊 477 - prompt7: WER=0.2475, CER=0.2348
+2025-03-31 18:43:23,549 - INFO - 📊 477 - prompt5: WER=0.2066, CER=0.1881
+2025-03-31 18:43:23,555 - INFO - 📊 477 - prompt1_1: WER=0.1738, CER=0.1789
+2025-03-31 18:43:23,561 - INFO - 📊 477 - prompt4: WER=0.1689, CER=0.1722
+2025-03-31 18:43:23,642 - INFO - 📊 477 - prompt3: WER=8.3377, CER=14.1397
+2025-03-31 18:43:23,642 - INFO - 📜 Procesando documento: 717
+2025-03-31 18:43:48,412 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:44:05,523 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:44:25,665 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:44:39,758 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:44:56,943 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:45:51,598 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:46:05,084 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:46:35,291 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:47:32,917 - INFO - HTTP Request: POST http://localhost:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2025-03-31 18:47:32,939 - INFO - 📊 717 - prompt2: WER=0.8758, CER=0.7182
+2025-03-31 18:47:32,946 - INFO - 📊 717 - prompt8: WER=0.7168, CER=0.6621
+2025-03-31 18:47:32,955 - INFO - 📊 717 - prompt6: WER=0.6671, CER=0.6124
+2025-03-31 18:47:32,963 - INFO - 📊 717 - prompt1: WER=0.8335, CER=0.7523
+2025-03-31 18:47:32,971 - INFO - 📊 717 - prompt7: WER=0.7068, CER=0.6461
+2025-03-31 18:47:32,986 - INFO - 📊 717 - prompt5: WER=1.0621, CER=0.7812
+2025-03-31 18:47:32,993 - INFO - 📊 717 - prompt1_1: WER=0.7453, CER=0.7097
+2025-03-31 18:47:33,004 - INFO - 📊 717 - prompt4: WER=0.6758, CER=0.5851
+2025-03-31 18:47:33,019 - INFO - 📊 717 - prompt3: WER=1.0658, CER=0.6981
+2025-03-31 18:47:33,019 - INFO - ✅ Experimento finalizado. Resultados ordenados por WER:
+2025-03-31 18:47:33,019 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt2', 0.15737704918032788, 0.157514450867052, 29.5169, 'data/corrected_texts/phi-4_prompt2_477.txt', 0]
+2025-03-31 18:47:33,019 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt4', 0.16885245901639345, 0.17220616570327554, 27.2608, 'data/corrected_texts/phi-4_prompt4_477.txt', 0]
+2025-03-31 18:47:33,019 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt1_1', 0.1737704918032787, 0.1789499036608863, 27.9756, 'data/corrected_texts/phi-4_prompt1_1_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt1', 0.18360655737704917, 0.16546242774566475, 27.7561, 'data/corrected_texts/phi-4_prompt1_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt8', 0.19836065573770492, 0.20207129094412332, 29.7159, 'data/corrected_texts/phi-4_prompt8_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt5', 0.20655737704918034, 0.18810211946050095, 27.5622, 'data/corrected_texts/phi-4_prompt5_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt1_1', 0.20803782505910165, 0.07162921348314606, 19.5443, 'data/corrected_texts/phi-4_prompt1_1_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt3', 0.21749408983451538, 0.05723314606741573, 19.6812, 'data/corrected_texts/phi-4_prompt3_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt7', 0.23167848699763594, 0.06530898876404495, 19.7217, 'data/corrected_texts/phi-4_prompt7_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt6', 0.23404255319148937, 0.07162921348314606, 20.0933, 'data/corrected_texts/phi-4_prompt6_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt4', 0.23404255319148937, 0.0877808988764045, 19.5986, 'data/corrected_texts/phi-4_prompt4_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt6', 0.23442622950819672, 0.22567437379576108, 30.0835, 'data/corrected_texts/phi-4_prompt6_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt7', 0.24754098360655738, 0.23482658959537572, 28.9679, 'data/corrected_texts/phi-4_prompt7_477.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt2', 0.3404255319148936, 0.17661516853932585, 23.3538, 'data/corrected_texts/phi-4_prompt2_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt1', 0.36879432624113473, 0.20786516853932585, 21.3446, 'data/corrected_texts/phi-4_prompt1_278.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt6', 0.6670807453416149, 0.6123502304147466, 20.1415, 'data/corrected_texts/phi-4_prompt6_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt4', 0.675776397515528, 0.5850691244239631, 30.2071, 'data/corrected_texts/phi-4_prompt4_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt7', 0.7068322981366459, 0.6460829493087558, 17.1854, 'data/corrected_texts/phi-4_prompt7_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt8', 0.7167701863354037, 0.6621198156682028, 17.1109, 'data/corrected_texts/phi-4_prompt8_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt1_1', 0.7453416149068323, 0.7096774193548387, 13.486, 'data/corrected_texts/phi-4_prompt1_1_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt1', 0.8335403726708075, 0.752258064516129, 14.0932, 'data/corrected_texts/phi-4_prompt1_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt2', 0.8757763975155279, 0.7181566820276498, 24.7714, 'data/corrected_texts/phi-4_prompt2_717.txt', 0]
+2025-03-31 18:47:33,020 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt5', 1.062111801242236, 0.7811981566820276, 54.6551, 'data/corrected_texts/phi-4_prompt5_717.txt', 0]
+2025-03-31 18:47:33,021 - INFO - ['microsoft/phi-4', 0.0, '717', 'prompt3', 1.0658385093167702, 0.6980645161290323, 57.6259, 'data/corrected_texts/phi-4_prompt3_717.txt', 0]
+2025-03-31 18:47:33,021 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt8', 1.4539007092198581, 1.3651685393258426, 48.609, 'data/corrected_texts/phi-4_prompt8_278.txt', 0]
+2025-03-31 18:47:33,021 - INFO - ['microsoft/phi-4', 0.0, '278', 'prompt5', 1.7163120567375887, 1.4817415730337078, 46.9928, 'data/corrected_texts/phi-4_prompt5_278.txt', 0]
+2025-03-31 18:47:33,021 - INFO - ['microsoft/phi-4', 0.0, '477', 'prompt3', 8.337704918032786, 14.139691714836223, 396.1299, 'data/corrected_texts/phi-4_prompt3_477.txt', 0]

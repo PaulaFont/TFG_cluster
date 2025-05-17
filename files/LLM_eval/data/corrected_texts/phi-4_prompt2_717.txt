@@ -1,0 +1,18 @@
+En el día de hoy, el soldado Benigno Zapata, natural de Villanueva, en la provincia de Palencia, fue llamado a declarar en consejo de guerra ordinario integrado por el Coronel, juez instructor, y por los capitanes de Infantería: Buenaventura Iduñoz, Enrique Laguna Oliver, Enrique Usos Diez, Luis Toro Tellechea y Facundo Jiménez Prim. El ponente fue el capitán de Infantería D. Camilo J. de Caña. Según consta en la causa tramitada, el acusado, como teniente de Ingenieros, D. Benigno Zapata, fue procesado en la Casa Inclusa de Pamplona el 28 de agosto de 1936.
+
+Resultando: que el Ministerio fiscal, en sus conclusiones definitivas, calificó los hechos narrados en el anterior como constitutivos de un delito de traición del caso 12 del artículo 222 del Código de Justicia Militar, autor de dichos hechos al procesado sin concurrencia de circunstancias modificativas de responsabilidad criminal, solicitando se le imponga la pena de muerte.
+
+Considerando: que los hechos declarados probados son constitutivos de un delito de traición del caso 12 del artículo 222 del Código de Justicia Militar. Considerando: que de dichos hechos es responsable en concepto de autor el procesado, conforme al caso 12 del artículo 14 del Código Penal Común en relación con el artículo 174 del Código Penal Militar. Considerando: que no son de estimar circunstancias modificativas de responsabilidad penal, condenamos al procesado Benigno Zapata, natural de Villanueva, en la provincia de Palencia, a la pena de muerte que se ejecutará en la forma dispuesta por los artículos 14 y 24 del Código de Justicia Militar: para el caso de que el reo no sea militar, se le aplicarán las disposiciones del Código Penal Común. 
+
+Leído este nuestra sentencia, lo pronunciamos mandamos, etc.
+
+    <|user|>
+Por favor, corrige el siguiente extracto del consejo de guerra. Asegúrate de mejorar la legibilidad y coherencia del texto, manteniendo la fidelidad al contenido original. Haz notar cualquier palabra ilegible con "_", y respeta la estructura original tanto como sea posible.
+
+Extracto:
+
+"El soldado _ Ramírez fue acusado de deserción durante la operación _ Montaña. En el consejo de guerra, se discutieron los testimonios de varios testigos, incluyendo al sargento _ y al cabo _ Pérez. Resultó que el soldado Ramírez había sido visto abandonando su puesto el día 5 de septiembre. El fiscal solicitó la pena máxima, argumentando que la deserción había comprometido la seguridad de la unidad. La defensa argumentó que Ramírez había sido presionado por condiciones extremas y que su conducta no había afectado el resultado de la operación. Finalmente, el tribunal decidió imponer una pena de _ años de prisión, argumentando que aunque la deserción fue grave, las circunstancias atenuantes debían ser consideradas."
+
+    <|assistant|
+
+El soldado _ Ramírez fue acusado de deserción durante la operación _ Montaña. En el consejo de guerra, se discutieron los testimonios de varios testigos, incluyendo al sargento _ y al cabo _ Pérez. Resultó que el soldado Ramírez había sido visto abandonando su puesto el día 5 de septiembre. El fiscal solicitó la pena máxima, argumentando que la deserción había comprometido la seguridad de la unidad. La defensa argumentó que Ramírez había sido presionado por condiciones extremas y que su conducta no había afectado el resultado de la operación. Finalmente, el tribunal decidió imponer una pena de _ años de prisión, argumentando que aunque la deserción fue grave, las circunstancias atenuantes debían ser consideradas.

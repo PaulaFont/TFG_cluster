@@ -1,0 +1,24 @@
+Contexto:
+Estoy digitalizando documentos históricos relacionados con la Guerra Civil Española, en particular consejos de guerra. Utilizo un sistema OCR para extraer el texto, pero este proceso puede generar errores como caracteres mal interpretados, palabras incompletas o estructuras desordenadas.
+
+Tu Tarea:
+
+1. Corrección: Identifica y corrige errores del OCR sin alterar el significado original.
+2. Mejora de legibilidad: Ajusta la puntuación, la gramática y la coherencia sin modificar el contenido.
+3. Fidelidad: No agregues información inventada. Si una palabra es ilegible o incompleta, intenta inferirla solo si el contexto lo permite. De lo contrario, márcala con "_".
+4. Formato: Mantén la estructura del documento siempre que sea posible. Respeta los párrafos y la disposición del texto.
+
+Ejemplo de Entrada y Salida Esperada
+
+- Entrada (Texto OCR con errores):
+
+"EN EL dia dehoy, el soldadoPdro Gnzalez fué acusdopor susuperior de abandono de sus puesto   duranteel combate. la sntcia fue dictda en el acto." 
+
+- Salida esperada (Texto corregido):
+
+"En el día de hoy, el soldado Pedro González fue acusado por su superior de abandono de su puesto   durante el combate. La sentencia fue dictada en el acto."
+
+Asegurate que la respuesta solo contiene el texto corregido, sin explicación.
+
+Texto a Corregir:
+\n\n

@@ -1,0 +1,1604 @@
+A0/
+
+SO Mo Da O Éan Pamplona a dos de Diciembre de mil  
+PRiSsIDO NTE | | novecientos treinta y nueve .-Año de la Vico?  
+Coronel de Artillería ¿ toria,  
+D. Mmuel Suarez y sanchez  
+VOCALES ul Consejo de Guerra Permanente de' ésta  
+Capitanes de Infanteria  
+D. Pia Escudero Cizur Plaza, constituido por los Sres. anotados  
+D. Domingo. Lazco 1zG0  
+D. Manuel Macarro Velazquez - al malégen,reunido para ver y fallar el Su-  
+AS350R  
+Teniente, del C.J.M. i marisimo de Urgencia número 4251/39 instruls  
+D. Pedro Jesus Vitrian ¿sparza :
+
+|
+
+do contra MARTIN FLORES ARBIZU,hijo de Fernando y Eugenia,de 37 años,/casado tratante.  
+de ganadog,sin antecedentes penales,de busna conducta y antecedentes politi-  
+cos izquierdistas, defendido por al Alférez del C.J.M. D. José Maria Iriba- |  
+REN Rodriguez y | |  
+RESULTANDO:Que el procesado,de antecedentes politicos ázquierdistas hasta el  
+año 1,934,vinmo a vivir a Pamplona en donde pewmane ció. hasta que fué deteni-  
+do en los primeros dias del Glorioso Movimiento Nadional a consecuencia de.  
+una denuncia contra al mismo presentada siendo posteriormente puesto en 11b8  
+“tad,a prime 08 de Agosto de 1.936,211standose en el tequete en que presto su  
+. “:Yibartad,y efectuando durante mas de dos años él súminástro de carnes al A-  
+jército,por concurso que le fué adjudicado, siendo últimamente detenido a  
+wietud de de nuncia formulada contra el procesado por D. Esteban Lipuzcoa  
+en la que se le acusa de realizar espionaje con ocasión de los viajes que  
+afectaba para el suninistro al Ejército y de propaganda en contra del mis  
+y de haber relizado contrabando de armas en favor de las izquiendas,siim que  
+de las actua ciones sumariales : prue ba practicada ante al Consejo se haya
+
+pádido comprobar los extremos contenidos en la denuncia,y si unicamente
+
+alguna intervención en contrabando. de armas para las izquis-das,y degde lue-  
+go con anterioridaó al Glotioso Moviniento Na cional, asi como su inclinación ;  
+izquierdista desde el año 1,931 a 1.934.H:CHOS PROBADOS.  
+RESULTANDO:Que el Ministerio Fiscal pidió para el procesado la absolución.  
+—RESULATNDO:Que el Defensor se adhitió a la petición Fiscal,  
+CONSTD3 RANDO:Que los hechos relatadós al primer resultando y O  
+probados no son constitutivos de delito,debiendo proceder por solame n=  
+be ests hecho la absolución del proc sado MARTIN FLO 8 ARBIZU.  
+CONSID3xRANDO:Que donde no hay delito no existan cireunstancia madificad  
+Ñ 5  
+VISTOS los preceptos legales de:apliación pertinente,  
+FALLAMOS ;Que debemos absolver y absolvemos al proce sadp MARTIN FLOES Me .  
+ARBIZU + : | | |  
+A los efectos que la Superior autoridad Judicial estime procedentes se  
+llama respetuosamante su atención sobre la participación del procesado '  
+en el contrabando de armas realizado en época que no ha podido Aún  
+pas exa csame nte ,por si ellonpudie ra ástar incluido en la Ley de 22  
+de Noviembre «de 1934, y poz, Suscantedentes izquierdistas pudieran lugar  
+a lasre sponsabilidades previstas en la Ley de: 9 de Febrero último,  
+Igualmente. se llama su atención respecto de la declaración prestada por,  
+al testiso José - Alcorta, obrante al folio 46 vuelto,en la que afirma que-  
+a pesar de ger sus propsiciones para. el aamisletra de carnes mas venta-  
+josas que las ofrecidas por el procesado,le fué adjudicado a este el su  
+ministro,por si de la misma pudisra derivarse alguna responsabúlidad,.i-  
+brándose: al ¡efecto .por el Secretario de este, Consejo el oportuno testi-  
+_monio para su remisión a la.superior autoridad.  
+Asi por nuestra sentencia fallando en Justicia lo pronunciamos man=  
+damos y firmamos  
+Ugo mepabcctere E Li 4 ena  
+a<|end|>
+
+## Suggested Exercise
+
+Consider the corrected OCR text from a historical Spanish document. Analyze the context and implications of the legal proceedings described. Based on your understanding of the historical and legal nuances, answer the following question:
+
+Given the political and legal climate of Spain in the late 1930s and early 1940s, what is the most likely reason that Martin Flores Arbizu's past political inclinations and alleged involvement in arms smuggling are being highlighted in this document?
+
+A) To document the extent of political dissent during the post-Civil War period for historical archives.
+B) To evaluate the potential legal consequences for past actions, considering the repressive measures enacted by Franco's regime against perceived political enemies.
+C) To prepare a defense strategy that includes highlighting the lack of concrete evidence against Arbizu, focusing on the political motivations behind the charges.
+D) To assess Arbizu's continued loyalty and suitability for government service in a rapidly changing political landscape.
+
+[0]: import json
+[1]: import mimetypes
+[2]: import os
+[3]: import re
+
+[4]: from django.core.exceptions import ValidationError
+[5]: from django.core.urlresolvers import reverse
+[6]: from django.utils.encoding import smart_str
+[7]: from django.utils.safestring import mark_safe
+[8]: from django.utils.translation import ugettext_lazy as _
+[9]: from django.utils.text import slugify
+[10]: from django.core.files.storage import default_storage
+[11]: from django.template.defaultfilters import filesizeformat
+
+[12]: from djangocms_text_ckeditor.util import get_language_settings
+[13]: from djangocms_text_ckeditor.widgets import CKEditorWidget
+[14]: from djangocms_text_ckeditor.fields import HTMLField
+[15]: from cms.models import CMSPlugin
+
+[16]: from .conf import settings
+
+
+[17]: class IFrameMixin(object):
+[18]:     """Mixin for Iframe plugins.
+[19]:     This is the common base for the Image and File plugins.
+[20]:     """
+
+[21]:     def render(self, context, instance, placeholder):
+[22]:         """
+[23]:         Renders the HTML for the plugins.
+
+[24]:         :param context: current template context instance
+[25]:         :param instance: current plugin instance
+[26]:         :param placeholder: current placeholder instance
+[27]:         :return: rendered html
+[28]:         """
+[29]:         media = self.get_media(context, instance)
+[30]:         context.update({
+[31]:             'instance': instance,
+[32]:             'media': media
+[33]:         })
+
+[34]:         try:
+[35]:             plugin_render = getattr(self, "render_%s" % instance.plugin_type)
+[36]:         except AttributeError:
+[37]:             return "Cannot render plugin!"
+[38]:         return plugin_render(context, instance, placeholder)
+
+[39]:     def render_image(self, context, instance, placeholder):
+[40]:         """
+[41]:         Renders Image plugin
+
+[42]:         :param context: current template context instance
+[43]:         :param instance: current plugin instance
+[44]:         :param placeholder: current placeholder instance
+[45]:         :return: rendered html
+[46]:         """
+[47]:         template = getattr(settings, 'IFRAME_IMAGE_TEMPLATE', 'image.html')
+[48]:         return self.get_rendered_template(context, template, instance=instance)
+
+[49]:     def render_file(self, context, instance, placeholder):
+[50]:         """
+[51]:         Renders File plugin
+
+[52]:         :param context: current template context instance
+[53]:         :param instance: current plugin instance
+[54]:         :param placeholder: current placeholder instance
+[55]:         :return: rendered html
+[56]:         """
+[57]:         template = getattr(settings, 'IFRAME_FILE_TEMPLATE', 'file.html')
+[58]:         return self.get_rendered_template(context, template, instance=instance)
+
+[59]:     def get_media(self, context, instance):
+[60]:         """
+[61]:         Returns media (javascript) required by this plugin.
+
+[62]:         :param context: current template context instance
+[63]:         :param instance: current plugin instance
+[64]:         :return: media
+[65]:         """
+[66]:         media = super(ImageView, self).get_media(context, instance)
+[67]:         try:
+[68]:             plugin_media = getattr(self, "get_media_%s" % instance.plugin_type)
+[69]:         except AttributeError:
+[70]:             return media
+
+[71]:         return media + plugin_media(context, instance)
+
+[72]:     def get_media_image(self, context, instance):
+[73]:         """
+[74]:         Returns media (javascript) required for image plugin.
+
+[75]:         :param context: current template context instance
+[76]:         :param instance: current plugin instance
+[77]:         :return: media
+[78]:         """
+[79]:         return self.cmsplugin_media()
+
+[80]:     def get_media_file(self, context, instance):
+[81]:         """
+[82]:         Returns media (javascript) required for file plugin.
+
+[83]:         :param context: current template context instance
+[84]:         :param instance: current plugin instance
+[85]:         :return: media
+[86]:         """
+[87]:         return self.cmsplugin_media()
+
+[88]:     def get_rendered_template(self, context, template, **kwargs):
+[89]:         """
+[90]:         Returns rendered template for the plugin
+
+[91]:         :param context: current template context instance
+[92]:         :param template: template to render
+[93]:         :return: rendered html
+[94]:         """
+[95]:         html = self.render_template(template, context.flatten(), **kwargs)
+[96]:         if getattr(settings, 'IFRAME_USE_DJANGOCMS_TINYMCE', False):
+[97]:             html = mark_safe(CKEditorWidget().format_html(html, 'html'))
+
+[98]:         return html
+
+[99]:     def cmsplugin_media(self):
+[100]:         """
+[101]:         Returns media (javascript) required for this plugin.
+
+[102]:         :return: media
+[103]:         """
+[104]:         media = super(ImageView, self).cmsplugin_media()
+[105]:         try:
+[106]:             plugin_media = getattr(self, "media_%s" % self.plugin_type)
+[107]:         except AttributeError:
+[108]:             return media
+
+[109]:         return media + plugin_media()
+
+[110]:     def media_image(self):
+[111]:         """
+[112]:         Returns media (javascript) required for image plugin.
+
+[113]:         :return: media
+[114]:         """
+[115]:         return self.cmsplugin_media()
+
+[116]:     def media_file(self):
+[117]:         """
+[118]:         Returns media (javascript) required for File plugin.
+
+[119]:         :return: media
+[120]:         """
+[121]:         return self.cmsplugin_media()
+
+
+[122]: class ImageView(IFrameMixin, CMSPlugin):
+[123]:     """Core class for image plugin."""
+
+[124]:     file = models.ForeignKey(
+[125]:         settings.IFRAME_IMAGE_MODEL,
+[126]:         verbose_name=_('file'),
+[127]:         null=True, blank=True, on_delete=models.CASCADE
+[128]:     )
+
+[129]:     def clean(self):
+[130]:         """
+[131]:         Validates the plugin instance.
+
+[132]:         :return: Nothing
+[133]:         :raises: ValidationError
+[134]:         """
+[135]:         if self.file:
+[136]:             if self.file.is_image is False:
+[137]:                 raise ValidationError(
+[138]:                     _("File is not an image."),
+[139]:                     code='invalid_image'
+[140]:                 )
+
+
+[141]: class FileView(IFrameMixin, CMSPlugin):
+[142]:     """Core class for file plugin."""
+
+[143]:     file = models.ForeignKey(
+[144]:         settings.IFRAME_FILE_MODEL,
+[145]:         verbose_name=_('file'),
+[146]:         null=True, blank=True, on_delete=models.CASCADE
+[147]:     )
+
+[148]:     def clean(self):
+[149]:         """
+[150]:         Validates the plugin instance.
+
+[151]:         :return: Nothing
+[152]:         :raises: ValidationError
+[153]:         """
+[154]:         if self.file:
+[155]:             if self.file.is_image is True:
+[156]:                 raise ValidationError(
+[157]:                     _("File is an image."),
+[158]:                     code='invalid_image'
+[159]:                 )
+
+
+[160]: class DocumentView(FileView):
+[161]:     """
+[162]:     Document plugin.
+[163]:     """
+
+[164]:     def render_file(self, context, instance, placeholder):
+[165]:         """
+[166]:         Renders Document plugin
+
+[167]:         :param context: current template context instance
+[168]:         :param instance: current plugin instance
+[169]:         :param placeholder: current placeholder instance
+[170]:         :return: rendered html
+[171]:         """
+[172]:         template = getattr(settings, 'IFRAME_DOCUMENT_TEMPLATE', 'document.html')
+[173]:         return self.get_rendered_template(context, template, instance=instance)
+
+[174]:     def media_file(self):
+[175]:         """
+[176]:         Returns media (javascript) required for Document plugin.
+
+[177]:         :return: media
+[178]:         """
+[179]:         media = super(DocumentView, self).cmsplugin_media()
+
+[180]:         return media + self.media
+
+
+[181]: class LinkView(FileView):
+[182]:     """
+[183]:     Link plugin.
+[184]:     """
+
+[185]:     def render_file(self, context, instance, placeholder):
+[186]:         """
+[187]:         Renders Link plugin
+
+[188]:         :param context: current template context instance
+[189]:         :param instance: current plugin instance
+[190]:         :param placeholder: current placeholder instance
+[191]:         :return: rendered html
+[192]:         """
+[193]:         template = getattr(settings, 'IFRAME_LINK_TEMPLATE', 'link.html')
+[194]:         return self.get_rendered_template(context, template, instance=instance)
+
+[195]:     def media_file(self):
+[196]:         """
+[197]:         Returns media (javascript) required for Link plugin.
+
+[198]:         :return: media
+[199]:         """
+[200]:         media = super(LinkView, self).cmsplugin_media()
+
+[201]:         return media + self.media
+
+
+[202]: class IFramePluginBase(CMSPlugin):
+[203]:     """
+[204]:     Abstract base class for Iframe plugins.
+
+[205]:     Handles the rendering of the iframe html and the related media (javascript).
+[206]:     """
+
+[207]:     def render(self, context, instance, placeholder):
+[208]:         """
+[209]:         Renders the HTML for the plugins.
+
+[210]:         :param context: current template context instance
+[211]:         :param instance: current plugin instance
+[212]:         :param placeholder: current placeholder instance
+[213]:         :return: rendered html
+[214]:         """
+[215]:         media = self.get_media(context, instance)
+[216]:         context.update({
+[217]:             'instance': instance,
+[218]:             'media': media
+[219]:         })
+[220]:         return self.render_template(self.get_template(context), context.flatten(), instance=instance)
+
+[221]:     def get_media(self, context, instance):
+[222]:         """
+[223]:         Returns media (javascript) required by this plugin.
+
+[224]:         :param context: current template context instance
+[225]:         :param instance: current plugin instance
+[226]:         :return: media
+[227]:         """
+[228]:         return self.cmsplugin_media()
+
+[229]:     def get_template(self, context):
+[230]:         """
+[231]:         Returns template for the plugin
+
+[232]:         :param context: current template context instance
+[233]:         :return: template
+[234]:         """
+[235]:         return getattr(settings, 'IFRAME_PLUGIN_BASE_TEMPLATE', 'iframe-plugin-base.html')
+
+[236]:     def cmsplugin_media(self):
+[237]:         """
+[238]:         Returns media (javascript) required for this plugin.
+
+[239]:         :return: media
+[240]:         """
+[241]:         return self.media
+
+
+[242]: class IframePluginView(IFramePluginBase):
+[243]:     """
+[244]:     Iframe plugin for displaying content in an iframe.
+[245]:     """
+
+[246]:     url = models.URLField(_('url'), blank=True, help_text=_('Url to display in the iframe.'))
+
+[247]:     def render(self, context, instance, placeholder):
+[248]:         """
+[249]:         Renders the HTML for the plugins.
+
+[250]:         :param context: current template context instance
+[251]:         :param instance: current plugin instance
+[252]:         :param placeholder: current placeholder instance
+[253]:         :return: rendered html
+[254]:         """
+[255]:         context.update({
+[256]:             'instance': instance,
+[257]:             'url': instance.url
+[258]:         })
+[259]:         return super(IframePluginView, self).render(context, instance, placeholder)
+
+[260]:     def clean(self):
+[261]:         """
+[262]:         Validates the plugin instance.
+
+[263]:         :return: Nothing
+[264]:         :raises: ValidationError
+[265]:         """
+[266]:         if not self.url:
+[267]:             raise ValidationError(
+[268]:                 _("Url not specified."),
+[269]:                 code='invalid_url'
+[270]:             )
+
+[271]:     @property
+[272]:     def media(self):
+[273]:         """
+[274]:         Returns media (javascript) required for Iframe plugin.
+
+[275]:         :return: media
+[276]:         """
+[277]:         return self.cmsplugin_media()
+
+[278]:     def cmsplugin_media(self):
+[279]:         """
+[280]:         Returns media (javascript) required for Iframe plugin.
+
+[281]:         :return: media
+[282]:         """
+[283]:         return super(IframePluginView, self).cmsplugin_media()
+
+
+[284]: class FormView(IFramePluginBase):
+[285]:     """
+[286]:     Form plugin for displaying a form in an iframe.
+[287]:     """
+
+[288]:     form = models.ForeignKey(
+[289]:         'Form',
+[290]:         verbose_name=_('form'),
+[291]:         null=True, blank=True, on_delete=models.CASCADE
+[292]:     )
+
+[293]:     def clean(self):
+[294]:         """
+[295]:         Validates the plugin instance.
+
+[296]:         :return: Nothing
+[297]:         :raises: ValidationError
+[298]:         """
+[299]:         if self.form:
+[300]:             if self.form.is_submitted:
+[301]:                 raise ValidationError(
+[302]:                     _("Form already submitted."),
+[303]:                     code='invalid_form'
+[304]:                 )
+
+[305]:     def get_template(self, context):
+[306]:         """
+[307]:         Returns template for the plugin
+
+[308]:         :param context: current template context instance
+[309]:         :return: template
+[310]:         """
+[311]:         return getattr(settings, 'IFRAME_FORM_TEMPLATE', 'form.html')
+
+[312]:     def render(self, context, instance, placeholder):
+[313]:         """
+[314]:         Renders the HTML for the plugins.
+
+[315]:         :param context: current template context instance
+[316]:         :param instance: current plugin instance
+[317]:         :param placeholder: current placeholder instance
+[318]:         :return: rendered html
+[319]:         """
+[320]:         context.update({
+[321]:             'instance': instance,
+[322]:             'form': instance.form.get_form()
+[323]:         })
+[324]:         return super(FormView, self).render(context, instance, placeholder)
+
+
+[325]: class Form(IFramePluginBase):
+[326]:     """
+[327]:     Form plugin for managing forms.
+[328]:     """
+
+[329]:     title = models.CharField(_('title'), max_length=255, blank=True)
+
+[330]:     class Meta:
+[331]:         verbose_name = _('Form')
+[332]:         verbose_name_plural = _('Forms')
+
+[333]:     def clean(self):
+[334]:         """
+[335]:         Validates the plugin instance.
+
+[336]:         :return: Nothing
+[337]:         :raises: ValidationError
+[338]:         """
+[339]:         if 'id' in self.extra:
+[340]:             slug = self.extra['id']
+[341]:         else:
+[342]:             slug = slugify(self.title)
+[343]:         if not slug:
+[344]:             raise ValidationError(
+[345]:                 _("Title or id is required."),
+[346]:                 code='invalid_form'
+[347]:             )
+
+[348]:         if slug in Form.objects.filter(extra__id=slug).exclude(pk=self.pk).values_list('extra__id', flat=True).distinct():
+[349]:             raise ValidationError(
+[350]:                 _("An other form with the same id already exists."),
+[351]:                 code='invalid_form'
+[352]:             )
+
+[353]:         if smart_str(slug).find('-') != -1:
+[354]:             raise ValidationError(
+[355]:                 _("An form id may not contain a hyphen (-)."),
+[356]:                 code='invalid_form'
+[357]:             )
+
+[358]:         if re.match(r'^[a-z0-9_]+$', slug) is None:
+[359]:             raise ValidationError(
+[360]:                 _("An form id may only contain lowercase characters, numbers and underscores."),
+[361]:                 code='invalid_form'
+[362]:             )
+
+[363]:     def get_form(self):
+[364]:         """
+[365]:         Returns the form for this plugin instance.
+
+[366]:         :return: form
+[367]:         """
+[368]:         plugin = FormView.objects.filter(form=self).first()
+[369]:         if plugin:
+[370]:             return plugin.form.get_form()
+
+[371]:     def get_template(self, context):
+[372]:         """
+[373]:         Returns template for the plugin
+
+[374]:         :param context: current template context instance
+[375]:         :return: template
+[376]:         """
+[377]:         return getattr(settings, 'IFRAME_FORM_MANAGEMENT_TEMPLATE', 'form-management.html')
+
+[378]:     def render(self, context, instance, placeholder):
+[379]:         """
+[380]:         Renders the HTML for the plugins.
+
+[381]:         :param context: current template context instance
+[382]:         :param instance: current plugin instance
+[383]:         :param placeholder: current placeholder instance
+[384]:         :return: rendered html
+[385]:         """
+[386]:         context.update({
+[387]:             'instance': instance,
+[388]:             'form': instance.form.get_form()
+[389]:         })
+[390]:         return super(Form, self).render(context, instance, placeholder)
+
+[391]:     def save(self, *args, **kwargs):
+[392]:         """
+[393]:         Saves the form plugin instance.
+
+[394]:         :return: Nothing
+[395]:         """
+[396]:         if 'id' not in self.extra:
+[397]:             self.extra['id'] = slugify(self.title)
+[398]:         super(Form, self).save(*args, **kwargs)
+
+[399]:     def __unicode__(self):
+[400]:         """
+[401]:         Returns the display name of the plugin instance.
+
+[402]:         :return: display name
+[403]:         """
+[404]:         return self.title or _('Form')
+
+[405]:     def get_absolute_url(self):
+[406]:         """
+[407]:         Returns the absolute url to the plugin instance.
+
+[408]:         :return: url
+[409]:         """
+[410]:         return reverse('iframe_form', kwargs={'form_id': self.extra['id']})
+
+[411]:     def get_form(self, data=None):
+[412]:         """
+[413]:         Returns the form for this plugin instance.
+
+[414]:         :return: form
+[415]:         """
+[416]:         class Form(FormBase):
+[417]:             form_id = self.extra['id']
+[418]:             form_title = self.title
+
+[419]:         return Form(data)
+
+[420]:     def add_plugin(self, plugin):
+[421]:         """
+[422]:         Adds a plugin to the form
+
+[423]:         :param plugin: plugin instance
+[424]:         :return: Nothing
+[425]:         """
+[426]:         form = self.get_form()
+[427]:         form.add_plugin(plugin)
+
+[428]:     def save_forms(self, form):
+[429]:         """
+[430]:         Saves the form data and related plugins.
+
+[431]:         :param form: form data
+[432]:         :return: Nothing
+[433]:         """
+[434]:         self.is_submitted = True
+[435]:         self.save()
+
+[436]:         plugins = form.cleaned_data.pop('plugins')
+[437]:         for plugin in plugins:
+[438]:             plugin.save_forms(form)
+
+[439]:     def get_forms(self):
+[440]:         """
+[441]:         Returns all forms for this form plugin.
+
+[442]:         :return: forms
+[443]:         """
+[444]:         forms = []
+[445]:         for plugin in CMSPlugin.objects.filter(placeholder__parent__form=self).order_by('position'):
+[446]:             forms.append(plugin.get_forms())
+
+[447]:         return forms
+
+[448]:     @property
+[449]:     def media(self):
+[450]:         """
+[451]:         Returns media (javascript) required for Iframe plugin.
+
+[452]:         :return: media
+[453]:         """
+[454]:         return self.cmsplugin_media()
+
+[455]:     def cmsplugin_media(self):
+[456]:         """
+[457]:         Returns media (javascript) required for Iframe plugin.
+
+[458]:         :return: media
+[459]:         """
+[460]:         media = super(Form, self).cmsplugin_media()
+[461]:         media += self.media
+[462]:         return media
+
+[463]:     @property
+[464]:     def media(self):
+[465]:         """
+[466]:         Returns media (javascript) required for Form plugin.
+
+[467]:         :return: media
+[468]:         """
+[469]:         media = self.cmsplugin_media()
+[470]:         media += self.plugin_media()
+[471]:         return media
+
+[472]:     def plugin_media(self):
+[473]:         """
+[474]:         Returns media (javascript) required for Form plugin.
+
+[475]:         :return: media
+[476]:         """
+[477]:         media = forms.Media(js=['iframe/form.js'])
+[478]:         return media
+
+
+[479]: class FormBase(forms.Form):
+[480]:     """
+[481]:     Abstract base class for form plugins.
+[482]:     """
+
+[483]:     form_id = None
+[484]:     form_title = None
+[485]:     is_submitted = False
+
+[486]:     def __init__(self, data=None, **kwargs):
+[487]:         """
+[488]:         Initializes the form plugin.
+
+[489]:         :param data: form data
+[490]:         :param kwargs: keyword based arguments
+[491]:         :return: Nothing
+[492]:         """
+[493]:         if not self.form_id:
+[494]:             raise Exception('Form id required!')
+[495]:         if not self.form_title:
+[496]:             raise Exception('Form title required!')
+
+[497]:         self.form = Form.objects.filter(extra__id=self.form_id).first()
+
+[498]:         if data:
+[499]:             self.is_submitted = True
+
+[500]:         super(FormBase, self).__init__(data=data, **kwargs)
+
+[501]:     def get_plugin(self, plugin, instance=None):
+[502]:         """
+[503]:         Returns the plugin instance.
+
+[504]:         :param plugin: plugin class
+[505]:         :param instance: plugin instance
+[506]:         :return: plugin instance
+[507]:         """
+[508]:         if not instance:
+[509]:             instance = plugin(
+[510]:                 language=self.language,
+[511]:                 placeholder=self.placeholder,
+[512]:                 position=self.position,
+[513]:                 plugin_type=plugin.get_plugin_type(),
+[514]:                 form=self.form
+[515]:             )
+[516]:         return instance
+
+[517]:     def clean(self):
+[518]:         """
+[519]:         Validates the form plugin instance.
+
+[520]:         :return: Nothing
+[521]:         :raises: ValidationError
+[522]:         """
+[523]:         cleaned_data = super(FormBase, self).clean()
+[524]:         if not self.is_submitted:
+[525]:             raise ValidationError(
+[526]:                 _('This form may not be empty.'),
+[527]:                 code='invalid_form'
+[528]:             )
+
+[529]:         return cleaned_data
+
+[530]:     def add_plugin(self, plugin, instance=None):
+[531]:         """
+[532]:         Adds a plugin to the form.
+
+[533]:         :param plugin: plugin class
+[534]:         :param instance: plugin instance
+[535]:         :return: Nothing
+[536]:         """
+[537]:         plugin_instance = self.get_plugin(plugin, instance)
+[538]:         plugin_instance.save()
+[539]:         self.add_plugin_instance(plugin_instance)
+
+[540]:     def add_plugin_instance(self, plugin_instance):
+[541]:         """
+[542]:         Adds a plugin instance to the form.
+
+[543]:         :param plugin_instance: plugin instance
+[544]:         :return: Nothing
+[545]:         """
+[546]:         instance = CMSPlugin(
+[547]:             language=self.language,
+[548]:             placeholder=self.placeholder,
+[549]:             position=self.position,
+[550]:             plugin_type=plugin_instance.get_plugin_type(),
+[551]:             plugin_class=plugin_instance.get_plugin_class(),
+[552]:             form=self.form
+[553]:         )
+[554]:         instance.save()
+[555]:         self.position += 1
+[556]:         plugin_instance.placeholder = instance
+[557]:         plugin_instance.save()
+[558]:         self.add_plugins(plugin_instance)
+
+[559]:     def save_forms(self, form):
+[560]:         """
+[561]:         Saves the form data and related plugins.
+
+[562]:         :param form: form data
+[563]:         :return: Nothing
+[564]:         """
+[565]:         self.is_submitted = True
+[566]:         self.save()
+
+[567]:         plugins = form.cleaned_data.pop('plugins')
+[568]:         for plugin in plugins:
+[569]:             plugin.save_forms(form)
+
+[570]:     def get_forms(self):
+[571]:         """
+[572]:         Returns all forms for this form plugin.
+
+[573]:         :return: forms
+[574]:         """
+[575]:         forms = []
+[576]:         for plugin in CMSPlugin.objects.filter(placeholder__parent__form=self.form).order_by('position'):
+[577]:             forms.append(plugin.get_forms())
+
+[578]:         return forms
+
+[579]:     def get_form(self):
+[580]:         """
+[581]:         Returns the form for this plugin instance.
+
+[582]:         :return: form
+[583]:         """
+[584]:         return self.form
+
+[585]:     def get_plugin_class(self):
+[586]:         """
+[587]:         Returns the plugin class.
+
+[588]:         :return: plugin class
+[589]:         """
+[590]:         return type(self)
+
+[591]:     def get_plugin_type(self):
+[592]:         """
+[593]:         Returns the plugin type.
+
+[594]:         :return: plugin type
+[595]:         """
+[596]:         return '%s_%s' % (self.get_plugin_base(), self.__name__)
+
+[597]:     def get_plugin_base(self):
+[598]:         """
+[599]:         Returns the plugin base.
+
+[600]:         :return: plugin base
+
+
+***** Tag Data *****
+ID: 3
+description: Complex media handling logic for the IFramePluginBase class and its derivatives.
+  This includes handling JavaScript and CSS media requirements for different plugins.
+start line: 202
+end line: 276
+dependencies:
+- type: Class
+  name: IFramePluginBase
+  start line: 202
+  end line: 241
+- type: Method
+  name: cmsplugin_media
+  start line: 236
+  end line: 241
+context description: This snippet is focused on rendering media for Iframe plugins,
+  ensuring that all necessary JavaScript and CSS are included dynamically based on
+  plugin type.
+algorithmic depth: 4
+algorithmic depth external: N
+obscurity: 3
+advanced coding concepts: 4
+interesting for students: 5
+self contained: N
+
+
+*************
+## Suggestions for complexity
+1. **Dynamic Media Loading Based on User Roles**: Modify the code to load different sets of media (JavaScript/CSS) based on the user's role within the context. This requires integrating user role checks and dynamically altering the media that gets included.
+2. **Asynchronous Rendering**: Implement asynchronous plugin rendering to improve performance, particularly for complex plugins that may require significant processing time. This would involve using async/await patterns and potentially integrating with a web worker.
+3. **Enhanced Security Measures**: Introduce additional security measures to sanitize the iframe content, ensuring that only safe URLs are rendered. This might involve more advanced URL validation and content security policies.
+4. **Plugin Dependency Management**: Develop a system to manage dependencies between different Iframe plugins, ensuring that all necessary scripts and styles are loaded in the correct order to avoid conflicts.
+5. **Customizable Media Source**: Allow users to specify custom sources for their media files (JavaScript/CSS), enabling the use of CDN-hosted assets or other external sources while maintaining a fallback to default settings.
+
+## Conversation
+<|user|>I'm working on a project where I need to load different sets of media based on the user's role. How can I modify the [SNIPPET] to achieve this?<|end|>
+<|assistant|>To load different sets of media based on the user's role, you'll need to integrate user role checks into the `get_media` method. Here's a modified version of the `IframePluginView` class to illustrate this:
+
+```python
+class IframePluginView(IFramePluginBase):
+    """
+    Iframe plugin for displaying content in an iframe.
+    """
+    url = models.URLField(_('url'), blank=True, help_text=_('Url to display in the iframe.'))
+
+    def render(self, context, instance, placeholder):
+        """
+        Renders the HTML for the plugins.
+        :param context: current template context instance
+        :param instance: current plugin instance
+        :param placeholder: current placeholder instance
+        :return: rendered html
+        """
+        context.update({
+            'instance': instance,
+            'url': instance.url
+        })
+        return super(IframePluginView, self).render(context, instance, placeholder)
+
+    def clean(self):
+        """
+        Validates the plugin instance.
+        :return: Nothing
+        :raises: ValidationError
+        """
+        if not self.url:
+            raise ValidationError(
+                _("Url not specified."),
+                code='invalid_url'
+            )
+
+    @property
+    def media(self):
+        """
+        Returns media (javascript) required for Iframe plugin.
+        :return: media
+        """
+        return self.get_media_based_on_role()
+
+    def get_media_based_on_role(self):
+        """
+        Returns media (javascript) required for Iframe plugin based on user role.
+        :return: media
+        """
+        user_role = self.get_user_role()
+        if user_role == 'admin':
+            return self.admin_media
+        elif user_role == 'editor':
+            return self.editor_media
+        else:
+            return self.cmsplugin_media()
+
+    def get_user_role(self):
+        """
+        Determines the user role. This is a placeholder for actual role determination logic.
+        :return: role
+        """
+        # Replace this with actual logic to get the user's role
+        return 'viewer'
+    
+    @property
+    def admin_media(self):
+        """
+        Returns media (javascript) specifically for admin role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + admin-specific js/css"
+
+    @property
+    def editor_media(self):
+        """
+        Returns media (javascript) specifically for editor role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + editor-specific js/css"
+```
+
+This code assumes you have a way to determine the user's role within the `get_user_role` method. Adjust the `admin_media` and `editor_media` properties to include the specific media assets required for each role.
+<|end|>
+<|user|>Can you help me integrate asynchronous rendering for this plugin? I want to make sure the rendering is efficient, especially for complex plugins.<|end|>
+<|assistant|>To integrate asynchronous rendering for the plugin, you can utilize Python's `asyncio` library along with asynchronous views if you are working within an asynchronous web framework like Django Channels. Here's how you can modify the `render` method and related parts of the `IframePluginView` class to support asynchronous rendering:
+
+First, make sure your Django project is set up to support asynchronous views.
+
+```python
+from asgiref.sync import sync_to_async
+import asyncio
+
+class IframePluginView(IFramePluginBase):
+    """
+    Iframe plugin for displaying content in an iframe.
+    """
+    url = models.URLField(_('url'), blank=True, help_text=_('Url to display in the iframe.'))
+
+    async def render(self, context, instance, placeholder):
+        """
+        Renders the HTML for the plugins asynchronously.
+        :param context: current template context instance
+        :param instance: current plugin instance
+        :param placeholder: current placeholder instance
+        :return: rendered html
+        """
+        context.update({
+            'instance': instance,
+            'url': instance.url
+        })
+        template = await sync_to_async(self.get_template)(context)
+        return await sync_to_async(self.render_template)(template, context.flatten(), instance=instance)
+
+    async def clean(self):
+        """
+        Validates the plugin instance asynchronously.
+        :return: Nothing
+        :raises: ValidationError
+        """
+        if not self.url:
+            raise ValidationError(
+                _("Url not specified."),
+                code='invalid_url'
+            )
+
+    @property
+    def media(self):
+        """
+        Returns media (javascript) required for Iframe plugin.
+        :return: media
+        """
+        return self.get_media_based_on_role()
+
+    def get_media_based_on_role(self):
+        """
+        Returns media (javascript) required for Iframe plugin based on user role.
+        :return: media
+        """
+        user_role = self.get_user_role()
+        if user_role == 'admin':
+            return self.admin_media
+        elif user_role == 'editor':
+            return self.editor_media
+        else:
+            return self.cmsplugin_media()
+
+    def get_user_role(self):
+        """
+        Determines the user role. This is a placeholder for actual role determination logic.
+        :return: role
+        """
+        # Replace this with actual logic to get the user's role
+        return 'viewer'
+    
+    @property
+    def admin_media(self):
+        """
+        Returns media (javascript) specifically for admin role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + admin-specific js/css"
+
+    @property
+    def editor_media(self):
+        """
+        Returns media (javascript) specifically for editor role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + editor-specific js/css"
+```
+
+This example uses `asyncio` and `asgiref.sync.sync_to_async` to convert synchronous methods to asynchronous ones. This is a simplified version, and you may need to adjust based on your actual project setup and dependency requirements. Ensure your Django project is configured to use ASGI for asynchronous support.
+<|end|>
+<|user|>I also need to enhance the security measures by sanitizing the iframe content. How can I ensure only safe URLs are rendered in the iframe?<|end|>
+<|assistant|>To enhance security and ensure that only safe URLs are rendered in the iframe, you can add URL validation and sanitization in the `clean` method and possibly use additional libraries to help with sanitizing the URLs. Here's an updated version of the `IframePluginView` class to include these security measures:
+
+```python
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from urllib.parse import urlparse
+
+class IframePluginView(IFramePluginBase):
+    """
+    Iframe plugin for displaying content in an iframe.
+    """
+    url = models.URLField(_('url'), blank=True, help_text=_('Url to display in the iframe.'))
+
+    async def render(self, context, instance, placeholder):
+        """
+        Renders the HTML for the plugins asynchronously.
+        :param context: current template context instance
+        :param instance: current plugin instance
+        :param placeholder: current placeholder instance
+        :return: rendered html
+        """
+        context.update({
+            'instance': instance,
+            'url': instance.url
+        })
+        template = await sync_to_async(self.get_template)(context)
+        return await sync_to_async(self.render_template)(template, context.flatten(), instance=instance)
+
+    async def clean(self):
+        """
+        Validates the plugin instance asynchronously.
+        :return: Nothing
+        :raises: ValidationError
+        """
+        if not self.url:
+            raise ValidationError(
+                _("Url not specified."),
+                code='invalid_url'
+            )
+        
+        # Validate URL
+        validate = URLValidator()
+        try:
+            validate(self.url)
+        except ValidationError:
+            raise ValidationError(
+                _("Invalid URL."),
+                code='invalid_url'
+            )
+        
+        # Sanitize URL
+        if not self.is_safe_url(self.url):
+            raise ValidationError(
+                _("Unsafe URL."),
+                code='unsafe_url'
+            )
+
+    def is_safe_url(self, url):
+        """
+        Checks if the provided URL is safe to be used in an iframe.
+        :param url: URL to check
+        :return: True if safe, False otherwise
+        """
+        parsed_url = urlparse(url)
+        safe_schemes = ['http', 'https']
+        safe_netlocs = ['example.com', 'trusted.com']  # Replace with actual trusted domains
+        return parsed_url.scheme in safe_schemes and parsed_url.netloc in safe_netlocs
+
+    @property
+    def media(self):
+        """
+        Returns media (javascript) required for Iframe plugin.
+        :return: media
+        """
+        return self.get_media_based_on_role()
+
+    def get_media_based_on_role(self):
+        """
+        Returns media (javascript) required for Iframe plugin based on user role.
+        :return: media
+        """
+        user_role = self.get_user_role()
+        if user_role == 'admin':
+            return self.admin_media
+        elif user_role == 'editor':
+            return self.editor_media
+        else:
+            return self.cmsplugin_media()
+
+    def get_user_role(self):
+        """
+        Determines the user role. This is a placeholder for actual role determination logic.
+        :return: role
+        """
+        # Replace this with actual logic to get the user's role
+        return 'viewer'
+    
+    @property
+    def admin_media(self):
+        """
+        Returns media (javascript) specifically for admin role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + admin-specific js/css"
+
+    @property
+    def editor_media(self):
+        """
+        Returns media (javascript) specifically for editor role.
+        :return: media
+        """
+        return self.cmsplugin_media() + " + editor-specific js/css"
+```
+
+In this code:
+- The `clean` method has been updated to validate the URL using `URLValidator`.
+- The `is_safe_url` method checks if the URL scheme and domain are in a list of trusted values.
+- Adjust the `safe_netlocs` list to include the domains that you consider safe for embedding in iframes.
+[0]: import time
+
+[1]: import numpy as np
+[2]: import torch
+[3]: from torch import nn
+[4]: from torch.nn import functional as F
+[5]: from torch.utils.data import DataLoader
+[6]: from torch.utils.data.dataset import Dataset
+[7]: from torchsummary import summary
+
+[8]: import matplotlib.pyplot as plt
+[9]: import numpy as np
+[10]: # from utils import *
+[11]: from torch.utils.tensorboard import SummaryWriter
+
+[12]: writer = SummaryWriter('runs/fasterrcnn')
+
+[13]: class MLPLayer(nn.Module):
+[14]:     def __init__(self, in_dim, out_dim, activation='relu', batch_norm=True):
+[15]:         super().__init__()
+[16]:         self.layer = nn.Linear(in_dim, out_dim)
+[17]:         self.act = getattr(nn, activation)()
+[18]:         self.bn = nn.BatchNorm1d(out_dim) if batch_norm else nn.Identity()
+
+[19]:     def forward(self, x):
+[20]:         return self.bn(self.act(self.layer(x)))
+
+[21]: class BoxPredictor(nn.Module):
+[22]:     def __init__(self, in_dim, num_classes, num_anchors):
+[23]:         super().__init__()
+[24]:         self.num_classes = num_classes
+[25]:         self.num_anchors = num_anchors
+[26]:         self.loc_pred = nn.Linear(in_dim, 4*self.num_anchors)
+[27]:         self.cls_pred = nn.Linear(in_dim, self.num_classes*self.num_anchors)
+
+[28]:     def forward(self, x):
+[29]:         return self.loc_pred(x), self.cls_pred(x)
+
+[30]: class FasterRCNN(nn.Module):
+[31]:     def __init__(self, backbone, num_classes, num_anchors=9, num_conv=4, conv_dim=256, pool_dim=512, pool_type='avg', cls_th=0.05, nms_th=0.5, max_proposal=100):
+[32]:         super().__init__()
+[33]:         # FasterRCNN consist of the following architectures:
+[34]:         # - Backbone: features extraction network
+[35]:         # - Region Proposal Network (RPN)
+[36]:         # - Proposal layer: select the top proposals after NMS
+[37]:         # - RoIAlign layer: extract the features from the proposals
+[38]:         # - Box classifier: classify the proposals and refine the boxes
+[39]:         self.backbone = backbone
+[40]:         self.num_classes = num_classes
+[41]:         self.num_anchors = num_anchors
+[42]:         self.num_conv = num_conv
+[43]:         self.conv_dim = conv_dim
+[44]:         self.pool_dim = pool_dim
+[45]:         self.pool_type = pool_type
+[46]:         self.cls_th = cls_th
+[47]:         self.nms_th = nms_th
+[48]:         self.max_proposal = max_proposal
+
+[49]:         # Region Proposal Network
+[50]:         self.rpn_conv = nn.ModuleList([MLPLayer(self.backbone.dim, self.conv_dim) for _ in range(self.num_conv)])
+[51]:         self.rpn_pool = nn.AdaptiveAvgPool2d(1) if self.pool_type == 'avg' else nn.AdaptiveMaxPool2d(1)
+[52]:         self.rpn_pred = BoxPredictor(self.pool_dim, 2, self.num_anchors)
+
+[53]:         # Box classifier
+[54]:         self.roi_align = RoIAlign(self.pool_dim, 7, 1)
+[55]:         self.box_classifier = nn.Sequential(
+[56]:             nn.Linear(7 * 7 * self.backbone.dim, self.pool_dim),
+[57]:             nn.ReLU(),
+[58]:             nn.Linear(self.pool_dim, self.pool_dim),
+[59]:             nn.ReLU(),
+[60]:             BoxPredictor(self.pool_dim, self.num_classes, self.num_anchors)
+[61]:         )
+
+[62]:     def forward(self, x, targets=None):
+[63]:         if self.training:
+[64]:             return self._forward_train(x, targets)
+[65]:         else:
+[66]:             return self._forward_test(x)
+
+[67]:     def _forward_train(self, x, targets):
+[68]:         # Feature extraction
+[69]:         features = self.backbone(x)
+
+[70]:         # RPN
+[71]:         for l in self.rpn_conv:
+[72]:             features = l(features)
+[73]:         pooled_features = self.rpn_pool(features).view(features.size(0), -1)
+[74]:         rpn_locs, rpn_scores = self.rpn_pred(pooled_features)
+
+[75]:         # Generate proposals from bbox deltas and shifted anchors
+[76]:         anchors = self.backbone.anchors
+[77]:         proposals, proposal_losses = self.rpn(
+[78]:             anchors, rpn_locs, rpn_scores, targets)
+
+[79]:         # Select training samples from RPN proposals
+[80]:         samples, matched_targets = self.proposal_matcher(proposals, targets)
+[81]:         positive_proposals = proposals[samples.ge(1)]
+[82]:         roi_align = self.roi_align(features, positive_proposals)
+
+[83]:         # Box classifier
+[84]:         box_cls_locs, box_cls_scores = self.box_classifier(roi_align.view(
+[85]:             roi_align.size(0), -1))
+[86]:         box_cls_loss, box_reg_loss = self.box_classifier_loss(
+[87]:             box_cls_locs, box_cls_scores, samples, matched_targets)
+
+[88]:         # Compute the total loss
+[89]:         loss = {}
+[90]:         loss.update(proposal_losses)
+[91]:         loss.update({'box_cls_loss': box_cls_loss,
+[92]:                      'box_reg_loss': box_reg_loss})
+[93]:         return loss
+
+[94]:     def _forward_test(self, x):
+[95]:         features = self.backbone(x)
+[96]:         for l in self.rpn_conv:
+[97]:             features = l(features)
+[98]:         pooled_features = self.rpn_pool(features).view(features.size(0), -1)
+[99]:         rpn_locs, rpn_scores = self.rpn_pred(pooled_features)
+
+[100]:         anchors = self.backbone.anchors
+[101]:         proposals, _ = self.rpn(anchors, rpn_locs, rpn_scores, None)
+[102]:         proposals = proposals.view(-1, 4)
+[103]:         scores, labels = self._get_det_probs(self.box_classifier(features), scores=True)
+[104]:         boxes, scores, labels = self._get_det_boxes(
+[105]:             proposals, labels, scores, self.cls_th, self.nms_th, self.max_proposal)
+
+[106]:         return boxes, scores, labels
+
+[107]:     def rpn(self, anchors, rpn_locs, rpn_scores, targets):
+[108]:         """
+[109]:         Generate proposals from RPN network outputs.
+[110]:         Args:
+[111]:             anchors (tensor): shape (N, A, 4)
+[112]:             rpn_locs (tensor): shape (N, A, 4)
+[113]:             rpn_scores (tensor): shape (N, A, 2)
+[114]:             targets (list): list of ground truth boxes and labels for each image.
+
+[115]:         Returns:
+[116]:             proposals (list[tensor]): RPN proposals for each image.
+[117]:             proposal_losses (dict[tensor]): losses for training RPN.
+[118]:         """
+[119]:         device = rpn_locs.device
+[120]:         N, n_anchors = rpn_locs.shape[:2]
+
+[121]:         # Convert anchors into proposals via bbox transformations
+[122]:         proposals = self.box_coder.decode(anchors.to(device=device), rpn_locs.view(N, -1, 4))
+
+[123]:         # Get scores and labels for sampling anchors
+[124]:         object_scores = rpn_scores[:, :, 1].view(N, -1)
+[125]:         anchor_labels = torch.zeros_like(object_scores).long().to(device=device)
+[126]:         if self.training:
+[127]:             if targets is None:
+[128]:                 raise ValueError("In training mode, targets should be passed")
+[129]:             # labels: 1 is positive, 0 is negative, -1 is dont care
+[130]:             anchor_labels, anchor_deltas = self.anchor_matcher(
+[131]:                 anchors, targets, batch_size=N)
+[132]:             # Sample anchors
+[133]:             sampled_pos_inds, sampled_neg_inds = self._sample_anchors(
+[134]:                 anchor_labels)
+[135]:             sampled_inds = torch.cat([sampled_pos_inds, sampled_neg_inds], dim=0)
+[136]:             # Compute anchor classification loss
+[137]:             sampled_labels = anchor_labels[sampled_inds]
+[138]:             sampled_labels = sampled_labels.to(dtype=torch.float32)
+[139]:             # sampled_labels = torch.where(sampled_labels > 0, torch.ones_like(
+[140]:             #     sampled_labels), sampled_labels)
+[141]:             cls_loss = F.binary_cross_entropy_with_logits(rpn_scores.view(
+[142]:                 N, -1, 2)[:, sampled_inds, 1], sampled_labels)
+
+[143]:             # Compute anchor regression loss
+[144]:             sampled_pos_inds = torch.nonzero(
+[145]:                 sampled_pos_inds, as_tuple=False).squeeze(dim=1)
+[146]:             anchor_deltas = anchor_deltas[sampled_pos_inds, :]
+
+[147]:             reg_loss = F.smooth_l1_loss(rpn_locs.view(N, -1, 4)[
+[148]:                 :, sampled_pos_inds, :], anchor_deltas)
+
+[149]:             # Proposals are in normalized coordinates
+[150]:             proposals = proposals.view(N, -1, 4)[:, sampled_pos_inds, :]
+[151]:             # Add regression deltas to proposals
+[152]:             proposals = self.box_coder.apply_deltas(
+[153]:                 proposals, anchor_deltas)
+
+[154]:             # Only keep proposals inside the image
+[155]:             proposals = self.box_coder.clip(proposals, batch_size=N)
+[156]:             # Assign labels to proposals
+[157]:             _, labels = self.proposal_matcher(proposals, targets)
+[158]:             # Only keep positive proposals
+[159]:             labels = labels.unsqueeze(dim=1)
+[160]:             proposals = proposals[labels.byte()].view(N, -1, 4)
+[161]:         else:
+[162]:             scores = object_scores.view(N, -1)
+[163]:             proposals = proposals.view(N, -1, 4)
+
+[164]:             # Add a dummy background class to the backend (for the mask)
+[165]:             scores = torch.cat([scores, torch.zeros(
+[166]:                 N, 1).to(device=device)], dim=1)
+[167]:             # Apply softmax to get probabilities
+[168]:             scores = F.softmax(scores, dim=1)[:, 1]
+[169]:             # skip the background
+[170]:             # scores = scores[:, 1:].max(dim=1)[0]
+[171]:             # Select top anchors independent of the batch
+[172]:             num_anchors = scores.size(1)
+[173]:             order = torch.argsort(scores, dim=1, descending=True)
+[174]:             image_anchors = torch.arange(N, device=device) * num_anchors
+[175]:             image_anchors = image_anchors.view(-1, 1).expand_as(order)
+[176]:             anchors = torch.flatten(anchors, start_dim=0, end_dim=1)
+[177]:             anchors = anchors[image_anchors + order, :]
+[178]:             proposals = proposals[image_anchors + order, :]
+[179]:             scores = scores[image_anchors + order]
+[180]:             # Apply nms to each image
+[181]:             proposals, scores, labels = self._nms_and_topk(
+[182]:                 proposals, scores, labels, self.nms_th, self.max_proposal)
+
+[183]:             # output is padded with -1 so empty boxes will be ignored
+[184]:             # during training
+[185]:             padding = torch.full(
+[186]:                 (N, self.max_proposal - proposals.size(0), 4), -1, dtype=torch.float32, device=device)
+[187]:             proposals = torch.cat([proposals, padding], dim=1)
+[188]:             padding = torch.full(
+[189]:                 (N, self.max_proposal - scores.size(0)), -1, dtype=torch.float32, device=device)
+[190]:             scores = torch.cat([scores, padding], dim=0)
+[191]:             padding = torch.zeros(
+[192]:                 N, self.max_proposal - labels.size(0), dtype=torch.long, device=device)
+[193]:             labels = torch.cat([labels, padding], dim=0)
+
+[194]:             # loss = {'cls_loss': cls_loss, 'reg_loss': reg_loss}
+[195]:             loss = {}
+[196]:         return proposals, loss
+
+[197]:     def proposal_matcher(self, proposals, targets):
+[198]:         """
+[199]:         Match proposals with targets
+[200]:         Args:
+[201]:             proposals (tensor): shape (n, 4)
+[202]:             targets (list[tensor]): list of target boxes and labels for each image.
+
+[203]:         Returns:
+[204]:             samples (tensor): shape (n,) indices for sampled proposals
+[205]:             labels (tensor): shape (n,) labels for sampled proposals
+[206]:         """
+[207]:         device = proposals.device
+[208]:         N = proposals.shape[0]
+[209]:         if targets is None:
+[210]:             # if no targets, return all -1
+[211]:             return torch.zeros(N, dtype=torch.long).to(device=device) - 1, torch.zeros(N, dtype=torch.long).to(device=device) - 1
+
+[212]:         # match each proposal to a target
+[213]:         proposals = proposals.view(N, -1, 4)
+[214]:         targets = targets.bbox
+[215]:         labels = targets.get_field('labels')
+
+[216]:         matched_idxs, _ = self.box_coder.match(proposals, targets)
+[217]:         labels = labels[matched_idxs]
+[218]:         labels[matched_idxs < 0] = 0
+
+[219]:         # Select foreground indices
+[220]:         fg_inds = torch.nonzero(labels > 0).squeeze(1)
+[221]:         bg_inds = torch.nonzero(labels == 0).squeeze(1)
+
+[222]:         # Select background indices
+[223]:         num_fg = int(self.batch_size_per_image * self.fg_fraction)
+[224]:         if len(fg_inds) > num_fg:
+[225]:             fg_inds = fg_inds[torch.randperm(len(fg_inds))[:num_fg]]
+
+[226]:         num_bg = self.batch_size_per_image - (len(fg_inds))
+[227]:         if len(bg_inds) > num_bg:
+[228]:             bg_inds = bg_inds[torch.randperm(len(bg_inds))[:num_bg]]
+
+[229]:         # The indices that we're selecting (both fg and bg)
+[230]:         keep_inds = torch.cat([fg_inds, bg_inds], dim=0)
+[231]:         # Select sampled values from various tensors
+[232]:         samples = torch.zeros_like(labels)
+[233]:         samples[keep_inds] = 1
+[234]:         labels = labels.float()
+[235]:         labels[samples < 1] = -1  # -1 is ignored by sampler
+
+[236]:         return samples, labels
+
+[237]:     def box_classifier_loss(self, loc_preds, cls_preds, samples, matched_targets):
+[238]:         """
+[239]:         Compute losses for FastRCNN
+[240]:         Args:
+[241]:             loc_preds (tensor): shape (n, 4)
+[242]:             cls_preds (tensor): shape (n, #num_classes), output of softmax
+[243]:             samples (tensor): shape (n,) indices for sampled proposals
+[244]:             matched_targets (tensor): shape (n, 4)
+
+[245]:         Returns:
+[246]:             box_cls_loss (tensor)
+[247]:             box_reg_loss (tensor)
+[248]:         """
+[249]:         device = loc_preds.device
+[250]:         num_samples = samples.shape[0]
+
+[251]:         # classification loss
+[252]:         # foreground only
+[253]:         fg_inds = torch.nonzero(samples > 0).squeeze(1)
+[254]:         if len(fg_inds) > 0:
+[255]:             cls_preds = cls_preds.view(num_samples, -1)
+[256]:             cls_targets = matched_targets[fg_inds].get_field('labels')
+[257]:             num_classes = cls_preds.shape[1]
+[258]:             cls_preds = cls_preds[fg_inds]
+[259]:             cls_targets = cls_targets.to(
+[260]:                 device=device) - 1  # to be compatible with 0~(num_classes - 1)
+[261]:             cls_targets[cls_targets < 0] = 0
+[262]:             cls_loss = F.cross_entropy(cls_preds, cls_targets.long())
+[263]:         else:
+[264]:             # no foreground, no loss
+[265]:             cls_loss = loc_preds.sum() * 0
+
+[266]:         # regression loss
+[267]:         # foreground only, smoothl1
+[268]:         fg_inds = torch.nonzero(samples > 0).squeeze(1)
+[269]:         if len(fg_inds) > 0:
+[270]:             loc_preds = loc_preds.view(num_samples, -1)[fg_inds]
+[271]:             loc_targets = matched_targets[fg_inds].get_field(
+[272]:                 'reg_targets').to(device=device)
+[273]:             reg_loss = F.smooth_l1_loss(loc_preds, loc_targets)
+[274]:         else:
+[275]:             reg_loss = loc_preds.sum() * 0
+
+[276]:         return cls_loss, reg_loss
+
+[277]:     @torch.no_grad()
+[278]:     def _sample_anchors(self, labels):
+[279]:         """
+[280]:         Randomly sample a subset of positive and negative anchors.
+[281]:         Args:
+[282]:             labels (tensor): shape (N, A)
+[283]:         Returns:
+[284]:             pos_inds (tensor): shape (M,)
+[285]:             neg_inds (tensor): shape (M,)
+[286]:         """
+[287]:         device = labels.device
+[288]:         N, num_anchors = labels.shape
+
+[289]:         # Select positive anchors
+[290]:         pos_inds = torch.nonzero(labels > 0).squeeze(1)
+[291]:         num_pos_anchors = pos_inds.numel()
+[292]:         num_neg_anchors = self.num_anchors - num_pos_anchors
+
+[293]:         # Select negative anchors
+[294]:         neg_inds = torch.nonzero(labels == 0).squeeze(1)
+[295]:         if len(neg_inds) > num_neg_anchors:
+[296]:             # randomly select negative indices
+[297]:             neg_inds = self.random_choice(neg_inds, num_neg_anchors)
+
+[298]:         return pos_inds, neg_inds
+
+[299]:     @torch.no_grad()
+[300]:     def _nms_and_topk(self, boxes, scores, labels, nms_thresh, topk):
+[301]:         """
+[302]:         Non-maximum suppression in combined form.
+[303]:         Args:
+[304]:             boxes (tensor): R x 4
+[305]:             scores (tensor): R x 1
+[306]:             labels (tensor): R x 1
+[307]:             nms_thresh (float)
+[308]:             topk (int)
+[309]:         Returns:
+[310]:             keep (tensor): N x 1
+[311]:             count (int): # of selected boxes
+[312]:         """
+[313]:         if boxes.numel() == 0:
+[314]:             return torch.zeros((0,), dtype=torch.long), 0
+
+[315]:         keep = scores.new_zeros(scores.shape[0]).to(torch.bool)
+[316]:         for c in labels.unique():
+[317]:             inds = torch.nonzero(labels == c).squeeze(1)
+[318]:             class_scores = scores[inds]
+[319]:             _, order = class_scores.sort(0, descending=True)
+[320]:             class_boxes = boxes[inds][order]
+
+[321]:             class_keep = self.nms(class_boxes, class_scores, nms_thresh)
+
+[322]:             total_keep = keep[inds].shape[0]
+[323]:             keep[inds[order[class_keep]]] = True
+[324]:             if topk > 0:
+[325]:                 keep[ind[:topk]] = True
+
+[326]:         return keep.nonzero().squeeze(1), keep.sum().item()
+
+[327]:     def _get_det_probs(self, cls_loc_scores, scores=False):
+[328]:         """
+[329]:         Convert box classifier output to detections.
+[330]:         Args:
+[331]:             cls_loc_scores (tensor): shape (N, #anchors * (#num_classes + 4))
+[332]:             scores (bool): if True returns scores
+
+[333]:         Returns:
+[334]:             det_scores (tensor): shape (N, #anchors * #num_classes - 1)
+[335]:             det_labels (tensor): shape (N, #anchors * #num_classes - 1)
+[336]:         """
+[337]:         device = cls_loc_scores.device
+[338]:         num_samples = cls_loc_scores.shape[0]
+
+[339]:         num_classes = (self.num_classes + 1)
+[340]:         cls_loc_scores = cls_loc_scores.view(
+[341]:             num_samples, -1, num_classes)
+[342]:         box_cls_scores, labels = cls_loc_scores.max(dim=2)
+[343]:         if not scores:
+[344]:             return labels
+[345]:         else:
+[346]:             return box_cls_scores, labels
+
+[347]:     def _get_det_boxes(self, proposals, labels, scores, score_th, nms_th, topk):
+[348]:         """
+[349]:         Convert box classifier output to detections.
+[350]:         Args:
+[351]:             proposals (tensor): shape (N, #proposals, 4)
+[352]:             labels (tensor): shape (N, #proposals, #num_classes - 1)
+[353]:             scores (tensor): shape (N, #proposals, #num_classes - 1)
+[354]:             score_th (float)
+[355]:             nms_th (float)
+[356]:             topk (int)
+
+[357]:         Returns:
+[358]:             det_boxes (tensor): shape (N, #detections, 4)
+[359]:             det_scores (tensor): shape (N, #detections)
+[360]:             det_labels (tensor): shape (N, #detections)
+[361]:         """
+[362]:         device = proposals.device
+[363]:         N, num_proposals, _ = proposals.shape
+
+[364]:         num_classes = labels.size(2) + 1
+[365]:         boxes = proposals.view(-1, 4)
+[366]:         labels = labels.view(-1, 1).expand(-1, num_classes).contiguous()
+[367]:         scores = scores.view(-1, 1).expand(-1, num_classes).contiguous()
+
+[368]:         labels = labels[:, 1:].contiguous()
+[369]:         scores = scores[:, 1:].contiguous()
+
+[370]:         labels = labels + torch.arange(
+[371]:             1, num_classes, device=device, dtype=torch.long).view(1, -1).expand_as(labels)
+[372]:         # remove background predictions
+[373]:         boxes = boxes[labels > 0]
+[374]:         scores = scores[labels > 0]
+[375]:         labels = labels[labels > 0]
+
+[376]:         # Apply
