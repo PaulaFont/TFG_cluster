@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2025-05-26">
+    <creator>NetworkX 3.4.2</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="edge">
+      <attribute id="0" title="predicate_label" type="string" />
+      <attribute id="1" title="networkx_key" type="string" />
+    </attributes>
+    <nodes>
+      <node id="Don Pedro Manuel Ruiz Pardo" label="Don Pedro Manuel Ruiz Pardo" />
+      <node id="haber iniciado el Movimiento Nacional en la Aduana de Errezil" label="haber iniciado el Movimiento Nacional en la Aduana de Errezil" />
+      <node id="cooperar con el Gobierno marxista para facilitar el paso de elementos de derechas" label="cooperar con el Gobierno marxista para facilitar el paso de elementos de derechas" />
+      <node id="un Consejo de Guerra ordinario de plaza en Pamplona" label="un Consejo de Guerra ordinario de plaza en Pamplona" />
+      <node id="dos años y un día de prisión temporal y veinte años de reclusión menor" label="dos años y un día de prisión temporal y veinte años de reclusión menor" />
+      <node id="un delito de auxilio a la rebelión" label="un delito de auxilio a la rebelión" />
+      <node id="Tribunal Supremo de Justicia Militar" label="Tribunal Supremo de Justicia Militar" />
+      <node id="Doce años y un día de reclusión menor" label="Doce años y un día de reclusión menor" />
+      <node id="siete años de prisión menor" label="siete años de prisión menor" />
+      <node id="Hijo de Don Pedro Manuel Ruiz Pardo" label="Hijo de Don Pedro Manuel Ruiz Pardo" />
+      <node id="el Ejército Nacional" label="el Ejército Nacional" />
+    </nodes>
+    <edges>
+      <edge source="Don Pedro Manuel Ruiz Pardo" target="haber iniciado el Movimiento Nacional en la Aduana de Errezil" id="0">
+        <attvalues>
+          <attvalue for="0" value="fue acusado de" />
+          <attvalue for="1" value="fue acusado de" />
+        </attvalues>
+      </edge>
+      <edge source="Don Pedro Manuel Ruiz Pardo" target="cooperar con el Gobierno marxista para facilitar el paso de elementos de derechas" id="1">
+        <attvalues>
+          <attvalue for="0" value="fue acusado de" />
+          <attvalue for="1" value="fue acusado de" />
+        </attvalues>
+      </edge>
+      <edge source="Don Pedro Manuel Ruiz Pardo" target="un Consejo de Guerra ordinario de plaza en Pamplona" id="2">
+        <attvalues>
+          <attvalue for="0" value="fue condenado por" />
+          <attvalue for="1" value="fue condenado por" />
+        </attvalues>
+      </edge>
+      <edge source="Don Pedro Manuel Ruiz Pardo" target="dos años y un día de prisión temporal y veinte años de reclusión menor" id="3">
+        <attvalues>
+          <attvalue for="0" value="fue condenado inicialmente a" />
+          <attvalue for="1" value="fue condenado inicialmente a" />
+        </attvalues>
+      </edge>
+      <edge source="Don Pedro Manuel Ruiz Pardo" target="un delito de auxilio a la rebelión" id="4">
+        <attvalues>
+          <attvalue for="0" value="fue condenado inicialmente por" />
+          <attvalue for="1" value="fue condenado inicialmente por" />
+        </attvalues>
+      </edge>
+      <edge source="Tribunal Supremo de Justicia Militar" target="Don Pedro Manuel Ruiz Pardo" id="5">
+        <attvalues>
+          <attvalue for="0" value="revocó la sentencia de" />
+          <attvalue for="1" value="revocó la sentencia de" />
+        </attvalues>
+      </edge>
+      <edge source="Tribunal Supremo de Justicia Militar" target="Doce años y un día de reclusión menor" id="6">
+        <attvalues>
+          <attvalue for="0" value="condenó a" />
+          <attvalue for="1" value="condenó a" />
+        </attvalues>
+      </edge>
+      <edge source="Doce años y un día de reclusión menor" target="siete años de prisión menor" id="7">
+        <attvalues>
+          <attvalue for="0" value="fue conmutada por" />
+          <attvalue for="1" value="fue conmutada por" />
+        </attvalues>
+      </edge>
+      <edge source="Hijo de Don Pedro Manuel Ruiz Pardo" target="el Ejército Nacional" id="8">
+        <attvalues>
+          <attvalue for="0" value="murió luchando en" />
+          <attvalue for="1" value="murió luchando en" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>

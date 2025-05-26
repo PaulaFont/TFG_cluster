@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2025-05-26">
+    <creator>NetworkX 3.4.2</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="edge">
+      <attribute id="0" title="predicate_label" type="string" />
+      <attribute id="1" title="networkx_key" type="string" />
+    </attributes>
+    <nodes>
+      <node id="Paris" label="Paris" />
+      <node id="France" label="France" />
+      <node id="Europe" label="Europe" />
+      <node id="Eiffel Tower" label="Eiffel Tower" />
+      <node id="famous landmark" label="famous landmark" />
+      <node id="Gustave Eiffel" label="Gustave Eiffel" />
+      <node id="Berlin" label="Berlin" />
+      <node id="Germany" label="Germany" />
+      <node id="Manuel Suárez Sánchez" label="Manuel Suárez Sánchez" />
+      <node id="Presidente" label="Presidente" />
+      <node id="Coronel de Artillería" label="Coronel de Artillería" />
+      <node id="Artillería" label="Artillería" />
+    </nodes>
+    <edges>
+      <edge source="Paris" target="France" id="0">
+        <attvalues>
+          <attvalue for="0" value="is the capital of" />
+          <attvalue for="1" value="is the capital of" />
+        </attvalues>
+      </edge>
+      <edge source="France" target="Europe" id="1">
+        <attvalues>
+          <attvalue for="0" value="is in" />
+          <attvalue for="1" value="is in" />
+        </attvalues>
+      </edge>
+      <edge source="Eiffel Tower" target="famous landmark" id="2">
+        <attvalues>
+          <attvalue for="0" value="is a" />
+          <attvalue for="1" value="is a" />
+        </attvalues>
+      </edge>
+      <edge source="Eiffel Tower" target="famous landmark" id="3">
+        <attvalues>
+          <attvalue for="0" value="is" />
+          <attvalue for="1" value="is" />
+        </attvalues>
+      </edge>
+      <edge source="Eiffel Tower" target="Paris" id="4">
+        <attvalues>
+          <attvalue for="0" value="located in" />
+          <attvalue for="1" value="located in" />
+        </attvalues>
+      </edge>
+      <edge source="Eiffel Tower" target="Gustave Eiffel" id="5">
+        <attvalues>
+          <attvalue for="0" value="built by" />
+          <attvalue for="1" value="built by" />
+        </attvalues>
+      </edge>
+      <edge source="Berlin" target="Germany" id="6">
+        <attvalues>
+          <attvalue for="0" value="is the capital of" />
+          <attvalue for="1" value="is the capital of" />
+        </attvalues>
+      </edge>
+      <edge source="Germany" target="Europe" id="7">
+        <attvalues>
+          <attvalue for="0" value="is in" />
+          <attvalue for="1" value="is in" />
+        </attvalues>
+      </edge>
+      <edge source="Manuel Suárez Sánchez" target="Presidente" id="8">
+        <attvalues>
+          <attvalue for="0" value="title" />
+          <attvalue for="1" value="title" />
+        </attvalues>
+      </edge>
+      <edge source="Manuel Suárez Sánchez" target="Presidente" id="9">
+        <attvalues>
+          <attvalue for="0" value="has title" />
+          <attvalue for="1" value="has title" />
+        </attvalues>
+      </edge>
+      <edge source="Manuel Suárez Sánchez" target="Coronel de Artillería" id="10">
+        <attvalues>
+          <attvalue for="0" value="rank" />
+          <attvalue for="1" value="rank" />
+        </attvalues>
+      </edge>
+      <edge source="Manuel Suárez Sánchez" target="Coronel de Artillería" id="11">
+        <attvalues>
+          <attvalue for="0" value="has military rank" />
+          <attvalue for="1" value="has military rank" />
+        </attvalues>
+      </edge>
+      <edge source="Manuel Suárez Sánchez" target="Artillería" id="12">
+        <attvalues>
+          <attvalue for="0" value="occupation" />
+          <attvalue for="1" value="occupation" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>

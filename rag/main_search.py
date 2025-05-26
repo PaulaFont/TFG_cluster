@@ -2,20 +2,24 @@ import os
 import re
 from openai import OpenAI
 from llm_utils import * 
-from pre_processing import * 
+from pre_processing import *
+from graph_logic import * 
 import torch 
 import json
 from sentence_transformers import SentenceTransformer, util
 from sentence_transformers.cross_encoder import CrossEncoder
 import pandas as pd
 import gradio as gr
+import networkx as nx
 
 passages_data = []
 bi_encoder_model = None
 cross_encoder_model = None
 corpus_embeddings_tensor = None
 llm_client_instance = None
+knowledge_graph_instance = None 
 
+# KG_FILENAME = "online_knowledge_graph.pkl"
 SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings.pt"
 BASE_DOCUMENT_DIRECTORY = "/data/users/pfont/" 
 if not os.path.exists(BASE_DOCUMENT_DIRECTORY):
@@ -24,6 +28,10 @@ if not os.path.exists(BASE_DOCUMENT_DIRECTORY):
 
 def initialize_models_and_data(llm_model_name="microsoft/phi-4", bi_encoder_name="msmarco-bert-base-dot-v5", cross_encoder_name='cross-encoder/ms-marco-MiniLM-L6-v2', passages_filename="passages_data.json"):
     global passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor, llm_client_instance
+    global knowledge_graph_instance # Add knowledge_graph global
+
+    kg_filepath = os.path.join(BASE_DOCUMENT_DIRECTORY, KG_FILENAME)
+    knowledge_graph_instance = load_knowledge_graph(kg_filepath)
 
     if not start_llm_server(llm_model_name, port=8000): # Assuming this handles its own errors
         llm_client_instance = None
@@ -286,7 +294,7 @@ def manage_search_terms(analyzed_query_dict):
 
 
 def chat_search(message, history):
-    global passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor, llm_client_instance
+    global passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor, llm_client_instance, knowledge_graph_instance
 
     # Accumulator for the response string
     response_parts = []
@@ -395,8 +403,7 @@ def chat_search(message, history):
         additional_chunks_for_llm_data,
         client=llm_client_instance
     )
-    response_parts.append(f"Respuesta: {llm_answer}")
-    response_parts.append("") # Blank line
+    response_parts.append(f"Respuesta: {llm_answer}\n")
 
     # --- Stage 5: Full Transparency Output ---
     response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
@@ -432,11 +439,19 @@ if __name__ == "__main__":
 
     initialize_models_and_data()
 
+
+    #TODO; change html
+    html_content = "hi"
+    html_path = "/home/pfont/rag/graph_demo_files/my_interactive_kg.html"
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+
     if not all([passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor is not None]):
         print("Critical error during initialization. Exiting.")
     else:
         print("Models and data loaded. Launching Gradio interface...")
-        demo = gr.ChatInterface(
+        chatbot = gr.ChatInterface(
             fn=chat_search,
             title="Chatbot Histórico",
             description="Pregunta sobre documentos históricos. Se mostrará todo el contexto usado para la respuesta.",
@@ -448,4 +463,10 @@ if __name__ == "__main__":
             ],
             cache_examples=False 
         )
+
+        with gr.Blocks() as demo:
+            with gr.Row():
+                chatbot.render()
+                gr.HTML(html_content)
+
         demo.launch()
