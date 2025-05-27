@@ -1,9 +1,9 @@
 import os
 from openai import OpenAI 
 import networkx as nx
-from llm_utils import * 
+from ../llm_utils import * 
 
-from graph_logic import (
+from ../graph_logic import (
     visualize_knowledge_graph,
     load_knowledge_graph,
     extract_triples_from_text,

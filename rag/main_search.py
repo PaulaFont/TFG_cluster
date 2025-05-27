@@ -17,22 +17,27 @@ bi_encoder_model = None
 cross_encoder_model = None
 corpus_embeddings_tensor = None
 llm_client_instance = None
-knowledge_graph_instance = None 
+knowledge_graph_instance = nx.MultiDiGraph()  
+html_file_path = ""
 
-# KG_FILENAME = "online_knowledge_graph.pkl"
+# KG_FILENAME = "online_knowledge_graph.pkl" 
 SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings.pt"
 BASE_DOCUMENT_DIRECTORY = "/data/users/pfont/" 
+GRAPH_DOCUMENT_DIRECTORY = "/data/users/pfont/graph/"
+os.makedirs(GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
 if not os.path.exists(BASE_DOCUMENT_DIRECTORY):
     print(f"WARNING: BASE_DOCUMENT_DIRECTORY '{BASE_DOCUMENT_DIRECTORY}' does not exist. Full document loading will fail.")
 
 
 def initialize_models_and_data(llm_model_name="microsoft/phi-4", bi_encoder_name="msmarco-bert-base-dot-v5", cross_encoder_name='cross-encoder/ms-marco-MiniLM-L6-v2', passages_filename="passages_data.json"):
     global passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor, llm_client_instance
-    global knowledge_graph_instance # Add knowledge_graph global
+    global knowledge_graph_instance 
 
+    # GRAPH
     kg_filepath = os.path.join(BASE_DOCUMENT_DIRECTORY, KG_FILENAME)
     knowledge_graph_instance = load_knowledge_graph(kg_filepath)
 
+    # LLM
     if not start_llm_server(llm_model_name, port=8000): # Assuming this handles its own errors
         llm_client_instance = None
         print("LLM Server failed to start. LLM functionalities will be unavailable.")
@@ -43,6 +48,7 @@ def initialize_models_and_data(llm_model_name="microsoft/phi-4", bi_encoder_name
         )
         print("LLM Client initialized.")
     
+    # TEXT CHUNKS
     print("Creating/Loading passages and metadata...")
     if not os.path.exists(passages_filename):
         print(f"File {passages_filename} not found. Creating new passages...")
@@ -59,34 +65,13 @@ def initialize_models_and_data(llm_model_name="microsoft/phi-4", bi_encoder_name
     if not passages_data:
         print("No passages were loaded or created. Critical error.")
         return
-
-    # Validate essential keys in passages_data
-    for i, p in enumerate(passages_data):
-        if 'text' not in p or not p['text'].strip():
-            print(f"Warning: Passage {i} is missing 'text' or has empty text.")
-        if 'base_document_id' not in p:
-            print(f"Warning: Passage {i} is missing 'base_document_id' (filename).")
-            p['base_document_id'] = f"unknown_filename_{i}" # Placeholder
-        if 'processing_version' not in p:
-            print(f"Warning: Passage {i} is missing 'processing_version'. This is needed for full document path.")
-            # Attempt to infer from a path if available, or use a default
-            p['processing_version'] = "unknown_version" # Placeholder
-            if 'file_path' in p and "out_llm_" in p['file_path']:
-                path_parts = p['file_path'].split(os.sep)
-                for part in path_parts:
-                    if part.startswith("out_llm_"):
-                        p['processing_version'] = part.replace("out_llm_","")
-                        break
-        # Derive conceptual_doc_id (assumes base_document_id is the filename without versioning info in its name itself)
-        # If base_document_id can contain version info, extract_conceptual_id needs to be more robust
-        p['conceptual_doc_id'] = extract_conceptual_id_from_filename(p.get('base_document_id', ''))
-
-
+        
     passage_texts = [p['text'] for p in passages_data if 'text' in p and p['text'].strip()]
     if not passage_texts:
         print("Passages data contains no valid text entries. Critical error.")
         return
 
+    # EMBEDDING MODELS
     print("Loading embedding models...")
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f"Using device: {device}")
@@ -97,66 +82,45 @@ def initialize_models_and_data(llm_model_name="microsoft/phi-4", bi_encoder_name
         print(f"Error loading sentence-transformer models: {e}")
         return
     
-    
+    # LOAD CORPUSEMBEDDING
     saved_embeddings_path = os.path.join(BASE_DOCUMENT_DIRECTORY, SAVED_EMBEDDINGS_FILENAME)
-    # --- Attempt to load pre-computed embeddings and processed passages_data ---
     loaded_from_cache = False
     if os.path.exists(saved_embeddings_path):
         print(f"Found pre-computed embeddings at {saved_embeddings_path}")
         try:
             print("Loading corpus embeddings...")
-            corpus_embeddings_tensor = torch.load(saved_embeddings_path, map_location=device) # Load to current device
+            corpus_embeddings_tensor = torch.load(saved_embeddings_path, map_location=device) 
             if corpus_embeddings_tensor.shape[0] == len(passage_texts):
                 print(f"Loaded corpus embeddings. Shape: {corpus_embeddings_tensor.shape}, Device: {corpus_embeddings_tensor.device}")
                 loaded_from_cache = True
-                print("Successfully loaded embeddings from cache.")
             else:
                 print(f"Mismatch! Loaded embeddings count ({corpus_embeddings_tensor.shape[0]}) "
                       f"does not match current passage texts count ({len(passage_texts)}). "
                       f"Will regenerate embeddings.")
                 corpus_embeddings_tensor = None # Invalidate loaded tensor
                 loaded_from_cache = False # Force regeneration
-
         except Exception as e:
             print(f"Error loading from cache: {e}. Will regenerate.")
             loaded_from_cache = False
             corpus_embeddings_tensor = None
-    else:
-        print("Pre-computed files not found. Will generate new ones.")
 
     if not loaded_from_cache:
         print("Creating embeddings for all passages...")
         corpus_embeddings_tensor = bi_encoder_model.encode(passage_texts, convert_to_tensor=True, show_progress_bar=True)
         print(f"Corpus embeddings created on device: {corpus_embeddings_tensor.device}. Shape: {corpus_embeddings_tensor.shape}")
         if corpus_embeddings_tensor is not None: # Only save if generation was successful
-            try:
-                if not os.path.exists(BASE_DOCUMENT_DIRECTORY): # Double check dir exists before saving
-                    print(f"Target save directory {BASE_DOCUMENT_DIRECTORY} does not exist. Skipping save.")
-                else:
-                    print(f"Saving new corpus embeddings to {saved_embeddings_path}...")
-                    torch.save(corpus_embeddings_tensor, saved_embeddings_path)
-                    print("Embeddings saved successfully.")
+            try:                    
+                print(f"Saving new corpus embeddings to {saved_embeddings_path}...")
+                torch.save(corpus_embeddings_tensor, saved_embeddings_path)
             except Exception as e:
                 print(f"Error saving new corpus embeddings to {saved_embeddings_path}: {e}")
 
-
-    if corpus_embeddings_tensor is None: # Final check
+    if corpus_embeddings_tensor is None: 
         print("Critical error: Corpus embeddings are not available after initialization attempt.")
         return
+
+
     print("Initialization complete.")
-
-
-def extract_conceptual_id_from_filename(filename):
-    """
-    Extracts a conceptual document ID from a filename.
-    If your filenames already are the conceptual ID (e.g., "document_XYZ.txt" and version is only in folder),
-    then this can be simpler.
-    This example assumes filenames might also have some versioning/ocr tags to strip.
-    """
-    if not filename:
-        return "unknown_conceptual_doc"
-
-    return os.path.splitext(filename)[0] # Fallback
 
 
 def load_full_document_by_details(filename, processing_version):
@@ -167,18 +131,12 @@ def load_full_document_by_details(filename, processing_version):
     if not filename or not processing_version:
         print("Error: Filename or processing_version missing for load_full_document_by_details.")
         return None
-    if not BASE_DOCUMENT_DIRECTORY or not os.path.exists(BASE_DOCUMENT_DIRECTORY):
-        print(f"Error: BASE_DOCUMENT_DIRECTORY ('{BASE_DOCUMENT_DIRECTORY}') is not set or does not exist.")
-        return None
 
     version_folder_name = f"out_llm_{processing_version}"
     filepath = os.path.join(BASE_DOCUMENT_DIRECTORY, version_folder_name, filename)
 
     if not os.path.exists(filepath):
         print(f"Error: Document file '{filepath}' not found.")
-        # Fallback: search for the filename in any "out_llm_*" folder if exact version not found
-        # This might be too broad but can be a fallback if processing_version metadata is imperfect
-        found_alternative = False
         for item in os.listdir(BASE_DOCUMENT_DIRECTORY):
             if item.startswith("out_llm_"):
                 alt_path = os.path.join(BASE_DOCUMENT_DIRECTORY, item, filename)
@@ -354,14 +312,14 @@ def chat_search(message, history):
     all_candidate_chunks_scored.sort(key=lambda x: x['cross_score'], reverse=True)
 
     # --- Stage 3: Context Selection for LLM ---
-    MAX_ADDITIONAL_CHUNKS_FOR_LLM = 3
+    MAX_ADDITIONAL_CHUNKS_FOR_LLM = 0
     full_document_for_llm_data = None
     additional_chunks_for_llm_data = []
     conceptual_doc_scores = {} 
     
     for scored_chunk in all_candidate_chunks_scored:
         passage_details = scored_chunk['passage_data']
-        conceptual_id = passage_details['conceptual_doc_id']
+        conceptual_id = passage_details['doc_id']
         current_score = scored_chunk['cross_score']
         if conceptual_id not in conceptual_doc_scores or current_score > conceptual_doc_scores[conceptual_id][0]:
             conceptual_doc_scores[conceptual_id] = (
@@ -382,7 +340,7 @@ def chat_search(message, history):
             print(f"Loaded full text: {fname} (V: {p_version})")
         else: print(f"Failed to load full text: {fname} (V: {p_version})")
 
-    used_corpus_ids_for_additional_llm_chunks = set()
+    """used_corpus_ids_for_additional_llm_chunks = set()
     if full_document_for_llm_data:
          used_corpus_ids_for_additional_llm_chunks.add(sorted_conceptual_docs[0][1][3])
 
@@ -394,16 +352,17 @@ def chat_search(message, history):
                           passage_details['conceptual_doc_id'] != top_conceptual_id_for_full_doc
         if is_diff_concept and chunk_corpus_id not in used_corpus_ids_for_additional_llm_chunks:
             additional_chunks_for_llm_data.append(passage_details)
-            used_corpus_ids_for_additional_llm_chunks.add(chunk_corpus_id)
+            used_corpus_ids_for_additional_llm_chunks.add(chunk_corpus_id)"""
             
     # --- Stage 4: Generate LLM Answer ---
     llm_answer = generate_answer_with_llm(
         user_query_mejorado,
         full_document_for_llm_data,
-        additional_chunks_for_llm_data,
+        [],
         client=llm_client_instance
     )
     response_parts.append(f"Respuesta: {llm_answer}\n")
+    #TODO: answer_to_graph(llm_answer)
 
     # --- Stage 5: Full Transparency Output ---
     response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
@@ -414,23 +373,43 @@ def chat_search(message, history):
         response_parts.append(f"  Versión de Procesamiento: {full_document_for_llm_data['processing_version']}")        
         response_parts.append(f"  Contenido:\n{full_document_for_llm_data['text']}")
     else:
-        response_parts.append("\nNo se utilizó un documento completo principal.")
-
-    if additional_chunks_for_llm_data:
-        response_parts.append("\nFRAGMENTOS ADICIONALES DE OTROS DOCUMENTOS:\n")
-        for i, chunk_data in enumerate(additional_chunks_for_llm_data):
-            response_parts.append(f"  \nFragmento Adicional {i+1}:")
-            response_parts.append(f"    Archivo: {chunk_data.get('base_document_id', 'N/A')}")
-            response_parts.append(f"    Versión de Procesamiento: {chunk_data.get('processing_version', 'N/A')}")
-            response_parts.append(f"    Texto del Fragmento:\n{chunk_data.get('text', '')}")
-    else:
-        response_parts.append("\nNo se utilizaron fragmentos adicionales de otros documentos.")
+        response_parts.append("\nNo se utilizó un documento completo principal. Reescribir la pregunta")
     
     if not full_document_for_llm_data and not additional_chunks_for_llm_data:
         response_parts.append("\n(No se proporcionó contexto específico al LLM para esta respuesta, o la recuperación falló).")
 
     # Yield the entire accumulated response at once
-    yield "\n".join(response_parts)
+    #yield "\n".join(response_parts)
+    return "\n".join(response_parts), "hi"
+
+def answer_to_graph(current_graph, llm_answer, model="microsoft/phi-4"):
+    print(f"Initial KG: {len(current_graph.nodes)} nodes, {len(current_graph.edges)} edges")
+
+    #Extract triples:
+    extract_triples_from_text(
+                    text_content=llm_answer,
+                    current_graph=current_graph,
+                    client=llm_client_instance,
+                    model=model,
+                    base_doc_dir_for_saving=GRAPH_DOCUMENT_DIRECTORY
+                )
+    kg_html_iframe_code = "<p style='text-align:center; padding:20px;'>El grafo está vacío o hubo un error.</p>" # Default
+
+
+    #Save in HTML:
+    html_file_path = visualize_knowledge_graph(
+            graph=current_graph,
+            output_format="html",
+            filename_prefix="my_interactive_kg",
+            output_directory=GRAPH_DOCUMENT_DIRECTORY, 
+            show_in_browser_html=False,
+            default_node_color="#A0A0A0",
+            default_edge_color="#C0C0C0", 
+        )
+
+    if html_file_path:
+        print(f"Generated HTML at: {html_file_path}")
+    return html_file_path
 
 if __name__ == "__main__":
     print("Starting RAG program initialization...")
@@ -439,11 +418,10 @@ if __name__ == "__main__":
 
     initialize_models_and_data()
 
-
-    #TODO; change html
-    html_content = "hi"
-    html_path = "/home/pfont/rag/graph_demo_files/my_interactive_kg.html"
-    with open(html_path, "r", encoding="utf-8") as f:
+    #TODO; change DEFAULT !!!
+    if not html_file_path:
+        html_file_path = "/home/pfont/rag/graph_demo_files_old/my_interactive_kg.html"
+    with open(html_file_path, "r", encoding="utf-8") as f:
         html_content = f.read()
 
 
@@ -454,7 +432,7 @@ if __name__ == "__main__":
         chatbot = gr.ChatInterface(
             fn=chat_search,
             title="Chatbot Histórico",
-            description="Pregunta sobre documentos históricos. Se mostrará todo el contexto usado para la respuesta.",
+            description="Pregunta sobre documentos históricos. Las preguntas deben limitarse a consultas sobre personas o eventos especificos. Se mostrará todo el contexto usado para la respuesta.",
             theme="default",
             examples=[
                 "¿Qué sentencias se dictaron en agosto de 1939?",
@@ -464,9 +442,11 @@ if __name__ == "__main__":
             cache_examples=False 
         )
 
+
         with gr.Blocks() as demo:
             with gr.Row():
                 chatbot.render()
                 gr.HTML(html_content)
 
-        demo.launch()
+        demo.launch()"""
+   

@@ -88,7 +88,8 @@ def create_passages(base_directory="/data/users/pfont/", min_words_per_paragraph
                                 "original_filename": filename, # Good to keep for reference
                                 "section_type": section_type, # e.g., "Considerando"
                                 "segment_index_in_section": i, # Order within its original section
-                                "word_count": len(passage_text.split())
+                                "word_count": len(passage_text.split()),
+                                "doc_id": os.path.splitext(filename)[0]
                             })
         
     df_passages = pd.DataFrame(all_passages_data)
