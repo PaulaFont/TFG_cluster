@@ -18,7 +18,7 @@ def crop_with_margin(image, bbox, margin=10):
     y1 = min(height, y1 + margin)
     return image.crop((x0, y0, x1, y1))
 
-
+# Uses json info to cut each image with a margin and save it to the output folder
 def cut_save_boxes(json_path, folder_image_path, output_folder, margin=10, confidence_threshold=0.5):
     os.makedirs(output_folder, exist_ok=True)
     
