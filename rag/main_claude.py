@@ -411,7 +411,7 @@ class RAGSystem:
         # Save in HTML
         html_file_path = visualize_knowledge_graph(
             graph=self.knowledge_graph_instance,
-            output_format="html_json",
+            output_format="html",
             filename_prefix=self.GRAPH_FILENAME,
             output_directory=self.GRAPH_DOCUMENT_DIRECTORY, 
             show_in_browser_html=False,
@@ -434,7 +434,6 @@ class RAGSystem:
             self.corpus_embeddings_tensor is not None
         ])
 
-
 # main.py
 def main():
     print("Starting RAG program initialization...")
@@ -454,7 +453,6 @@ def main():
         return
         
     # Launch Gradio interface
-
     current_kg_html_path = rag_system.html_file_path
     initial_html_content = "<p>El grafo de conocimiento aparecerá aquí después de la primera consulta.</p>"
 

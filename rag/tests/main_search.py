@@ -1,5 +1,9 @@
 import os
 import re
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from openai import OpenAI
 from llm_utils import * 
 from pre_processing import *
@@ -379,8 +383,7 @@ def chat_search(message, history):
         response_parts.append("\n(No se proporcionó contexto específico al LLM para esta respuesta, o la recuperación falló).")
 
     # Yield the entire accumulated response at once
-    #yield "\n".join(response_parts)
-    return "\n".join(response_parts), "hi"
+    yield "\n".join(response_parts)
 
 def answer_to_graph(current_graph, llm_answer, model="microsoft/phi-4"):
     print(f"Initial KG: {len(current_graph.nodes)} nodes, {len(current_graph.edges)} edges")
@@ -418,18 +421,11 @@ if __name__ == "__main__":
 
     initialize_models_and_data()
 
-    #TODO; change DEFAULT !!!
-    if not html_file_path:
-        html_file_path = "/home/pfont/rag/graph_demo_files_old/my_interactive_kg.html"
-    with open(html_file_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
-
-
     if not all([passages_data, bi_encoder_model, cross_encoder_model, corpus_embeddings_tensor is not None]):
         print("Critical error during initialization. Exiting.")
     else:
         print("Models and data loaded. Launching Gradio interface...")
-        chatbot = gr.ChatInterface(
+        demo = gr.ChatInterface(
             fn=chat_search,
             title="Chatbot Histórico",
             description="Pregunta sobre documentos históricos. Las preguntas deben limitarse a consultas sobre personas o eventos especificos. Se mostrará todo el contexto usado para la respuesta.",
@@ -442,11 +438,6 @@ if __name__ == "__main__":
             cache_examples=False 
         )
 
-
-        with gr.Blocks() as demo:
-            with gr.Row():
-                chatbot.render()
-                gr.HTML(html_content)
-
-        demo.launch()"""
+        #chatbot.render()
+        demo.launch()
    
