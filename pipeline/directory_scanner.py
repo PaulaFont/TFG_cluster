@@ -1,5 +1,5 @@
 import os
-from evaluate_utils import process_file_pairs
+from evaluate_llm_utils import process_file_pairs
 
 def process_all_output_directories(base_directory, csv_file, threshold_normalized_levenshtein=0.3, threshold_wer=0.4):
     """

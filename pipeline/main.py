@@ -6,9 +6,9 @@ from llm_utils import *
 from layout_utils import *
 from utils import *
 from directory_scanner import *
-from voting_system import *
 import numpy as np
-from PIL import Image
+from tqdm import tqdm
+# from PIL import Image
 
 """
     == GUIDE TO DATA UNDERSTANDING ==
@@ -94,54 +94,55 @@ def apply_llm(input_path, args):
     #Kill Server
     end_llm_server()
 
-def ocr_vote_based_text_generation(filename, path_to_save, args):
-    versions = []
-    filename ="rsc37_rsc176_278.txt"
-    current_dir = "/data/users/pfont"
-    for folder in os.listdir(current_dir):
-        folder_path = os.path.join(current_dir, folder)
-        if os.path.isdir(folder_path) and folder.startswith("out_transcription_"):
-            file_path = os.path.join(folder_path, filename)
-            if os.path.exists(file_path):
-                print(f"Found: {file_path}")
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                versions.append(content)
-
-    harmonized_text = harmonize_versions(versions, majority_threshold=2)
-    print(f"Harmonized (threshold 2):\n{harmonized_text, }\n")
-
-    # Save only final version
-    save_final_output(harmonized_text, filename, path_to_save)
-
-
-def llm_vote_based_text_refinement(path_to_example, path_to_save, args):
-    # Get Tesseract Transcription
-    f = open(path_to_example, "r")
-    ocr_text = f.read()
-    prompt = get_prompts(ocr_text, "prompt6")
-
-    versions_text = []
-
+def llm_vote_based_text_refinement(args, harmonized_folder="/data/users/pfont/out_harmonized_ocr/",filename_json="llm_versions.json"):
+    # Start LLM server
     start_llm_server(args.model_name, port=8000)
     client = OpenAI(
         base_url="http://localhost:8000/v1",
         api_key="token-abc123"
     )
 
-    # Per 10 times:
-    for i in range(10):
-        print(f"Processing version {i}")
-        # Call LLM to improve 
-        output = query_llm(client, args.model_name, prompt)
-        # Save in a global dictionary
-        versions_text.append(output)
+    # Load previous data
+    json_path = os.path.join(args.base_directory , filename_json)
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            data_dict = json.load(f)
+    else:
+        data_dict = {}
 
-    # Apply voting system
-    final_version = harmonize_versions(versions_text, majority_threshold=2)
+    for filename in tqdm(os.listdir(harmonized_folder)):
+        # Open text
+        text_path = os.path.join(harmonized_folder , filename)
+        with open(text_path, "r", encoding="utf-8") as f:
+            ocr_text = f.read()
 
-    # Save only final version
-    save_final_output(final_version, os.path.basename(os.path.normpath(path_to_example)), path_to_save)
+        # Create prompt
+        prompt = get_prompts(ocr_text, "prompt6")
+
+        # Get and save metadata
+        doc_id = filename.split("_")[-1].split(".")[0]
+        extension = "normal"
+        rep = 6
+        if ("cut" in filename):
+            extension = "cut"
+            rep = 4
+        
+        if doc_id not in data_dict:
+            data_dict[doc_id] = {}
+            data_dict[doc_id]["llm_version_info"] = []
+            data_dict[doc_id]["llm_version_text"] = []
+        data_dict[doc_id][f"original_ocr_{extension}"] = ocr_text
+
+        for i in range(rep):
+            version_info = f"v_{extension}_{i+1}"
+            version_text = query_llm(client, args.model_name, prompt)
+            
+            data_dict[doc_id]["llm_version_info"].append(version_info)
+            data_dict[doc_id]["llm_version_text"].append(version_text)
+
+    # Save with new data
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(data_dict, f, ensure_ascii=False, indent=2)
 
 def evaluate_all_transcriptions():
     # Calculate editing distance between all pais of tesseract output and llm_output
@@ -159,24 +160,14 @@ def main(args):
     tesseract_merge_all(input_folder, args)
     apply_llm(input_folder, args)
     evaluate_all_transcriptions()"""
-    #llm_vote_based_text_refinement("/data/users/pfont/out_transcription_binary_hisam_inverted/rsc37_rsc176_278.txt", "/home/pfont/pipeline", args)
 
-    """f = open("/home/pfont/pipeline/rsc37_rsc176_278.txt", "r")
-    ocr_text = f.read()
-    prompt = f"Genera una versión final de este documento. Cuando aparece CONFLICTO o LOW_CONF se debe a que a sufrido un proceso de harmonización. Genera la versión final. Solo devuelve el texto resultante sin nada más. TEXTO: {ocr_text}"
-    client = OpenAI(
-        base_url="http://localhost:8000/v1",
-        api_key="token-abc123"
-    )
-    output = query_llm(client, args.model_name, prompt)
-    save_final_output(output, "rsc37_rsc176_278_llm.txt", "/home/pfont/pipeline")"""
-
-    ocr_vote_based_text_generation("rsc37_rsc176_278.txt", "/home/pfont/pipeline", args)
+    llm_vote_based_text_refinement(args)
     
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description="Process text files and compute metrics.")
+    parser.add_argument("--base_directory", type=str, default="/data/users/pfont", help="Base directory with all data")
     parser.add_argument("--folder_pdf", type=str, default="/data/users/pfont/03-GT_MASSIU_VE_DE_DEDALO", help="Folder path containing the PDF files")
     parser.add_argument("--input_folder", type=str, default="/data/users/pfont/input", help="Folder path containing the input files")
     parser.add_argument("--output_folder_tesseract", type=str, default="/data/users/pfont/out_tesseract", help="Folder path containing the output files")

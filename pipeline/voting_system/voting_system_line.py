@@ -1,8 +1,18 @@
+"""
+Takes various lines of text as input, votes character by character comparing lines, 
+returns the common string out of all lines. 
+"""
 from collections import Counter
 import re
 import json
-import os
+import os, sys
+from pathlib import Path 
+import pandas as pd
+from tqdm import tqdm
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 from utils import save_final_output 
+
 
 # Using a placeholder character that is unlikely to appear in your documents
 # The paper uses '_', but that might be in text. Let's use '^' or some other symbol.
@@ -222,99 +232,87 @@ def harmonize_ocr_outputs(ocr_versions, min_lcs_len=1, debug=False):
     
     return final_text
 
-# --- Example Usage ---
-def example_usage():
-    print("--- Example 1 (from paper, conceptual) ---")
-    texts1 = [
-        "Ana has pears",
-        "Joana loves deer",
-        "Diana sheds tears"
+def process_versions(versions, filename, output_folder: "../voting_tests", min_lcs_len=2):
+    harmonized_text = harmonize_ocr_outputs(versions, min_lcs_len=min_lcs_len)
+    save_final_output(harmonized_text, filename, output_folder)
+
+def filter_documents(sub_df, versions):
+    cut = sub_df["version"].str.contains("cut", na=False).any()
+    garbage_lines = 200 if cut else 140
+    avg_total_length = sub_df['total_length'].mean()
+
+    filtered_df = sub_df[
+        (sub_df['total_length'] > (avg_total_length-1000)) &
+        (sub_df['garbage_lines'] < garbage_lines) &
+        (sub_df['avg_line_length'] > 10) &
+        (sub_df['avg_word_length'] > 3) &
+        (sub_df['alphabetic_letter_count'] > 1000) &
+        (sub_df['non_ascii_chars'] < 150)
     ]
-    # Expected (from paper's Figure 3, but my algorithm might differ slightly in placeholder placement):
-    # A__ n a _ h a _ s _ _ p e a r s
-    # J o a n a _ l o v e s _ d e e r _ _
-    # D i a n a _ s h e d s _ t e a r s
-    # Voted: A_ana _h_a_s _ _ _e_ars (This is a guess, depends on tie-breaking & exact alignment)
-    result1 = harmonize_ocr_outputs(texts1, min_lcs_len=1, debug=True)
-    print(f"Final Harmonized 1: '{result1}'\n")
 
-    print("--- Example 2 (more similar texts) ---")
-    texts2 = [
-        "the quick brown fox jumps",
-        "the quick brown foox jumps over", # error 'o', extra ' over'
-        "the quick brown fox jumps",
-        "a quick brown fox jumps",   # error 'a'
-        "the quik brown fox jumps"   # error 'i'
-    ]
-    # Expected: "the quick brown fox jumps" (ideally, 'over' might get dropped or kept based on votes)
-    result2 = harmonize_ocr_outputs(texts2, min_lcs_len=2, debug=True)
-    print(f"Final Harmonized 2: '{result2}'\n")
+    # Add again the Hi-SAM versions
+    all_versions_cut = [versions[key] for key in filtered_df["version"] if key in versions and "cut" in key]
+    all_versions_cut.append(versions["binary_hisam_inverted_cut"])
+    all_versions_normal = [versions[key] for key in filtered_df["version"] if key in versions and "cut" not in key]
+    all_versions_normal.append(versions["binary_hisam_inverted"])
+    return all_versions_normal, all_versions_cut
 
-    print("--- Example 3 (different lengths and errors) ---")
-    texts3 = [
-        "This is version one of the document.",
-        "This is version two.", # Shorter, different word
-        "This is version one of document.", # Missing "the"
-        "This as version one of the document.", # "as" vs "is"
-        "This is version one of the document" # Missing final period
-    ]
-    result3 = harmonize_ocr_outputs(texts3, min_lcs_len=3, debug=True)
-    print(f"Final Harmonized 3: '{result3}'\n")
+def manage_df(df):
+    def get_id(filename):
+        return filename.split("_")[-1].split(".")[0]
+    df['document_id'] = df['filename'].apply(get_id)
+    return df, list(df['document_id'].unique()) 
 
-    print("--- Example 4 (simple identical) ---")
-    texts4 = ["test", "test", "test"]
-    result4 = harmonize_ocr_outputs(texts4, debug=True)
-    print(f"Final Harmonized 4: '{result4}'\n")
+def get_versions(filename, base_directory):
+    version_dict = {}
+    for folder in os.listdir(base_directory):
+        folder_path = os.path.join(base_directory, folder)
+        if os.path.isdir(folder_path) and folder.startswith("out_transcription_"):
+            file_path = os.path.join(folder_path, filename)
+            version_name = "_".join(folder.split("_")[2:])
 
-    print("--- Example 5 (simple different) ---")
-    texts5 = ["apple", "apply", "apricot"]
-    result5 = harmonize_ocr_outputs(texts5, min_lcs_len=2, debug=True)
-    print(f"Final Harmonized 5: '{result5}'\n")
-    
-    print("--- Example 6 (edge case - one empty string) ---")
-    texts6 = ["hello world", "", "hello universe"]
-    result6 = harmonize_ocr_outputs(texts6, min_lcs_len=2, debug=True)
-    print(f"Final Harmonized 6: '{result6}'\n")
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                version_dict[version_name] = content
+    return version_dict
 
-    print("--- Example 7 (edge case - all empty strings) ---")
-    texts7 = ["", "", ""]
-    result7 = harmonize_ocr_outputs(texts7, min_lcs_len=1, debug=True)
-    print(f"Final Harmonized 7: '{result7}'\n")
-    
-    print("--- Example 8 (edge case - single string) ---")
-    texts8 = ["single string input"]
-    result8 = harmonize_ocr_outputs(texts8, debug=True)
-    print(f"Final Harmonized 8: '{result8}'\n")
+def document_processing(df_path, base_directory="/data/users/pfont", output_folder="../voting_tests"):
+    df = pd.read_csv(df_path)
+    df, document_ids = manage_df(df)
+    for d_id in tqdm(document_ids,ascii=True):
+        print(f"Processing document: {d_id}")
+        all_versions_dict = get_versions(f"rsc37_rsc176_{d_id}.txt", base_directory)
+        all_versions_normal, all_versions_cut = filter_documents(df[df['document_id'] == str(d_id)], all_versions_dict)
 
-def test(filename, output_folder="/home/pfont/pipeline/voting_tests", current_dir = "/data/users/pfont"):
+        process_versions(all_versions_cut, f"rsc37_rsc176_{d_id}_cut.txt", output_folder)
+        process_versions(all_versions_normal, f"rsc37_rsc176_{d_id}.txt", output_folder)
+
+
+def test(filename, output_folder="/home/pfont/pipeline/voting_system/voting_tests", current_dir = "/data/users/pfont"):
     # Open all versions of one document
     versions = []
     for folder in os.listdir(current_dir):
         folder_path = os.path.join(current_dir, folder)
         if os.path.isdir(folder_path) and folder.startswith("out_transcription_"):
             file_path = os.path.join(folder_path, filename)
-            if os.path.exists(file_path):
-                print(f"Found: {file_path}")
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                versions.append(content)
-
+            if "out_transcription_normal" not in folder:
+                if os.path.exists(file_path):
+                    print(f"Found: {file_path}")
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    versions.append(content)
+                    if folder == "out_transcription_binary_hisam_inverted":
+                        versions.append(content)
+    
     harmonized_text = harmonize_ocr_outputs(versions, min_lcs_len=2)
     save_final_output(harmonized_text, filename, output_folder)
 
 if __name__ == "__main__":
     # example_usage()
 
-    """## Experiment with first paragraph
-    with open('./miscelanious/voting_examples.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
-    my_ocr_versions = list(data.values())
-
-    final_coherent_text = harmonize_ocr_outputs(my_ocr_versions, min_lcs_len=2, debug=True)
-
-    print("Final Text:", final_coherent_text)"""
-
-    ## Experiment with a couple of documents
-    document_filenames = ["rsc37_rsc176_278.txt", "rsc37_rsc176_364.txt"]
+    """## Experiment with a couple of documents
+    document_filenames = ["rsc37_rsc176_364.txt"]
     for filename in document_filenames:
-        test(filename)
+        test(filename)"""
+    document_processing("./document_analysis.csv", output_folder="/data/users/pfont/out_harmonized_ocr")

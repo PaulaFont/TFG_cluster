@@ -1,6 +1,6 @@
 import os
 import re
-from PIL import Image
+"""from PIL import Image
 import pypdfium2 as pdfium
 
 def pdf2image(pdfpath, input_folder):
@@ -17,7 +17,7 @@ def pdf2image(pdfpath, input_folder):
         img = page.render(scale=4.861111).to_pil()
         img.save(imgpath, dpi=(350, 350))
     pdf.close()
-    return setImages
+    return setImages"""
 
 def get_pdf_paths(folder_path):
     return [os.path.join(folder_path, filename) for filename in os.listdir(folder_path)]
