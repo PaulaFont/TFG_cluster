@@ -315,4 +315,17 @@ if __name__ == "__main__":
     document_filenames = ["rsc37_rsc176_364.txt"]
     for filename in document_filenames:
         test(filename)"""
-    document_processing("./document_analysis.csv", output_folder="/data/users/pfont/out_harmonized_ocr")
+    #document_processing("./document_analysis.csv", output_folder="/data/users/pfont/out_harmonized_ocr")
+
+    base_directory = "/data/users/pfont/"
+    json_path = os.path.join(base_directory , "llm_versions.json")
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            data_dict = json.load(f)
+    llm_outputs_example = data_dict["278"]["llm_version_text"]
+
+    print("\n--- Harmonizing LLM Outputs (Word-Level Direct Column Voting) ---")
+    harmonized_result = harmonize_ocr_outputs(llm_outputs_example, min_lcs_len=2)
+
+    print("\n--- Final Harmonized Text ---")
+    print(harmonized_result)

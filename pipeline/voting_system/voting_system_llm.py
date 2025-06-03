@@ -1,4 +1,4 @@
-import re
+import re, time, os, json
 from collections import Counter
 from voting_utils import _detokenize
 
@@ -139,64 +139,15 @@ def harmonize_llm_outputs_word_level(llm_outputs):
 
 # --- Main Example ---
 if __name__ == "__main__":
-    llm_outputs_example = [
-        "The quick brown fox jumps swiftly over the lazy dog.",
-        "A quick brown fox jumped over a lazy dog.", # "A", "jumped", "a"
-        "The quick brown fox jumps over the very lazy dog.", # "very"
-        "The quick brown fox will jump over the lazy dog indeed.", # "will jump", "indeed"
-        "The quick brown fox jumps over the lazy dog." # Baseline
-    ]
-
-    print("--- LLM Outputs (Example) ---")
-    for i, output in enumerate(llm_outputs_example):
-        print(f"LLM {i+1}: {output}")
+    base_directory = "/data/users/pfont/"
+    json_path = os.path.join(base_directory , "llm_versions.json")
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            data_dict = json.load(f)
+    llm_outputs_example = data_dict["278"]["llm_version_text"]
 
     print("\n--- Harmonizing LLM Outputs (Word-Level Direct Column Voting) ---")
-    
-    import time
-    start_time = time.time()
-
     harmonized_result = harmonize_llm_outputs_word_level(llm_outputs_example)
-    
-    end_time = time.time()
-    print(f"Processing time: {end_time - start_time:.4f} seconds")
 
     print("\n--- Final Harmonized Text ---")
     print(harmonized_result)
-
-    print("\n--- Another Example (More Structural Variation) ---")
-    llm_outputs_example2 = [
-        "User asked for a summary. The system provided a concise overview.",
-        "The user requested a summary. System gave a brief overview.",
-        "User asked for a summary. The system provided an overview.", # Shorter overview part
-        "Summary was requested by the user. System provided a concise overview." # Passive voice start
-    ]
-    print("--- LLM Outputs (Example 2) ---")
-    for i, output in enumerate(llm_outputs_example2):
-        print(f"LLM {i+1}: {output}")
-    
-    start_time = time.time()
-    harmonized_result2 = harmonize_llm_outputs_word_level(llm_outputs_example2)
-    end_time = time.time()
-    print(f"Processing time (Ex2): {end_time - start_time:.4f} seconds")
-    print("\n--- Final Harmonized Text (Example 2) ---")
-    print(harmonized_result2)
-
-    # Example with significant disagreement
-    print("\n--- Example 3 (Significant Disagreement) ---")
-    llm_outputs_example3 = [
-        "The result is positive.",
-        "The outcome appears favorable.",
-        "It seems the conclusion is good.",
-        "A positive result was achieved."
-    ]
-    print("--- LLM Outputs (Example 3) ---")
-    for i, output in enumerate(llm_outputs_example3):
-        print(f"LLM {i+1}: {output}")
-
-    start_time = time.time()
-    harmonized_result3 = harmonize_llm_outputs_word_level(llm_outputs_example3)
-    end_time = time.time()
-    print(f"Processing time (Ex3): {end_time - start_time:.4f} seconds")
-    print("\n--- Final Harmonized Text (Example 3) ---")
-    print(harmonized_result3)

@@ -1,4 +1,3 @@
-# rag_system.py
 import os
 import re
 from openai import OpenAI
@@ -13,13 +12,16 @@ import pandas as pd
 import gradio as gr
 import networkx as nx
 
+LLM_HOSTING = "http://localhost:8000/v1"
+BASE_DIRECTORY = "/data/users/pfont/"
+
 class RAGSystem:
     """
     A class to encapsulate all RAG system state and functionality.
     This eliminates the need for global variables.
     """
     
-    def __init__(self, base_document_directory="/data/users/pfont/", 
+    def __init__(self, base_document_directory=BASE_DIRECTORY, 
                  graph_document_directory=None):
         # Configuration
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
@@ -64,7 +66,7 @@ class RAGSystem:
             print("LLM Server failed to start. LLM functionalities will be unavailable.")
         else:
             self.llm_client_instance = OpenAI(
-                base_url="http://localhost:8000/v1",
+                base_url=LLM_HOSTING,
                 api_key="token-abc123" 
             )
             print("LLM Client initialized.")
@@ -434,7 +436,7 @@ class RAGSystem:
             self.corpus_embeddings_tensor is not None
         ])
 
-# main.py
+
 def main():
     print("Starting RAG program initialization...")
     

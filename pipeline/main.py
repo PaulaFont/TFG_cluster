@@ -94,7 +94,7 @@ def apply_llm(input_path, args):
     #Kill Server
     end_llm_server()
 
-def llm_vote_based_text_refinement(args, harmonized_folder="/data/users/pfont/out_harmonized_ocr/",filename_json="llm_versions.json"):
+def llm_10_times_generation(args, harmonized_folder="/data/users/pfont/out_harmonized_ocr/",filename_json="llm_versions.json"):
     # Start LLM server
     start_llm_server(args.model_name, port=8000)
     client = OpenAI(
@@ -120,7 +120,7 @@ def llm_vote_based_text_refinement(args, harmonized_folder="/data/users/pfont/ou
         prompt = get_prompts(ocr_text, "prompt6")
 
         # Get and save metadata
-        doc_id = filename.split("_")[-1].split(".")[0]
+        doc_id = filename.split("_")[-1].split(".")[0] #TODO: Fix. In the case of document_cut.txt, we get the cut instead of the ID
         extension = "normal"
         rep = 6
         if ("cut" in filename):
@@ -160,8 +160,49 @@ def main(args):
     tesseract_merge_all(input_folder, args)
     apply_llm(input_folder, args)
     evaluate_all_transcriptions()"""
+    harmonized_folder="/data/users/pfont/out_harmonized_ocr/"
+    filename_json="llm_versions.json"
+    # Start LLM server
+    start_llm_server(args.model_name, port=8000)
+    client = OpenAI(
+        base_url="http://localhost:8000/v1",
+        api_key="token-abc123"
+    )
 
-    llm_vote_based_text_refinement(args)
+    # Load previous data
+    json_path = os.path.join(args.base_directory , filename_json)
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            data_dict = json.load(f)
+    else:
+        data_dict = {}
+
+    for filename in tqdm(os.listdir(harmonized_folder)):
+        if "cut" in filename:
+            # Open text
+            text_path = os.path.join(harmonized_folder , filename)
+            with open(text_path, "r", encoding="utf-8") as f:
+                ocr_text = f.read()
+
+            # Create prompt
+            prompt = get_prompts(ocr_text, "prompt6")
+
+            # Get and save metadata
+            doc_id = filename.split("_")[-2].split(".")[0]
+            data_dict[doc_id][f"original_ocr_cut"] = ocr_text
+
+            for i in range(4):
+                version_info = f"v_cut_{i+1}"
+                print(doc_id, data_dict[doc_id].keys(), version_info)
+                version_text = query_llm(client, args.model_name, prompt)
+                data_dict[doc_id]["llm_version_info"].append(version_info)
+                data_dict[doc_id]["llm_version_text"].append(version_text)
+
+    # Save with new data
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(data_dict, f, ensure_ascii=False, indent=2)
+
+    
     
 
 if __name__ == "__main__":
@@ -180,3 +221,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+
+
