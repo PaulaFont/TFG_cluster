@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from pyvis.network import Network as PyvisNetwork # Alias to avoid confusion with nx.Network
 import json
 
-KG_FILENAME = "online_knowledge_graph.pkl" 
+KG_FILENAME = "online_knowledge_graph_tests.pkl" 
 
 # --- Function to save the knowledge graph ---
 def save_knowledge_graph(graph, filepath):
@@ -32,24 +32,31 @@ def load_knowledge_graph(filepath):
         print("No saved knowledge graph found. Starting with an empty graph.")
         return nx.MultiDiGraph()
 
-def produce_prompt_for_kg_extraction(input_caption): 
+
+def produce_prompt_for_kg_extraction(input_caption):
     def _parse_to_python(string):
-        # Define the regex for matching the list of triples
         triple_list_pattern = r"\[\s*(?:\(\s*(?:[^,()]+(?:,\s*[^,()]+)*)?\s*\)\s*,?\s*)+\]"
-        # Search for the list in the string
         match = re.search(triple_list_pattern, string)
-        # Extract the matched list
         list_string = match.group(0)
+        return [x for x in eval(list_string) if len(x) == 3 and isinstance(x, (tuple, list))]
 
-        return [x for x  in eval(list_string) if len(x) == 3 and isinstance(x, (tuple, list))]
+    system_message = (
+        "Eres un agente que recibe un fragmento de texto en el formato:\n"
+        "```BOS | [contenido] | EOS```\n"
+        "Tu tarea es extraer múltiples tripletas (sujeto, predicado, objeto) concisas para construir un grafo de conocimiento.\n"
+        "Utiliza entidades nombradas o conceptos clave como sujetos y objetos.\n"
+        "Mantén los nodos cortos (de 1 a 3 palabras), evita frases largas.\n"
+        "Extrae todas las tripletas relevantes de la misma frase, usando el contexto.\n"
+        "El texto está en español, responde siempre en español.\n"
+        "Solo devuelve la lista de tripletas en este formato:\n"
+        "```[('s', 'p', 'o'), ('s', 'p', 'o'), ...]```, sin explicaciones ni texto adicional."
+    )
 
+    user_message = f"Convierte esta frase en tripletas: BOS | {input_caption} | EOS. Solo devuelve la lista."
 
     return [
-        {"role": "system", "content": "You are an agent that receives a fragment of text in spanish. "
-                                      "Your task is to convert the given text into a set of triples (subject, predicate, object) for knowledge graph construction. "
-                                      "Output ONLY the list of triples in the format: [('s1', 'p1', 'o1'), ('s2', 'p2', 'o2'), ...]. "
-                                      "Ensure subject, predicate, and object are strings in spanish. Do not add any explanations or conversation."},
-        {"role": "user", "content": f"Convert this text to knowledge graph triples: ```{input_caption}```"}
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message}
     ], _parse_to_python
 
 # --- Function to extract triples using LLM ---

@@ -12,8 +12,11 @@ import pandas as pd
 import gradio as gr
 import networkx as nx
 
-LLM_HOSTING = "http://localhost:8000/v1"
+PORT=8000
+LLM_HOSTING = f"http://localhost:{PORT}/v1"
 BASE_DIRECTORY = "/data/users/pfont/"
+DOCUMENTS_PATH = "/data/users/pfont/final_documents"
+
 
 class RAGSystem:
     """
@@ -26,9 +29,12 @@ class RAGSystem:
         # Configuration
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
         self.GRAPH_DOCUMENT_DIRECTORY = graph_document_directory or os.path.join(base_document_directory, "graph/")
-        self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings.pt"
+        self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_2.pt" # Saved in /data
+        self.SAVED_PASSAGES_DATA = "passages_data.json"  # Saved locally
         self.LLM_MODEL_NAME = "microsoft/phi-4"
         self.GRAPH_FILENAME = "online_knowledge_graph"
+        self.BI_ENCODER_NAME="msmarco-bert-base-dot-v5"
+        self.CROSS_ENCODER_NAME='cross-encoder/ms-marco-MiniLM-L6-v2'
         
         # Create directories
         os.makedirs(self.GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
@@ -48,20 +54,26 @@ class RAGSystem:
         self.MAX_SEARCH_TERMS = 5
         self.BI_ENCODER_TOP_K = 20
         self.CROSS_ENCODER_THRESHOLD = 0.0
-        self.MAX_ADDITIONAL_CHUNKS_FOR_LLM = 0
+
+        # Answer Flags
+        self.RAG_ANSWER = False
+        self.GRAPH_ANSWER = False
 
     def initialize_models_and_data(self, 
-                                 bi_encoder_name="msmarco-bert-base-dot-v5", 
-                                 cross_encoder_name='cross-encoder/ms-marco-MiniLM-L6-v2', 
-                                 passages_filename="passages_data.json"):
+                                 bi_encoder_name=None, 
+                                 cross_encoder_name=None, 
+                                 passages_filename=None):
         """Initialize all models and data"""
+        bi_encoder_name = self.BI_ENCODER_NAME if not bi_encoder_name else bi_encoder_name
+        cross_encoder_name = self.CROSS_ENCODER_NAME if not cross_encoder_name else cross_encoder_name
+        passages_filename = self.SAVED_PASSAGES_DATA if not passages_filename else passages_filename
         
         # GRAPH
         kg_filepath = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, self.GRAPH_FILENAME + ".pkl")
         self.knowledge_graph_instance = load_knowledge_graph(kg_filepath)
 
         # LLM
-        if not start_llm_server(self.LLM_MODEL_NAME, port=8000):
+        if not start_llm_server(self.LLM_MODEL_NAME, port=PORT):
             self.llm_client_instance = None
             print("LLM Server failed to start. LLM functionalities will be unavailable.")
         else:
@@ -151,27 +163,18 @@ class RAGSystem:
                 print(f"Error saving new corpus embeddings: {e}")
 
     def load_full_document_by_details(self, filename, processing_version):
+        #TODO: Manage versions. At the moment just returns the one with more score
         """Load the full text content of a document"""
         if not filename or not processing_version:
             print("Error: Filename or processing_version missing.")
             return None
 
-        version_folder_name = f"out_llm_{processing_version}"
-        filepath = os.path.join(self.BASE_DOCUMENT_DIRECTORY, version_folder_name, filename)
+        filepath = os.path.join(DOCUMENTS_PATH, filename)
 
         if not os.path.exists(filepath):
             print(f"Error: Document file '{filepath}' not found.")
-            # Try alternative folders
-            for item in os.listdir(self.BASE_DOCUMENT_DIRECTORY):
-                if item.startswith("out_llm_"):
-                    alt_path = os.path.join(self.BASE_DOCUMENT_DIRECTORY, item, filename)
-                    if os.path.exists(alt_path):
-                        print(f"Found '{filename}' in alternative folder: {item}")
-                        filepath = alt_path
-                        break
-            else:
-                return None
-                
+            return None
+
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -181,8 +184,10 @@ class RAGSystem:
 
     def analyze_query_with_llm(self, user_query):
         """Analyze query with LLM to extract entities"""
+        #TODO: I changed the prompt asking it to be more specific. Check
         prompt = f"""
         Analiza la siguiente consulta en español e identifica las entidades clave.
+        Ten en cuenta que se usaran para Retrieval, no añadas conceptos generales. 
 
         Consulta del usuario: "{user_query}"
 
@@ -228,6 +233,7 @@ class RAGSystem:
 
     def generate_answer_with_llm(self, user_query, full_doc_context):
         """Generate answer using LLM with provided context"""
+        # Make sure it returns "0" when there is no context. 
         contexts_for_prompt = []
         if full_doc_context and full_doc_context.get('text'):
             contexts_for_prompt.append(
@@ -237,16 +243,15 @@ class RAGSystem:
             )
         
         if not contexts_for_prompt:
-            return "No he encontrado información relevante en los documentos para responder a tu pregunta."
+            return "0" 
 
         context_str = "\n\n".join(contexts_for_prompt)
         
         prompt = f"""
         Eres un asistente de IA experto en documentos históricos en español.
-        Responde a la pregunta del usuario basándote *únicamente* en el "DOCUMENTO COMPLETO PRINCIPAL" y, si es necesario, en los "FRAGMENTOS ADICIONALES" proporcionados.
-        Prioriza la información del "DOCUMENTO COMPLETO PRINCIPAL". Usa los fragmentos adicionales para complementar si es necesario.
+        Responde a la pregunta del usuario basándote *únicamente* en el contexto del "DOCUMENTO COMPLETO PRINCIPAL".
         Sé conciso y responde directamente. Sintetiza la información. No inventes nada.
-        Si la información no está en los textos, indícalo.
+        Si la información no está en los textos, indícalo contestando un "0" y nada más.  
         No menciones "DOCUMENTO COMPLETO PRINCIPAL" o "FRAGMENTOS ADICIONALES" en tu respuesta final.
 
         Pregunta del Usuario: "{user_query}"
@@ -259,7 +264,7 @@ class RAGSystem:
         if self.llm_client_instance:
             return query_llm(self.llm_client_instance, self.LLM_MODEL_NAME, prompt)
         else:
-            return f"Respuesta de muestra para '{user_query}' basada en {'documento completo' if full_doc_context else ''}"
+            return "0"
 
     def manage_search_terms(self, analyzed_query_dict):
         """Extract and manage search terms from analyzed query"""
@@ -278,10 +283,11 @@ class RAGSystem:
         return sorted(list(set(search_terms))) if search_terms else []
 
     def chat_search(self, message, history):
-        html_path = "hi"
-        """Main chat search function - now as a method"""
+        html_path = "hi" #TODO: Fix whatever this is
+
         response_parts = []
 
+        # Make sure everything is loaded
         if not all([self.passages_data, self.bi_encoder_model, self.cross_encoder_model, 
                    self.corpus_embeddings_tensor is not None]):
             response_parts.append("Error: Modelos o datos no inicializados. Revisa la consola.")
@@ -309,7 +315,7 @@ class RAGSystem:
         response_parts.append("")
 
         # Stage 2: Retrieval
-        search_terms = self.manage_search_terms(analyzed_query_dict)
+        search_terms = self.manage_search_terms(analyzed_query_dict) #TODO: add something to order them by more relevant ??
         if not search_terms: 
             search_terms = [user_query_mejorado]
 
@@ -353,7 +359,7 @@ class RAGSystem:
             if conceptual_id not in conceptual_doc_scores or current_score > conceptual_doc_scores[conceptual_id][0]:
                 conceptual_doc_scores[conceptual_id] = (
                     current_score, 
-                    passage_details['base_document_id'], 
+                    passage_details['original_filename'], 
                     passage_details['processing_version'],
                     scored_chunk['corpus_id']
                 )
@@ -362,7 +368,7 @@ class RAGSystem:
 
         top_conceptual_id_for_full_doc = None
         if sorted_conceptual_docs:
-            top_conceptual_id_for_full_doc, (score, fname, p_version, _) = sorted_conceptual_docs[0]
+            top_conceptual_id_for_full_doc, (score, fname, p_version, _) = sorted_conceptual_docs[0] 
             print(f"Top conceptual: '{top_conceptual_id_for_full_doc}' (File: {fname}, V: {p_version}), Score: {score}")
             full_text = self.load_full_document_by_details(fname, p_version)
             if full_text:
@@ -376,15 +382,23 @@ class RAGSystem:
             user_query_mejorado,
             full_document_for_llm_data
         )
+        # Is there context? Returns "0" when there is no satisfactory answer. 
+        if llm_answer == "0":
+            llm_answer = "No se ha encontrado contexto suficientemente relevante para contestar esta pregunta."
+            self.RAG_ANSWER = False
+        else: 
+            self.RAG_ANSWER = True
+
         response_parts.append(f"Respuesta: {llm_answer}\n")
 
         # Generate triples to graph
-        html_path_for_graph = self.answer_to_graph(llm_answer)
+        if self.RAG_ANSWER: # Only add triplets if there is an answer
+            html_path_for_graph = self.answer_to_graph(llm_answer)
 
         # Stage 5: Full Transparency Output
         response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
         
-        if full_document_for_llm_data:
+        if full_document_for_llm_data: #TODO: Make it more clear
             response_parts.append("\nDOCUMENTO COMPLETO PRINCIPAL:")
             response_parts.append(f"  Archivo: {full_document_for_llm_data['filename']}")
             response_parts.append(f"  Versión de Procesamiento: {full_document_for_llm_data['processing_version']}")        
