@@ -1,3 +1,6 @@
+# ner_logic.py
+# Utilities for extracting named entities and relevant phrases from Spanish text using spaCy and custom patterns.
+
 import re
 import spacy
 from spacy.matcher import Matcher
@@ -80,10 +83,18 @@ def postprocess_entities(entities):
         processed.add(ent)
     return processed
 
-def ner_function(text):
+#TODO: Maybe add a separation to dates in simple?
+def ner_function(text, simple=True):
     """
-    Extracts knowledge graph nodes by analyzing linguistic patterns.
+    Extracts knowledge graph nodes by analyzing linguistic patterns. Two modes: simple and complex.
     """
+    if simple:
+        doc = nlp(text)
+        named_entities = extract_spacy_ents(doc)
+        print(f"For text {text} the NER found {named_entities}")
+        return list(named_entities)
+
+    # Complex function. Separates with more detail (year, words, ... )
     doc = nlp(text)
     matcher = build_matcher(nlp)
     entities = set()
@@ -94,3 +105,71 @@ def ner_function(text):
     entities = remove_redundant_entities(entities)
     entities = postprocess_entities(entities)
     return sorted(list(entities))
+
+
+def link_components_by_context(original_phrase: str, substrings: list[str]) -> list[tuple[str, str, str]]:
+    """
+    Creates a relational chain of triplets by analyzing the context within an original phrase.
+
+    This function reconstructs the relationship between component parts by:
+    1. Finding the start position of each substring in the original phrase.
+    2. Sorting the substrings by their appearance order.
+    3. For each adjacent pair, extracting the intermediate text (the "glue") to use as the predicate.
+    
+    This replaces a single complex node with a more expressive, interconnected graph of its parts.
+
+    Args:
+        original_phrase: The full, original string from which the substrings were derived.
+        substrings: A list of the component nodes.
+
+    Returns:
+        A list of triplets in the format (head_node, tail_node, relationship).
+    """
+    if not substrings:
+        return []
+
+    # Step 1: Find the position of each substring in the original phrase.
+    # We store them to sort them and avoid re-calculating indices.
+    found_nodes = []
+    # Use a copy to safely remove items
+    searchable_substrings = sorted(substrings, key=len, reverse=True)
+    temp_phrase = original_phrase.lower()
+
+    for sub in searchable_substrings:
+        try:
+            start_index = temp_phrase.find(sub.lower())
+            if start_index != -1:
+                found_nodes.append({'text': sub, 'start': start_index, 'end': start_index + len(sub)})
+                # Blank out the found part to avoid re-matching a substring (e.g., 'pena' in 'pena menor')
+                temp_phrase = temp_phrase[:start_index] + (' ' * len(sub)) + temp_phrase[start_index + len(sub):]
+        except ValueError:
+            continue
+
+    # Step 2: Sort the found nodes by their start position in the original phrase.
+    ordered_nodes = sorted(found_nodes, key=lambda x: x['start'])
+    
+    # Step 3: Create a chain of triplets based on the determined order.
+    triplets = []
+    if len(ordered_nodes) < 2:
+        return []
+
+    for i in range(len(ordered_nodes) - 1):
+        head_node_info = ordered_nodes[i]
+        tail_node_info = ordered_nodes[i+1]
+        
+        # The relationship is the text between the end of the first node and the start of the next.
+        start_of_relation = head_node_info['end']
+        end_of_relation = tail_node_info['start']
+        
+        relation_text = original_phrase[start_of_relation:end_of_relation].strip()
+        
+        # Clean up the relation to be a valid, simple predicate
+        if not relation_text:
+            relation_text = 'is_related_to'
+
+        triplets.append((head_node_info['text'], tail_node_info['text'], relation_text))
+        
+    return triplets
+
+
+# print(link_components_by_context( 'delito de auxilio a la Rebelión', ['Rebelión', 'auxilio', 'delito']))

@@ -6,16 +6,22 @@ import spacy
 import Levenshtein as levenshtein
 from num2words import num2words
 import math
-from ner_logic import ner_function
+from ner_logic import ner_function, link_components_by_context
 
 MAX_LEN_NODE = 6 #(words)
 MAX_LEN_EDGE = 5 #(words)
 GRAPH_DIRECTORY = "/data/users/pfont/graph/"
 KG_FILENAME = "online_knowledge_graph_tests.pkl" 
 
+def filter_edge(edge):
+    """
+    Checks if the number of words in the edge string is less than MAX_LEN_EDGE.
+    """
+    return len(edge.split()) < MAX_LEN_EDGE
 
 
-# Apply NER in here. (Future idea: to provide information to the node as, the type: PER, LOC, ORG, DATE, ...)
+
+# TODO: Apply NER in here. (Future idea: to provide information to the node as, the type: PER, LOC, ORG, DATE, ...)
 def manage_wrongs(list_text):
     new_triplets = []
     for text in list_text:
@@ -53,8 +59,10 @@ def manage_wrongs(list_text):
                     current_subject = current_subject  # optional: update if needed
         new_triplets.append(triplets)
 
+# ------------------------------------------------------------------------
+# Apply string edit distance
+# ------------------------------------------------------------------------
 
-# DONE
 def are_strings_similar(word1, word2):
     """
     Determines whether two strings are similar based on a normalized Levenshtein distance.
@@ -102,10 +110,19 @@ def are_strings_similar(word1, word2):
     dist = levenshtein.distance(s1, s2) / max_len
     return dist <= threshold
 
-# Empty function. Apply are_strings_similar in here
-def compare_to_existing(current_graph, triplets_to_add):
-    existing_nodes = current_graph.nodes()
-
+def find_similars(lst, word):
+    """
+    Finds the first string in lst that is similar to word using are_strings_similar.
+    If more than one match is found, prints the first match.
+    Returns the first similar string, or None if no match is found.
+    """
+    matches = [item for item in lst if are_strings_similar(item, word)]
+    if matches:
+        if len(matches) > 1:
+            print(f"Multiple similar strings found. Returning the first: {matches[0]}")
+        return matches[0]
+    return None
+  
 
 # Idea: to manage long edges somehow (AT THE MOMENT WE WILL SKIP THEM)    
 def create_intermediate_triplets(subject: str, long_predicate: str, obj: str):# -> List[Tuple[str, str, str]]:
@@ -159,42 +176,211 @@ def create_intermediate_triplets(subject: str, long_predicate: str, obj: str):# 
     short_predicate = shorten_with_ner(long_predicate, MAX_LEN_EDGE)
     return [(subject, short_predicate, obj)]
 
-# DONE    
-def filter_edge(edge):
-    """
-    Checks if the number of words in the edge string is less than MAX_LEN_EDGE.
-    """
-    return len(edge.split()) < MAX_LEN_EDGE
 
-# General function.  #TODO: needs redoing
 def filter_and_fix_triplets(current_graph, triplets):
-    new_nodes = []
+    #TODO: remove, now it's temporary
+    existing_triplets = [
+        # About the Person (Subject)
+        ('Francisco Iacasta Catalán', 'labriego', 'era'),
+        ('Francisco Iacasta Catalán', '46 años', 'tenía'),
+        ('Francisco Iacasta Catalán', 'Olite', 'era_natural_de'),
+        ('Francisco Iacasta Catalán', 'Olite', 'era_vecino_de'),
 
-    adding_nodes = [x for s, p, o in triplets for x in (s, o)]
-    adding_edges = [p for s, p, o in triplets]
+        # The Trial and Accusation
+        ('Francisco Iacasta Catalán', 'Consejo de Guerra', 'fue_juzgado_por'),
+        ('Consejo de Guerra', 'Pamplona', 'tuvo_lugar_en'),
+        ('Consejo de Guerra', '22 de enero de 1943', 'fecha_de_juicio'),
+        ('Francisco Iacasta Catalán', 'auxilio a la Rebelión', 'fue_acusado_de'),
 
-    # Filter by length (nodes and edges)
-    filtered_nodes = [node for node in adding_nodes if len(node) < MAX_LEN_NODE] # Filter for short nodes
-    filtered_edges = [edge for edge in adding_edges if len(edge) < MAX_LEN_EDGE] # Filter for short edges
+        # The Court's Composition
+        ('Consejo de Guerra', 'Rodrigo Torrent', 'fue_presidido_por'),
+        ('Rodrigo Torrent', 'Teniente Coronel', 'tenía_título_de'),
+        ('Fallo', 'vocales del consejo', 'fue_confirmado_por'),
 
-    # Do NER to long triplets and divide them
-    long_nodes = list(set(adding_nodes).symmetric_difference(set(filtered_nodes))) # All new nodes that are not in short nodes list
-    triplets_with_long_nodes = [(s,p,o) for (s,p,o) in triplets if s or o in long_nodes]
-    long_edges = list(set(adding_edges) - set(filtered_edges))
-    triplets_with_long_edges = [(s,p,o) for (s,p,o)  in triplets if p in long_edges]
+        # Requests from Prosecution and Defense
+        ('Ministerio Fiscal', 'reclusión menor de dos a nueve años', 'solicitó_pena'),
+        ('Defensa', 'absolución o pena menor', 'solicitó'),
 
-    
+        # The Verdict and Sentence
+        ('Consejo de Guerra', 'Francisco Iacasta Catalán', 'condenó'),
+        ('Consejo de Guerra', 'dos años y seis meses de reclusión menor', 'impuso_pena'),
+        ('Condena', 'artículo 240 del Código de Justicia Militar', 'basada_en'),
 
-    # String distance to the nodes in the graph (only letters, put in lowercase, normalize by text_length ??)
-    # TODO: do
+        # Dissenting Opinion
+        ('Voto particular', 'un año de reclusión menor', 'propuso_pena')
+    ]
+    existing_nodes = list(set([t[0] for t in existing_triplets] + [t[1] for t in existing_triplets]))
+
+    triplets = current_graph.edges(keys=True) #node, node, edge #TODO: fix later
+    print(f"Orignal triplets to add: {triplets}")
+    current_triplets = []
+    for s, o, e in triplets:  # TODO: check order that triplets come from the LLM
+        if filter_edge(e):  # Short edge
+            sub_match = find_similars(existing_nodes, s)
+            ob_match = find_similars(existing_nodes, o)
+
+            subj_final = sub_match if sub_match else s
+            obj_final = ob_match if ob_match else o
+
+            if sub_match:
+                print(f"Matched subject '{s}' to existing node '{sub_match}'")
+            if ob_match:
+                print(f"Matched object '{o}' to existing node '{ob_match}'")
+
+            current_triplets.append((subj_final, e, obj_final))
+            
+            temporary_new_triplets = []
+            # NER (new triplets)
+            if not sub_match:
+                sub_list = ner_function(s)
+                if sub_list and sub_list != [s]:
+                    print(f"NER for subject '{s}': {sub_list}")
+                    new_triplets_sub = link_components_by_context(s, sub_list)
+                    temporary_new_triplets += new_triplets_sub
+            if not ob_match:
+                ob_list = ner_function(o)
+                if ob_list and ob_list != [o]:
+                    print(f"NER for object '{o}': {ob_list}")
+                    new_triplets_ob = link_components_by_context(o, ob_list)         
+                    temporary_new_triplets += new_triplets_ob
+            
+            # Check if the new nodes already exist:
+            for s, o, e in temporary_new_triplets: 
+                sub_match = find_similars(existing_nodes, s)
+                ob_match = find_similars(existing_nodes, o)
+
+                subj_final = sub_match if sub_match else s
+                obj_final = ob_match if ob_match else o
+
+                if sub_match:
+                    print(f"Matched subject '{s}' to existing node '{sub_match}'")
+                if ob_match:
+                    print(f"Matched object '{o}' to existing node '{ob_match}'")
+
+                current_triplets.append((subj_final, e, obj_final))
+
+        else: 
+            print(f"Removed triplet for LONG EDGE ({s} {e} {o})")
+    print(f"New triplets to add: {current_triplets}")
+    return current_triplets
 
 
+def filter_and_fix_triplets2(current_graph, initial_triplets):
+     #TODO: remove, now it's temporary
+    existing_triplets = [
+        # About the Person (Subject)
+        ('Francisco Iacasta Catalán', 'labriego', 'era'),
+        ('Francisco Iacasta Catalán', '46 años', 'tenía'),
+        ('Francisco Iacasta Catalán', 'Olite', 'era_natural_de'),
+        ('Francisco Iacasta Catalán', 'Olite', 'era_vecino_de'),
 
+        # The Trial and Accusation
+        ('Francisco Iacasta Catalán', 'Consejo de Guerra', 'fue_juzgado_por'),
+        ('Consejo de Guerra', 'Pamplona', 'tuvo_lugar_en'),
+        ('Consejo de Guerra', '22 de enero de 1943', 'fecha_de_juicio'),
+        ('Francisco Iacasta Catalán', 'auxilio a la Rebelión', 'fue_acusado_de'),
+
+        # The Court's Composition
+        ('Consejo de Guerra', 'Rodrigo Torrent', 'fue_presidido_por'),
+        ('Rodrigo Torrent', 'Teniente Coronel', 'tenía_título_de'),
+        ('Fallo', 'vocales del consejo', 'fue_confirmado_por'),
+
+        # Requests from Prosecution and Defense
+        ('Ministerio Fiscal', 'reclusión menor de dos a nueve años', 'solicitó_pena'),
+        ('Defensa', 'absolución o pena menor', 'solicitó'),
+
+        # The Verdict and Sentence
+        ('Consejo de Guerra', 'Francisco Iacasta Catalán', 'condenó'),
+        ('Consejo de Guerra', 'dos años y seis meses de reclusión menor', 'impuso_pena'),
+        ('Condena', 'artículo 240 del Código de Justicia Militar', 'basada_en'),
+
+        # Dissenting Opinion
+        ('Voto particular', 'un año de reclusión menor', 'propuso_pena')
+    ]
+    existing_nodes = list(set([t[0] for t in existing_triplets] + [t[1] for t in existing_triplets]))
+
+    initial_triplets = current_graph.edges(keys=True) #node, node, edge #TODO: fix later
+    print(f"Orignal triplets to add: {initial_triplets}")
+    final_triplets_to_add = []
+
+    for s, o, p in initial_triplets:
+        if not filter_edge(p):
+            print(f"SKIPPING triplet for LONG PREDICATE: ('{s}', '{p}', '{o}')")
+            continue
+            
+        # 1. Match nodes to existing ones in the graph
+        sub_match = find_similars(existing_nodes, s)
+        ob_match = find_similars(existing_nodes, o)
+
+        subj_final = sub_match if sub_match else s
+        obj_final = ob_match if ob_match else o
+        
+        # Log matches
+        if sub_match: print(f"Matched subject '{s}' -> '{subj_final}'")
+        if ob_match: print(f"Matched object '{o}' -> '{obj_final}'")
+
+        # 2. Decompose new nodes and prepare internal links
+        sub_ner_triplets = []
+        obj_ner_triplets = []
+        
+        # Decompose subject only if it's a new node
+        if not sub_match and len(s.split()) > MAX_LEN_NODE:
+            sub_components = ner_function(s)
+            if len(sub_components) > 1:
+                print(f"NER decomposed subject '{s}': {sub_components}")
+                sub_ner_triplets = link_components_by_context(s, sub_components)
+        else:
+            sub_components = [subj_final]
+            
+        # Decompose object only if it's a new node
+        if not ob_match and len(o.split()) > MAX_LEN_NODE:
+            obj_components = ner_function(o)
+            if len(obj_components) > 1:
+                print(f"NER decomposed object '{o}': {obj_components}")
+                obj_ner_triplets = link_components_by_context(o, obj_components)
+        else:
+            obj_components = [obj_final]
+            
+        # 3. Build the final list of triplets based on decompositions
+        linking_subj = subj_final
+        linking_obj = obj_final
+
+        # If the subject was decomposed...
+        if sub_ner_triplets:
+            # Add the internal links of the subject's chain.
+            final_triplets_to_add.extend(sub_ner_triplets)
+            # The new "head" of the main relationship is the LAST node of the subject's chain.
+            linking_subj = sub_components[-1]
+
+        # If the object was decomposed...
+        if obj_ner_triplets:
+            # Add the internal links of the object's chain.
+            final_triplets_to_add.extend(obj_ner_triplets)
+            # The new "tail" of the main relationship is the FIRST node of the object's chain.
+            linking_obj = obj_components[0]
+            
+        # Add the main, re-linked triplet. This connects the subject (or its chain's end)
+        # to the object (or its chain's start).
+        main_triplet = (linking_subj, p, linking_obj)
+        print(f"Adding main link: {main_triplet}")
+        final_triplets_to_add.append(main_triplet)
+        
+        #Remove all triplets with nodes longer than MAX_LEN_NODE
+        filtered_triplets = []
+        for triplet in final_triplets_to_add:
+            subj_len = len(triplet[0].split())
+            obj_len = len(triplet[2].split())
+            if subj_len > MAX_LEN_NODE or obj_len > MAX_LEN_NODE:
+                print(f"Skipping triplet due to long node: {triplet}")
+            else:
+                filtered_triplets.append(triplet)
+        final_triplets_to_add = filtered_triplets
+
+    print(f"\nFinal, processed triplets to add to graph: {final_triplets_to_add}")
+    return final_triplets_to_add
 # ------------------------------------------------------------------------
-# End of filtering/fixing helpers, start of LLM extraction and graph update
+# LLM extraction and graph update
 # ------------------------------------------------------------------------
-
-
 
 def extract_triplets(text_content, client, model="microsoft/phi-4"):
     if not text_content or not client:
@@ -256,3 +442,14 @@ def update_graph(text_content, current_graph, client, model="microsoft/phi-4", b
     new_triplets = filter_and_fix_triplets(current_graph, initial_triplets)
     add_triplets(current_graph, new_triplets, base_doc_dir_for_saving)
 
+
+filepath = os.path.join(GRAPH_DIRECTORY, KG_FILENAME)
+if os.path.exists(filepath):
+    try:
+        with open(filepath, 'rb') as f:
+            graph = pickle.load(f)
+        print(f"Knowledge graph loaded from {filepath}. Nodes: {len(graph.nodes)}, Edges: {len(graph.edges)}")
+    except Exception as e:
+        print(f"Error loading knowledge graph: {e}. Starting with an empty graph.")
+        
+filter_and_fix_triplets2(graph, [])
