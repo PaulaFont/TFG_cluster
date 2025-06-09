@@ -5,13 +5,12 @@ import pickle
 import spacy
 import Levenshtein as levenshtein
 from num2words import num2words
+import math
 
 
 MAX_LEN_NODE = 6
 MAX_LEN_EDGE = 5
 KG_FILENAME = "online_knowledge_graph_tests.pkl" 
-
-THRESHOLD_EDIT_DISTANCE = 0.2
 
 # nlp = spacy.load("es_core_news_lg") 
 #nlp = spacy.load("ca_core_news_trf")
@@ -84,7 +83,30 @@ def manage_wrongs(list_text):
                     current_subject = current_subject  # optional: update if needed
         new_triplets.append(triplets)
 
-def get_edit_distance(word1, word2, base_threshold=THRESHOLD_EDIT_DISTANCE):
+
+# DONE
+def are_strings_similar(word1, word2):
+    """
+    Determines whether two strings are similar based on a normalized Levenshtein distance.
+
+    This function compares two input strings by:
+      1. Converting any numeric digits to their textual representation in Spanish.
+      2. Normalizing the strings by converting to lowercase and removing all non-letter characters.
+      3. Calculating the normalized Levenshtein distance between the processed strings.
+      4. Returning True if the distance is within an allowed threshold, which is dynamically determined based on the string length.
+
+    Args:
+        word1 (str): The first string to compare.
+        word2 (str): The second string to compare.
+
+    Returns:
+        bool: True if the strings are considered similar, False otherwise.
+    """
+    # 0. Calcular cuantos errores se permiten
+    def max_allowed_errors(n: int) -> int:
+        # Número máximo de errores permitidos para una cadena de longitud n.
+        return max(1, int(math.log2(n)))
+
     # 1. Convert all numbers in string to text ("6" becomes "six")
     def numeros_a_texto(texto: str) -> str:
         # Reemplaza todos los números encontrados por su versión en texto (en español)
@@ -101,18 +123,15 @@ def get_edit_distance(word1, word2, base_threshold=THRESHOLD_EDIT_DISTANCE):
     s1 = normalise(numeros_a_texto(word1))
     s2 = normalise(numeros_a_texto(word2))
     if not s1 or not s2:
-        return False # We don't compare numbers and things like that. 
+        return False # We don't compare symbols, empty strings, ... 
 
     # 3. Get Numeric Distance between two processed strings
     max_len = max(len(s1), len(s2))
-    # threshold = base_threshold if max_len > 4 else 1 / max_len
-    threshold = 2 / max_len
+    # threshold = 2 / max_len if max_len > 4 else 1 / max_len
+    threshold = max_allowed_errors(max_len) / max_len
     dist = levenshtein.distance(s1, s2) / max_len
     return dist <= threshold
 
-s1 = "1986"
-s2 = "1987"
-print(f"Editing ditance between {s1} and {s2} is {get_edit_distance(s1,s2)}")
 
 
 
