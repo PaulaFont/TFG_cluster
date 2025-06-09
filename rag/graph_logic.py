@@ -5,7 +5,9 @@ import pickle
 import matplotlib.pyplot as plt
 from pyvis.network import Network as PyvisNetwork # Alias to avoid confusion with nx.Network
 import json
+from graph_utils import filter_and_fix_triplets
 
+GRAPH_DIRECTORY = "/data/users/pfont/graph/"
 KG_FILENAME = "online_knowledge_graph_tests.pkl" 
 
 # --- Function to save the knowledge graph ---
@@ -47,6 +49,7 @@ def produce_prompt_for_kg_extraction(input_caption):
         "Utiliza entidades nombradas o conceptos clave como sujetos y objetos.\n"
         "Mantén los nodos cortos (de 1 a 3 palabras), evita frases largas.\n"
         "Extrae todas las tripletas relevantes de la misma frase, usando el contexto.\n"
+        "Procura que todas las tripletas esten conectadas entre si \n"
         "El texto está en español, responde siempre en español.\n"
         "Solo devuelve la lista de tripletas en este formato:\n"
         "```[('s', 'p', 'o'), ('s', 'p', 'o'), ...]```, sin explicaciones ni texto adicional."
@@ -59,11 +62,8 @@ def produce_prompt_for_kg_extraction(input_caption):
         {"role": "user", "content": user_message}
     ], _parse_to_python
 
-# --- Function to extract triples using LLM ---
-# and add those triples to the current_graph
-def extract_triples_from_text(text_content, current_graph, client, model="microsoft/phi-4", base_doc_dir_for_saving=KG_FILENAME): 
-    knowledge_graph = current_graph
 
+def extract_triplets(text_content, client, model="microsoft/phi-4"):
     if not text_content or not client:
         return False
 
@@ -91,7 +91,11 @@ def extract_triples_from_text(text_content, current_graph, client, model="micros
     print(f"Raw LLM response for KG: {raw_llm_response[:500]}...") 
     
     extracted_triples = parser_func(raw_llm_response)
-    
+
+    return extracted_triples
+
+def add_triplets(current_graph, extracted_triples, base_doc_dir_for_saving):
+    knowledge_graph = current_graph
     if extracted_triples:
         print(f"Extracted {len(extracted_triples)} triples.")
         new_triples_added = 0
@@ -114,6 +118,12 @@ def extract_triples_from_text(text_content, current_graph, client, model="micros
         print("No valid triples parsed from LLM response.")
     return False
 
+def update_graph(text_content, current_graph, client, model="microsoft/phi-4", base_doc_dir_for_saving=KG_FILENAME): 
+    initial_triplets = extract_triplets(text_content, client, model)
+    new_triplets = filter_and_fix_triplets(current_graph, initial_triplets)
+    filepath = os.path.join(GRAPH_DIRECTORY, base_doc_dir_for_saving)
+    add_triplets(current_graph, new_triplets, filepath) # Adds processed triplets and saves graph
+    return current_graph
 
 def visualize_knowledge_graph(
     graph: nx.MultiDiGraph, 

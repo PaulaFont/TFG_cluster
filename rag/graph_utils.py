@@ -10,8 +10,6 @@ from ner_logic import ner_function, link_components_by_context
 
 MAX_LEN_NODE = 6 #(words)
 MAX_LEN_EDGE = 5 #(words)
-GRAPH_DIRECTORY = "/data/users/pfont/graph/"
-KG_FILENAME = "online_knowledge_graph_tests.pkl" 
 
 def filter_edge(edge):
     """
@@ -29,7 +27,9 @@ def filter_triplet(triplet):
         "no proporciona información adicional sobre",
         "la información proporcionada",
         "el documento", 
-        "el contexto"
+        "el contexto",
+        "documento",
+        "proporciona"
     ]
 
     for element in triplet:
@@ -202,68 +202,3 @@ def filter_and_fix_triplets(current_graph, initial_triplets):
     print(f"\nFinal, processed triplets to add to graph: {final_triplets_to_add}")
     return final_triplets_to_add
 
-# ------------------------------------------------------------------------
-# LLM extraction and graph update
-# ------------------------------------------------------------------------
-
-def extract_triplets(text_content, client, model="microsoft/phi-4"):
-    if not text_content or not client:
-        return False
-
-    messages_for_llm, parser_func = produce_prompt_for_kg_extraction(text_content)
-    
-    print(f"\nAttempting to extract KG triples from text (length: {len(text_content)} chars)...")
-
-    try:
-        # query_llm uses the OpenAI client directly with messages
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages_for_llm,
-            temperature=0.2
-        )
-        raw_llm_response = completion.choices[0].message.content
-        
-    except Exception as e:
-        print(f"Error calling LLM for KG triple extraction: {e}")
-        return False
-
-    if not raw_llm_response:
-        print("LLM returned empty response for KG triple extraction.")
-        return False
-
-    print(f"Raw LLM response for KG: {raw_llm_response[:500]}...") 
-    
-    extracted_triples = parser_func(raw_llm_response)
-
-    return extracted_triples
-
-def add_triplets(current_graph, extracted_triples, base_doc_dir_for_saving):
-    knowledge_graph = current_graph
-    if extracted_triples:
-        print(f"Extracted {len(extracted_triples)} triples.")
-        new_triples_added = 0
-        for s, p, o in extracted_triples:
-            # Basic normalization
-            s, p, o = str(s).strip(), str(p).strip(), str(o).strip()
-            if s and p and o: # Ensure no empty strings
-                # Add to the graph. NetworkX handles duplicate nodes/edges
-                if not knowledge_graph.has_edge(s, o, key=p): 
-                    knowledge_graph.add_edge(s, o, key=p, predicate_label=p) 
-                    new_triples_added += 1
-        if new_triples_added > 0:
-            print(f"Added {new_triples_added} new unique triples to the knowledge graph.")
-            print(f"KG now has {len(knowledge_graph.nodes)} nodes and {len(knowledge_graph.edges)} edges.")
-            # Saving the graph
-            kg_path = os.path.join(base_doc_dir_for_saving, KG_FILENAME)
-            save_knowledge_graph(knowledge_graph, kg_path)
-            return True
-    else:
-        print("No valid triples parsed from LLM response.")
-    return False
-
-def update_graph(text_content, current_graph, client, model="microsoft/phi-4", base_doc_dir_for_saving=KG_FILENAME): 
-    initial_triplets = extract_triplets(text_content, client, model)
-    new_triplets = filter_and_fix_triplets(current_graph, initial_triplets)
-    filepath = os.path.join(GRAPH_DIRECTORY, base_doc_dir_for_saving)
-    add_triplets(current_graph, new_triplets, filepath) #Addes processed triplets and saves graph
-    return current_graph

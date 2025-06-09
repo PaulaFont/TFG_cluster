@@ -3,7 +3,7 @@ import re
 from openai import OpenAI
 from llm_utils import * 
 from pre_processing import *
-from graph_logic import * 
+from graph_logic import update_graph, visualize_knowledge_graph, load_knowledge_graph
 import torch 
 import json
 from sentence_transformers import SentenceTransformer, util
@@ -28,7 +28,8 @@ class RAGSystem:
                  graph_document_directory=None):
         # Configuration
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
-        self.GRAPH_DOCUMENT_DIRECTORY = graph_document_directory or os.path.join(base_document_directory, "graph/")
+        self.GRAPH_DOCUMENT_DIRECTORY = os.path.realpath(graph_document_directory or os.path.join(base_document_directory, "graph/"))
+        
         self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_2.pt" # Saved in /data
         self.SAVED_PASSAGES_DATA = "passages_data.json"  # Saved locally
         self.LLM_MODEL_NAME = "microsoft/phi-4"
@@ -283,20 +284,19 @@ class RAGSystem:
         return sorted(list(set(search_terms))) if search_terms else []
 
     def chat_search(self, message, history):
-        html_path = "hi" #TODO: Fix whatever this is
+        html_path_for_graph = self.html_file_path
 
         response_parts = []
 
         # Make sure everything is loaded
-        if not all([self.passages_data, self.bi_encoder_model, self.cross_encoder_model, 
-                   self.corpus_embeddings_tensor is not None]):
+        if not self.is_initialized():
             response_parts.append("Error: Modelos o datos no inicializados. Revisa la consola.")
-            return "\n".join(response_parts), html_path
+            return "\n".join(response_parts), html_path_for_graph # Return current/last known path
 
         user_query = message.strip()
         if not user_query:
             response_parts.append("Introduce una consulta.")
-            return "\n".join(response_parts), html_path
+            return "\n".join(response_parts), html_path_for_graph # Return current/last known path
 
         # Stage 1: Query Analysis
         analyzed_query_dict = self.analyze_query_with_llm(user_query)
@@ -393,7 +393,9 @@ class RAGSystem:
 
         # Generate triples to graph
         if self.RAG_ANSWER: # Only add triplets if there is an answer
-            html_path_for_graph = self.answer_to_graph(llm_answer)
+            newly_generated_html_path = self.answer_to_graph(llm_answer)
+            if newly_generated_html_path and os.path.exists(newly_generated_html_path):
+                 html_path_for_graph = newly_generated_html_path
 
         # Stage 5: Full Transparency Output
         response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
@@ -415,8 +417,8 @@ class RAGSystem:
         """Add answer information to knowledge graph"""
         print(f"Initial KG: {len(self.knowledge_graph_instance.nodes)} nodes, {len(self.knowledge_graph_instance.edges)} edges")
 
-        # Extract triples
-        extract_triples_from_text(
+        # Extract triples, process them and save new graph
+        self.knowledge_graph_instance = update_graph( 
             text_content=llm_answer,
             current_graph=self.knowledge_graph_instance,
             client=self.llm_client_instance,
@@ -425,7 +427,7 @@ class RAGSystem:
         )
 
         # Save in HTML
-        html_file_path = visualize_knowledge_graph(
+        new_html_file_path = visualize_knowledge_graph(
             graph=self.knowledge_graph_instance,
             output_format="html",
             filename_prefix=self.GRAPH_FILENAME,
@@ -435,11 +437,14 @@ class RAGSystem:
             default_edge_color="#C0C0C0", 
         )
 
-        if html_file_path:
-            print(f"Generated HTML at: {html_file_path}")
-            self.html_file_path = html_file_path
-        
-        return html_file_path
+        if new_html_file_path and os.path.exists(new_html_file_path):
+            print(f"Generated HTML at: {new_html_file_path}")
+            self.html_file_path = new_html_file_path # Update the instance's path
+            return new_html_file_path
+        else:
+            print(f"Failed to generate or find HTML at: {new_html_file_path}. Returning previous path: {self.html_file_path}")
+            return self.html_file_path # Return last known good path if new one fails
+
 
     def is_initialized(self):
         """Check if the system is properly initialized"""
@@ -474,14 +479,15 @@ def main():
 
     if current_kg_html_path and os.path.exists(current_kg_html_path):
         try:
-            with open(current_kg_html_path, "r", encoding="utf-8") as f:
-                initial_html_content = f.read()
-            print(f"Initial graph HTML loaded from: {current_kg_html_path}")
+            abs_html_path = os.path.abspath(current_kg_html_path)
+            iframe_src = f"/file={abs_html_path}" 
+            initial_html_display = f'<iframe src="{iframe_src}" width="100%" height="600px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
+            print(f"Initial graph HTML will be loaded via iframe from: {current_kg_html_path}")
         except Exception as e:
-            print(f"Error loading initial HTML from {current_kg_html_path}: {e}")
+            print(f"Error preparing initial iframe for {current_kg_html_path}: {e}")
+            # initial_html_display remains the default message
     else:
-        print(f"No se encontró el archivo HTML del grafo inicial en '{current_kg_html_path}'. Se mostrará un mensaje predeterminado.")
-
+        print(f"No se encontró el archivo HTML del grafo inicial en '{current_kg_html_path}' o la ruta es None. Se mostrará un mensaje predeterminado.")
 
     print("Models and data loaded. Launching Gradio interface...")
     
@@ -502,12 +508,8 @@ def main():
         def handle_chat_interaction(user_message, current_chat_history):
             user_message = user_message.strip()
             if not user_message:
-                # Handle empty input gracefully
-                # No change to chat history, provide a message for HTML output, clear input
-                # To keep the current graph visible, we'd need its content.
-                # For simplicity, just show a message.
-                # The return signature must match the `outputs` list.
-                return current_chat_history, initial_html_content, current_chat_history, ""
+                # If input is empty, skip updating chatbot and HTML graph, just clear input text
+                return current_chat_history, gr.skip(), current_chat_history, ""
 
             # 1. Get bot response and new HTML path from RAG system
             bot_response_string, new_html_file_path = rag_system.chat_search(user_message, current_chat_history)
@@ -516,25 +518,22 @@ def main():
             updated_history = current_chat_history + [[user_message, bot_response_string]]
 
             # 3. Load HTML content for display
-            html_content_for_display = "<p>El grafo de conocimiento no se actualizó para esta consulta.</p>"
+            html_content_for_display = initial_html_display # Fallback to initial display
             if new_html_file_path and os.path.exists(new_html_file_path):
                 try:
-                    with open(new_html_file_path, "r", encoding="utf-8") as f:
-                        html_content_for_display = f.read()
+                    abs_html_path = os.path.abspath(new_html_file_path)
+                    # Add a timestamp as a query parameter to the iframe src to help bust cache
+                    import time
+                    iframe_src = f"/gradio_api/file={abs_html_path}?v={time.time()}"
+                    html_content_for_display = f'<iframe src="{iframe_src}" width="100%" height="600px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
                 except Exception as e:
-                    print(f"Error al leer el archivo HTML del grafo {new_html_file_path}: {e}")
+                    print(f"Error al crear el iframe para el grafo {new_html_file_path}: {e}")
                     html_content_for_display = f"<p>Error al cargar el grafo desde {new_html_file_path}: {e}</p>"
             elif new_html_file_path: # Path provided, but file does not exist
-                html_content_for_display = f"<p>No se encontró el archivo HTML del grafo en: {new_html_file_path}. Revisa los logs del sistema RAG.</p>"
-            else: # No path provided by rag_system.chat_search
+                html_content_for_display = f"<p>No se encontró el archivo HTML del grafo en: {new_html_file_path}. Revisa los logs.</p>"
+            else: # No path provided (e.g., if chat_search had an issue returning a valid path)
                  html_content_for_display = f"<p>No se generó una nueva ruta para el grafo. Mostrando estado anterior o mensaje.</p>"
 
-
-            # 4. Return:
-            #    - updated_history (for chatbot_ui component)
-            #    - html_content_for_display (for html_graph_output component)
-            #    - updated_history (to update chat_history_state)
-            #    - "" (to clear input_text component)
             return updated_history, html_content_for_display, updated_history, ""
 
         # Wire up the input submission
@@ -544,7 +543,7 @@ def main():
             outputs=[chatbot_ui, html_graph_output, chat_history_state, input_text]
         )
 
-    demo.launch()
+    demo.launch(allowed_paths=[rag_system.GRAPH_DOCUMENT_DIRECTORY])
 
 if __name__ == "__main__":
     main()
