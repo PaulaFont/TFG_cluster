@@ -6,15 +6,17 @@ import time
 
 from main import RAGSystem
 
-# Global state for chat history and graph path
-chat_history_global = []
-graph_path_global = None
-
 rag_system = RAGSystem()
 rag_system.initialize_models_and_data()
+HTML_HEIGHT=800
+
+os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
+
 
 GLOBAL_GRAPH_FILENAME = "global_knowledge_graph.html"
 GLOBAL_GRAPH_PATH = None
+
+
 if rag_system.GRAPH_DOCUMENT_DIRECTORY and os.path.isdir(rag_system.GRAPH_DOCUMENT_DIRECTORY):
     GLOBAL_GRAPH_PATH = os.path.join(rag_system.GRAPH_DOCUMENT_DIRECTORY, GLOBAL_GRAPH_FILENAME)
     print(f"Global graph path set to: {GLOBAL_GRAPH_PATH}")
@@ -22,12 +24,15 @@ else:
     print(f"Warning: rag_system.GRAPH_DOCUMENT_DIRECTORY ('{rag_system.GRAPH_DOCUMENT_DIRECTORY}') is not set or not a directory. Global graph feature might not work if the file isn't found or the path isn't allowed.")
     # If GLOBAL_GRAPH_PATH remains None, get_graph_html will show "No hay grafo disponible."
 
+GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html"
 
-def create_new_conversation_entry(name):
+def create_new_conversation_entry(base_name):
+    #TODO: Change name
     """Helper to create a new conversation dictionary."""
+    id_actual = str(uuid.uuid4())
     return {
-        "id": str(uuid.uuid4()),
-        "name": name,
+        "id": id_actual,
+        "name": f"{base_name}_{id_actual}",
         "history": [],
         "graph_path": None
     }
@@ -39,31 +44,16 @@ def get_conversation_by_id(conv_id, conversations_list):
             return conv
     return None
 
-def send_message(user_input, chat_history):
-    """Handle sending a message: show user input first, then process and return response."""
-    if not user_input.strip():
-        return "", chat_history, ""
-
-    # Immediately show user message
-    updated_history = chat_history + [[user_input, None]]
-    yield updated_history, "", ""  # Return chat update and empty graph for now
-
-    # Simulate or run actual RAG search
-    try:
-        bot_response, new_graph_path = rag_system.chat_search(user_input, chat_history)
-    except Exception as e:
-        bot_response = f"Error al procesar la consulta: {str(e)}"
-        new_graph_path = None
-
-    # Update chat with bot response
-    updated_history[-1][1] = bot_response
-    global graph_path_global
-    graph_path_global = new_graph_path
-
-    # Yield updated chat and graph
-    yield updated_history, get_graph_html(new_graph_path), ""
+# Helper function to create Gradio accessible file URLs
+def make_gradio_file_url(file_path):
+    if not file_path or not os.path.exists(file_path):
+        return None
+    abs_path = os.path.abspath(file_path)
+    # Appending a timestamp can help avoid caching issues with Gradio file serving
+    return f"/gradio_api/file={abs_path}?v={time.time()}"
 
 
+# Returns html from a path to an html (GRAPH)
 def get_graph_html(graph_file_path):
     """Return HTML content for displaying the graph"""
     if not graph_file_path or not os.path.exists(graph_file_path):
@@ -73,71 +63,81 @@ def get_graph_html(graph_file_path):
     try:
         import time
         iframe_src = f"/gradio_api/file={abs_path}?v={time.time()}"
-        return f'<iframe src="{iframe_src}" width="100%" height="600px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
+        return f'<iframe src="{iframe_src}" width="100%" height="{HTML_HEIGHT}px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
     except Exception as e:
         return f"<p>Error al cargar el grafo: {str(e)}</p>"
 
 # Gradio UI
-with gr.Blocks(title="Chatbot Histórico con Grafo", theme="default") as demo:
+with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
     # --- State Variables ---
-    initial_conversation = create_new_conversation_entry("Conversación 1")
+    initial_conversation = create_new_conversation_entry("Conversación") # Crea nueva conversación
     all_conversations_state = gr.State([initial_conversation])
     active_conversation_id_state = gr.State(initial_conversation["id"])
     showing_global_graph_state = gr.State(False) # False = current graph, True = global graph
 
-    gr.Markdown("## Chatbot Histórico con Visualización de Conocimiento\nPregunta sobre documentos históricos.")
+    gr.Markdown(
+        "<h1 style='text-align: center;'>Chatbot Histórico con Visualización de Conocimiento</h1>\n<p style='text-align: center;'>Pregunta sobre documentos históricos.</p>",
+        elem_id="title"
+    )
 
     with gr.Row(equal_height=False):
         with gr.Column(scale=1, min_width=250): # Sidebar for conversations
-            gr.Markdown("### Conversaciones")
+            gr.Markdown(
+                "<h3 style='text-align: center; color: #4CAF50;'>Conversaciones</h3>")
             conversation_selector = gr.Radio(
                 label="Selecciona una conversación",
                 choices=[(initial_conversation["name"], initial_conversation["id"])],
                 value=initial_conversation["id"],
                 type="value"
             )
-            new_conv_btn = gr.Button("➕ Nueva Conversación")
+            new_conv_btn = gr.Button("+ Nueva Conversación")
 
         with gr.Column(scale=3): # Main chat area
             chatbot = gr.Chatbot(
-                label="Chat",
-                bubble_full_width=False,
-                height=550
+            label="Chat", #TODO: hide label
+            #bubble_full_width=False, #TODO: check if affects
+            height=HTML_HEIGHT
             )
-            msg_input = gr.Textbox(
-                placeholder="Escribe tu pregunta aquí...",
-                label="Tu Pregunta",
-                show_label=False,
-                lines=2,
-            )
-            send_btn = gr.Button("Enviar")
+            with gr.Row():  # Place input and send button in the same row
+                msg_input = gr.Textbox(
+                    placeholder="Escribe tu pregunta aquí...",
+                    label="Tu Pregunta",
+                    show_label=False,
+                    lines=2,
+                    interactive=True  # Ensure the textbox is interactive
+                )
+                # send_btn = gr.Button("➤", elem_id="send_button", variant="primary", scale=1)  # Smaller scale for button #TODO: Decide to put it or not
 
         with gr.Column(scale=2, min_width=300): # Graph display area
             with gr.Row():
-                gr.Markdown("### Grafo de Conocimiento")
+                gr.Markdown(
+                "<h3 style='text-align: center; color: #4CAF50;'>Grafo de Conocimiento</h3>")
                 toggle_graph_btn = gr.Button("Ver Grafo Global", scale=1)
             graph_output = gr.HTML()
 
 
     # --- Event Handler Functions ---
+    """
+    Changes graph view (current graph or global graph) (changes the button and graph accordingly)
+    """
     def handle_toggle_graph_view(is_currently_showing_global, active_conv_id, all_conversations):
         new_showing_global = not is_currently_showing_global
         button_text = "Ver Grafo Actual" if new_showing_global else "Ver Grafo Global"
         
         graph_html_content = ""
-        if new_showing_global:
+        if new_showing_global: #If we change to showing global, show global
             graph_html_content = get_graph_html(GLOBAL_GRAPH_PATH)
         else:
             active_conv = get_conversation_by_id(active_conv_id, all_conversations)
             if active_conv:
-                graph_html_content = get_graph_html(active_conv["graph_path"])
+                graph_html_content = get_graph_html(active_conv["graph_path"]) #we get graph path and then html
             else: # Fallback if no active conversation somehow
-                graph_html_content = get_graph_html(None)
+                graph_html_content = get_graph_html(None) #empty in case of errors
                 
         return graph_html_content, gr.update(value=button_text), new_showing_global
 
     def handle_new_conversation_click(current_conversations):
-        new_conv_name = f"Conversación {len(current_conversations) + 1}"
+        new_conv_name = f"Conversación"
         new_conv = create_new_conversation_entry(new_conv_name)
         updated_conversations = current_conversations + [new_conv]
         
@@ -209,6 +209,35 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme="default") as demo:
         
         try:
             bot_response, new_graph_path = rag_system.chat_search(user_input, active_conv["history"])
+
+            # Construir la respuesta enriquecida en Markdown
+            markdown_response_parts = [bot_response]
+            context_txt_path = "/data/users/pfont/final_documents/rsc37_rsc176_278_all.txt" #TODO:change, needs to be a return from chat_search
+            if context_txt_path:
+                txt_url = make_gradio_file_url(context_txt_path)
+                if txt_url:
+                    markdown_response_parts.append(f"\n\n**Contexto:** [Ver archivo de texto]({txt_url})")
+            
+            image_doc_paths=["/data/users/pfont/input/rsc37_rsc176_278_0.jpg"] #TODO:change, needs to be a return from chat_search
+            # Añadir imagen(es) del documento si existen
+            if image_doc_paths and len(image_doc_paths) > 0:
+                first_image_path = image_doc_paths[0]
+                first_image_url = make_gradio_file_url(first_image_path)
+                if first_image_url:
+                    # Puedes ajustar el tamaño de la imagen con HTML si es necesario, ej: <img src='...' width='300'/>
+                    markdown_response_parts.append(f"\n\n**Documento (Página 1):**\n![Página 1 del documento]({first_image_url})")
+                
+                if len(image_doc_paths) > 1:
+                    page_links = []
+                    for i, img_path in enumerate(image_doc_paths[1:], start=2):
+                        img_url = make_gradio_file_url(img_path)
+                        if img_url:
+                            page_links.append(f"[Página {i}]({img_url})")
+                    if page_links:
+                        markdown_response_parts.append(f"Otras páginas: " + " ".join(page_links))
+            
+            bot_response = "".join(markdown_response_parts)
+
         except Exception as e:
             bot_response = f"Error al procesar la consulta: {str(e)}"
             new_graph_path = active_conv["graph_path"] # Keep old graph on error
@@ -219,6 +248,8 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme="default") as demo:
         
         # Final yield: bot response, updated graph for current conversation, toggle button reset
         yield active_conv["history"], get_graph_html(active_conv["graph_path"]), "", updated_conversations_list, gr.update(value="Ver Grafo Global"), False
+
+        
 
 
     def load_initial_ui(active_id, conversations):
@@ -253,23 +284,24 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme="default") as demo:
     # and outputs include toggle_graph_btn and showing_global_graph_state.
     # However, on_send_message_submit will always reset to current graph view.
     # The toggle button is the explicit way to view global.
+    # Remove the send button and use the submit event of the textbox for sending messages
     msg_input.submit(
         fn=on_send_message_submit,
         inputs=[msg_input, active_conversation_id_state, all_conversations_state],
         outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
     )
-    send_btn.click(
-        fn=on_send_message_submit,
-        inputs=[msg_input, active_conversation_id_state, all_conversations_state],
-        outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
-    )
+    
+    # send_btn.click(
+    #     fn=on_send_message_submit,
+    #     inputs=[msg_input, active_conversation_id_state, all_conversations_state],
+    #     outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
+    # )
 
     toggle_graph_btn.click(
         fn=handle_toggle_graph_view,
         inputs=[showing_global_graph_state, active_conversation_id_state, all_conversations_state],
         outputs=[graph_output, toggle_graph_btn, showing_global_graph_state]
     )
-
 # Launch app
 if __name__ == "__main__":
     graph_doc_dir = rag_system.GRAPH_DOCUMENT_DIRECTORY
@@ -292,6 +324,7 @@ if __name__ == "__main__":
     # global_graph_dir = os.path.dirname(GLOBAL_GRAPH_PATH)
     # if global_graph_dir not in allowed_paths_list and os.path.isdir(global_graph_dir):
     # allowed_paths_list.append(global_graph_dir)
-    
+    allowed_paths_list.append("/data/users/pfont/final_documents")
+    allowed_paths_list.append("/data/users/pfont/input")
     print(f"Launching Gradio app. Allowed paths for graphs: {allowed_paths_list}")
     demo.launch(allowed_paths=allowed_paths_list, share=False)
