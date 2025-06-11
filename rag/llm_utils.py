@@ -26,7 +26,7 @@ def start_llm_server(model_name: str, port: int, chat_template: str = None):
     print(f"Starting server LLM with model: {model_name}...")
     command = [
         "bash", "-c",
-        f"CUDA_VISIBLE_DEVICES=0,3 vllm serve {model_name} "
+        f"CUDA_VISIBLE_DEVICES=0,1 vllm serve {model_name} "
         "--dtype auto --api-key token-abc123 "
         f"--tensor-parallel-size 2 --enforce-eager --port {port}"
         + (f" --chat-template {chat_template}" if chat_template else "")

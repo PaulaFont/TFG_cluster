@@ -12,11 +12,13 @@ import pandas as pd
 import gradio as gr
 import networkx as nx
 
+os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
+
 PORT=8000
 LLM_HOSTING = f"http://localhost:{PORT}/v1"
 BASE_DIRECTORY = "/data/users/pfont/"
 DOCUMENTS_PATH = "/data/users/pfont/final_documents"
-
+HTML_HEIGHT=800
 
 class RAGSystem:
     """
@@ -481,7 +483,7 @@ def main():
         try:
             abs_html_path = os.path.abspath(current_kg_html_path)
             iframe_src = f"/file={abs_html_path}" 
-            initial_html_display = f'<iframe src="{iframe_src}" width="100%" height="600px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
+            initial_html_display = f'<iframe src="{iframe_src}" width="100%" height="{HTML_HEIGHT}px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
             print(f"Initial graph HTML will be loaded via iframe from: {current_kg_html_path}")
         except Exception as e:
             print(f"Error preparing initial iframe for {current_kg_html_path}: {e}")
@@ -497,13 +499,16 @@ def main():
         chat_history_state = gr.State([])
 
         with gr.Row():
-            with gr.Column(scale=2):
-                chatbot_ui = gr.Chatbot(label="Chat", bubble_full_width=False, height=600)
+            with gr.Column(scale=1):
+                chat_history_ui = gr.Chatbot(label="Historial de Conversaciones", bubble_full_width=False, height=HTML_HEIGHT)
+
+            with gr.Column(scale=3):
+                chatbot_ui = gr.Chatbot(label="Chat", bubble_full_width=False, height=HTML_HEIGHT)
                 input_text = gr.Textbox(placeholder="Escribe tu pregunta aquí...", show_label=False)
 
-            with gr.Column(scale=1):
+            with gr.Column(scale=4):
                 # The HTML component for displaying the knowledge graph
-                html_graph_output = gr.HTML(value=initial_html_content, label="Grafo de Conocimiento Dinámico")
+                html_graph_output = gr.HTML(value=initial_html_content, label="Grafo de Conocimiento Dinámico", min_height=HTML_HEIGHT)
 
         def handle_chat_interaction(user_message, current_chat_history):
             user_message = user_message.strip()
@@ -525,7 +530,7 @@ def main():
                     # Add a timestamp as a query parameter to the iframe src to help bust cache
                     import time
                     iframe_src = f"/gradio_api/file={abs_html_path}?v={time.time()}"
-                    html_content_for_display = f'<iframe src="{iframe_src}" width="100%" height="600px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
+                    html_content_for_display = f'<iframe src="{iframe_src}" width="100%" height="{HTML_HEIGHT}px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
                 except Exception as e:
                     print(f"Error al crear el iframe para el grafo {new_html_file_path}: {e}")
                     html_content_for_display = f"<p>Error al cargar el grafo desde {new_html_file_path}: {e}</p>"
