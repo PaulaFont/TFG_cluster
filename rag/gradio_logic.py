@@ -5,6 +5,7 @@ import os
 import uuid 
 import time 
 from rag_core import RAGSystem
+from pathlib import Path
 
 print("Starting RAG program initialization...")
 rag_system = RAGSystem()
@@ -13,7 +14,7 @@ HTML_HEIGHT=800
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
 
-
+INPUT_FOLDER = "/data/users/pfont/input"
 GLOBAL_GRAPH_FILENAME = "global_knowledge_graph.html"
 GLOBAL_GRAPH_PATH = None
 
@@ -25,6 +26,18 @@ else:
     # If GLOBAL_GRAPH_PATH remains None, get_graph_html will show "No hay grafo disponible."
 
 GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html" #TODO: It's hardcoded
+
+
+def get_images(document_id):
+    folder = Path(INPUT_FOLDER)
+
+    list_images = sorted([
+        str(file)
+        for file in folder.glob(f"rsc37_rsc176_{document_id}_*.jpg")
+        if file.is_file()
+    ])
+    return list_images
+
 
 def create_new_conversation_entry(base_name):
     #TODO: Change name
@@ -233,33 +246,33 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         yield active_conv["history"], get_graph_html(active_conv["graph_path"]), "", updated_conversations_list, gr.update(value="Ver Grafo Global"), False
         
         try:
-            bot_response, new_graph_path = rag_system.chat_search(user_input, active_conv["history"], conversation_id=active_conv_id)
+            answer_info, new_graph_path = rag_system.chat_search(user_input, active_conv["history"], conversation_id=active_conv_id)
+            #To recuperate images and show
+            context_text = answer_info.get("text", None) 
 
             # Construir la respuesta enriquecida en Markdown
-            markdown_response_parts = [bot_response]
-            context_txt_path = "/data/users/pfont/final_documents/rsc37_rsc176_278_all.txt" #TODO:change, needs to be a return from chat_search
-            if context_txt_path:
-                txt_url = make_gradio_file_url(context_txt_path)
-                if txt_url:
-                    markdown_response_parts.append(f'\n\n**Contexto:** <a href="{txt_url}" target="_blank">Ver archivo de texto</a>')
-            
-            image_doc_paths=["/data/users/pfont/input/rsc37_rsc176_278_0.jpg",
-            "/data/users/pfont/input/rsc37_rsc176_278_0.jpg",
-            "/data/users/pfont/input/rsc37_rsc176_278_0.jpg"] 
+            markdown_response_parts = ["".join(answer_info['llm_answer'])]
            
-            #TODO:change, needs to be a return from chat_search
-            # Añadir imagen(es) del documento si existen
-            if image_doc_paths and len(image_doc_paths) > 0:
-                markdown_response_parts.append("\n\n**Documento:**")
-                markdown_response_parts.append('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-items: center; max-width: 100%; overflow-x: auto;">')  # Start a flex container for images
-                for i, img_path in enumerate(image_doc_paths, start=1):
-                    img_url = make_gradio_file_url(img_path)
-                    if img_url:
-                        # Mostrar todas las imágenes del documento en línea con enlaces para abrir en otra pestaña
-                        markdown_response_parts.append(
-                            f'''<a href="{img_url}" class="image-wrapper" target="_blank" style="flex-shrink: 0;"><img class="hover-image" onmouseover="this.style.transform='scale(4)'" onmouseout="this.style.transform='scale(1)'" src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: contain; display: block;"/></a>''')
+            if context_text:
+                markdown_response_parts.append(
+                    f'\n\n**Contexto:**\n<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #f9f9f9; color: #333;">{context_text}</div>'
+                )
 
-                markdown_response_parts.append("</div>")  # Close the flex container
+                markdown_response_parts.append(f"\nContexto recuperado del documento {answer_info['filename']} utilizando la versión {answer_info['processing_version']}")
+                
+                image_doc_paths = get_images(str(answer_info["id"]))
+                
+                if image_doc_paths and len(image_doc_paths) > 0:
+                    markdown_response_parts.append("\n\n**Documento:**")
+                    markdown_response_parts.append('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-items: center; max-width: 100%; overflow-x: auto;">')  # Start a flex container for images
+                    for i, img_path in enumerate(image_doc_paths, start=1):
+                        img_url = make_gradio_file_url(img_path)
+                        if img_url:
+                            # Mostrar todas las imágenes del documento en línea con enlaces para abrir en otra pestaña
+                            markdown_response_parts.append(
+                                f'''<a href="{img_url}" target="_blank" style="flex-shrink: 0;"><img onmouseover="this.style.transform='scale(4)'" onmouseout="this.style.transform='scale(1)'" src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: contain; display: block;"/></a>''')
+
+                    markdown_response_parts.append("</div>")  # Close the flex container
             
             bot_response = "".join(markdown_response_parts)
 

@@ -45,7 +45,7 @@ def create_passages(document_directory=DOCUMENTS_PATH, min_words_per_paragraph =
             #Gather information from filename
             name = filename.replace(".txt", "")
             key = filename.split("_")[-1] #key
-            doc_id = filename.split("_")[-2] #key
+            doc_id = filename.split("_")[2] #key
 
             with open(filepath, 'r', encoding='utf8') as file:
                 content = file.read()

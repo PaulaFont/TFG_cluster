@@ -290,11 +290,13 @@ class RAGSystem:
     def chat_search(self, message, history, conversation_id=None):
         html_path_for_graph = None 
         response_parts = []
+        return_info = {}
 
         # Make sure everything is loaded
         if not self.is_initialized():
             response_parts.append("Error: Modelos o datos no inicializados. Revisa la consola.")
-            return "\n".join(response_parts), html_path_for_graph # Return current/last known path
+            return_info["llm_answer"] = response_parts
+            return return_info, html_path_for_graph # Return current/last known path
 
         # MANAGE CHANGING THE GRAPH INSTANCE TO THE ONE FOR THE CONVERSATION
         if conversation_id:
@@ -308,11 +310,11 @@ class RAGSystem:
             print(f"No conversation_id in chat_search, loaded default graph. Nodes: {len(self.knowledge_graph_instance.nodes)}, Edges: {len(self.knowledge_graph_instance.edges)}")
         # --- END: Load conversation-specific graph ---
 
-
         user_query = message.strip()
         if not user_query:
             response_parts.append("Introduce una consulta.")
-            return "\n".join(response_parts), html_path_for_graph # Return current/last known path
+            return_info["llm_answer"] = response_parts
+            return return_info, html_path_for_graph # Return current/last known path
 
         # Stage 1: Query Analysis
         analyzed_query_dict = self.analyze_query_with_llm(user_query)
@@ -327,7 +329,7 @@ class RAGSystem:
         )))
         keywords_display_str = ", ".join(keywords_display_list) if keywords_display_list else "ninguna palabra clave específica"
         
-        response_parts.append(f"Buscando: {{{user_query_mejorado}, [{keywords_display_str}]}}\n")
+        response_parts.append(f"\n\n**Buscando:** \{{{user_query_mejorado}, [{keywords_display_str}]}}\n")
         response_parts.append("")
 
         # Stage 2: Retrieval
@@ -389,9 +391,12 @@ class RAGSystem:
             full_text = self.load_full_document_by_details(fname, p_version)
             if full_text:
                 full_document_for_llm_data = {'filename': fname, 'processing_version': p_version, 'text': full_text}
+                return_info = full_document_for_llm_data
+                return_info["id"] = top_conceptual_id_for_full_doc
                 print(f"Loaded full text: {fname} (V: {p_version})")
             else: 
                 print(f"Failed to load full text: {fname} (V: {p_version})")
+        
                 
         # Stage 4: Generate LLM Answer
         llm_answer = self.generate_answer_with_llm(
@@ -400,12 +405,13 @@ class RAGSystem:
         )
         # Is there context? Returns "0" when there is no satisfactory answer. 
         if llm_answer == "0":
+            print("LLM returned '0'")
             llm_answer = "No se ha encontrado contexto suficientemente relevante para contestar esta pregunta."
             self.RAG_ANSWER = False
         else: 
             self.RAG_ANSWER = True
 
-        response_parts.append(f"Respuesta: {llm_answer}\n")
+        response_parts.append(f"\n\n**Respuesta:**\n {llm_answer}\n")
 
         # Generate triples to graph
         if self.RAG_ANSWER: # Only add triplets if there is an answer
@@ -415,20 +421,12 @@ class RAGSystem:
             # else: html_path_for_graph remains None, Gradio mostrará "No hay grafo"
 
         # Stage 5: Full Transparency Output
-        response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
         
-        if full_document_for_llm_data: #TODO: Make it more clear
-            response_parts.append("\nDOCUMENTO COMPLETO PRINCIPAL:")
-            response_parts.append(f"  Archivo: {full_document_for_llm_data['filename']}")
-            response_parts.append(f"  Versión de Procesamiento: {full_document_for_llm_data['processing_version']}")        
-            response_parts.append(f"  Contenido:\n{full_document_for_llm_data['text']}")
-        else:
+        if not full_document_for_llm_data: 
             response_parts.append("\nNo se utilizó un documento completo principal. Reescribir la pregunta")
-        
-        if not full_document_for_llm_data and not additional_chunks_for_llm_data:
-            response_parts.append("\n(No se proporcionó contexto específico al LLM para esta respuesta, o la recuperación falló).")
 
-        return "\n".join(response_parts), html_path_for_graph
+        return_info["llm_answer"] = response_parts
+        return return_info, html_path_for_graph
 
     def answer_to_graph(self, llm_answer, conversation_id=None):
         """Add answer information to knowledge graph"""

@@ -29,7 +29,9 @@ def filter_triplet(triplet):
         "el documento", 
         "el contexto",
         "documento",
-        "proporciona"
+        "proporciona",
+        "la respuesta es",
+        '"0"'
     ]
 
     for element in triplet:
