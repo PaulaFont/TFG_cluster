@@ -1,4 +1,5 @@
 import gradio as gr
+from gradio_modal import Modal
 from datetime import datetime
 import os
 import uuid 
@@ -73,7 +74,32 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
     all_conversations_state = gr.State([initial_conversation])
     active_conversation_id_state = gr.State(initial_conversation["id"])
     showing_global_graph_state = gr.State(False) # False = current graph, True = global graph
+    gr.HTML("""
+        <style>
+            .image-wrapper {
+                position: relative;
+                display: inline-block;
+                overflow: visible;
+            }
 
+            .hover-image {
+                width: 80px;
+                height: auto;
+                object-fit: contain;
+                display: block;
+                transition: transform 0.2s ease, z-index 0.2s ease;
+                z-index: 1;
+            }
+
+            .image-wrapper:hover .hover-image {
+                position: absolute;
+                transform: scale(2); /* Ajusta el zoom */
+                z-index: 10;
+                background: white;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            }
+        </style>
+    """)
     gr.Markdown(
         "<h1 style='text-align: center;'>Chatbot Histórico con Visualización de Conocimiento</h1>\n<p style='text-align: center;'>Pregunta sobre documentos históricos.</p>",
         elem_id="title"
@@ -91,11 +117,11 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             )
             new_conv_btn = gr.Button("+ Nueva Conversación")
 
-        with gr.Column(scale=3): # Main chat area
+        with gr.Column(scale=3): 
             chatbot = gr.Chatbot(
-            label="Chat", #TODO: hide label
-            #bubble_full_width=False, #TODO: check if affects
-            height=HTML_HEIGHT
+                label="Chat", 
+                show_label=False,
+                height=HTML_HEIGHT
             )
             with gr.Row():  # Place input and send button in the same row
                 msg_input = gr.Textbox(
@@ -231,7 +257,8 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                     if img_url:
                         # Mostrar todas las imágenes del documento en línea con enlaces para abrir en otra pestaña
                         markdown_response_parts.append(
-                            f'<a href="{img_url}" target="_blank" style="flex-shrink: 0;"><img src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: cover; display: block;"/></a>')
+                            f'''<a href="{img_url}" class="image-wrapper" target="_blank" style="flex-shrink: 0;"><img class="hover-image" onmouseover="this.style.transform='scale(4)'" onmouseout="this.style.transform='scale(1)'" src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: contain; display: block;"/></a>''')
+
                 markdown_response_parts.append("</div>")  # Close the flex container
             
             bot_response = "".join(markdown_response_parts)
