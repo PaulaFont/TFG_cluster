@@ -7,9 +7,6 @@ from pyvis.network import Network as PyvisNetwork # Alias to avoid confusion wit
 import json
 from graph_utils import filter_and_fix_triplets
 
-GRAPH_DIRECTORY = "/data/users/pfont/graph/"
-KG_FILENAME = "online_knowledge_graph_tests.pkl" 
-
 # --- Function to save the knowledge graph ---
 def save_knowledge_graph(graph, filepath):
     try:
@@ -94,7 +91,7 @@ def extract_triplets(text_content, client, model="microsoft/phi-4"):
 
     return extracted_triples
 
-def add_triplets(current_graph, extracted_triples, base_doc_dir_for_saving):
+def add_triplets(current_graph, extracted_triples, filepath):
     knowledge_graph = current_graph
     if extracted_triples:
         print(f"Extracted {len(extracted_triples)} triples.")
@@ -111,17 +108,15 @@ def add_triplets(current_graph, extracted_triples, base_doc_dir_for_saving):
             print(f"Added {new_triples_added} new unique triples to the knowledge graph.")
             print(f"KG now has {len(knowledge_graph.nodes)} nodes and {len(knowledge_graph.edges)} edges.")
             # Saving the graph
-            kg_path = os.path.join(base_doc_dir_for_saving, KG_FILENAME)
-            save_knowledge_graph(knowledge_graph, kg_path)
+            save_knowledge_graph(knowledge_graph, filepath)
             return True
     else:
         print("No valid triples parsed from LLM response.")
     return False
 
-def update_graph(text_content, current_graph, client, model="microsoft/phi-4", base_doc_dir_for_saving=KG_FILENAME): 
+def update_graph(text_content, current_graph, client, filepath, model="microsoft/phi-4"): 
     initial_triplets = extract_triplets(text_content, client, model)
     new_triplets = filter_and_fix_triplets(current_graph, initial_triplets)
-    filepath = os.path.join(GRAPH_DIRECTORY, base_doc_dir_for_saving)
     add_triplets(current_graph, new_triplets, filepath) # Adds processed triplets and saves graph
     return current_graph
 

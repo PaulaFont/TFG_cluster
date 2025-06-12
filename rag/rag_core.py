@@ -20,6 +20,7 @@ BASE_DIRECTORY = "/data/users/pfont/"
 DOCUMENTS_PATH = "/data/users/pfont/final_documents"
 HTML_HEIGHT=800
 
+
 class RAGSystem:
     """
     A class to encapsulate all RAG system state and functionality.
@@ -31,20 +32,21 @@ class RAGSystem:
         # Configuration
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
         self.GRAPH_DOCUMENT_DIRECTORY = os.path.realpath(graph_document_directory or os.path.join(base_document_directory, "graph/"))
-        
+        self.GRAPH_DIRECTORY_ID = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, "graph_ids/")
         self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_2.pt" # Saved in /data
         self.SAVED_PASSAGES_DATA = "passages_data.json"  # Saved locally
         self.LLM_MODEL_NAME = "microsoft/phi-4"
-        self.GRAPH_FILENAME = "online_knowledge_graph"
+        self.GRAPH_FILENAME_BASE = "online_graph"
         self.BI_ENCODER_NAME="msmarco-bert-base-dot-v5"
         self.CROSS_ENCODER_NAME='cross-encoder/ms-marco-MiniLM-L6-v2'
         
         # Create directories
         os.makedirs(self.GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
+        os.makedirs(self.GRAPH_DIRECTORY_ID, exist_ok=True)
         if not os.path.exists(self.BASE_DOCUMENT_DIRECTORY):
             print(f"WARNING: BASE_DOCUMENT_DIRECTORY '{self.BASE_DOCUMENT_DIRECTORY}' does not exist.")
         
-        # State variables (previously globals)
+        # State variables
         self.passages_data = []
         self.bi_encoder_model = None
         self.cross_encoder_model = None
@@ -72,7 +74,7 @@ class RAGSystem:
         passages_filename = self.SAVED_PASSAGES_DATA if not passages_filename else passages_filename
         
         # GRAPH
-        kg_filepath = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, self.GRAPH_FILENAME + ".pkl")
+        kg_filepath = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, self.GRAPH_FILENAME_BASE + ".pkl")
         self.knowledge_graph_instance = load_knowledge_graph(kg_filepath)
 
         # LLM
@@ -285,15 +287,27 @@ class RAGSystem:
         
         return sorted(list(set(search_terms))) if search_terms else []
 
-    def chat_search(self, message, history):
-        html_path_for_graph = self.html_file_path
-
+    def chat_search(self, message, history, conversation_id=None):
+        html_path_for_graph = None 
         response_parts = []
 
         # Make sure everything is loaded
         if not self.is_initialized():
             response_parts.append("Error: Modelos o datos no inicializados. Revisa la consola.")
             return "\n".join(response_parts), html_path_for_graph # Return current/last known path
+
+        # MANAGE CHANGING THE GRAPH INSTANCE TO THE ONE FOR THE CONVERSATION
+        if conversation_id:
+            conv_graph_pkl_filename = f"{self.GRAPH_FILENAME_BASE}_{conversation_id}.pkl"
+            conv_graph_path = os.path.join(self.GRAPH_DIRECTORY_ID, conv_graph_pkl_filename)
+            self.knowledge_graph_instance = load_knowledge_graph(conv_graph_path) # load_knowledge_graph is from graph_logic
+            print(f"Loaded graph for conversation {conversation_id} from {conv_graph_path}. Nodes: {len(self.knowledge_graph_instance.nodes)}, Edges: {len(self.knowledge_graph_instance.edges)}")
+        else:
+            default_graph_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, self.GRAPH_FILENAME_BASE + ".pkl")
+            self.knowledge_graph_instance = load_knowledge_graph(default_graph_path)
+            print(f"No conversation_id in chat_search, loaded default graph. Nodes: {len(self.knowledge_graph_instance.nodes)}, Edges: {len(self.knowledge_graph_instance.edges)}")
+        # --- END: Load conversation-specific graph ---
+
 
         user_query = message.strip()
         if not user_query:
@@ -395,9 +409,10 @@ class RAGSystem:
 
         # Generate triples to graph
         if self.RAG_ANSWER: # Only add triplets if there is an answer
-            newly_generated_html_path = self.answer_to_graph(llm_answer)
+            newly_generated_html_path = self.answer_to_graph(llm_answer, conversation_id=conversation_id) # PASAR conversation_id
             if newly_generated_html_path and os.path.exists(newly_generated_html_path):
                  html_path_for_graph = newly_generated_html_path
+            # else: html_path_for_graph remains None, Gradio mostrará "No hay grafo"
 
         # Stage 5: Full Transparency Output
         response_parts.append("--- CONTEXTO UTILIZADO PARA GENERAR LA RESPUESTA ---")
@@ -415,25 +430,31 @@ class RAGSystem:
 
         return "\n".join(response_parts), html_path_for_graph
 
-    def answer_to_graph(self, llm_answer):
+    def answer_to_graph(self, llm_answer, conversation_id=None):
         """Add answer information to knowledge graph"""
         print(f"Initial KG: {len(self.knowledge_graph_instance.nodes)} nodes, {len(self.knowledge_graph_instance.edges)} edges")
+
+        graph_file_suffix = f"_{conversation_id}" if conversation_id else ""
+        current_graph_filename_prefix = f"{self.GRAPH_FILENAME_BASE}{graph_file_suffix}"
+
+        #PKL FILEPATH:
+        filepath = os.path.join(self.GRAPH_DIRECTORY_ID, f"{current_graph_filename_prefix}.pkl")
 
         # Extract triples, process them and save new graph
         self.knowledge_graph_instance = update_graph( 
             text_content=llm_answer,
             current_graph=self.knowledge_graph_instance,
             client=self.llm_client_instance,
+            filepath=filepath,
             model=self.LLM_MODEL_NAME,
-            base_doc_dir_for_saving=self.GRAPH_DOCUMENT_DIRECTORY
         )
 
         # Save in HTML
         new_html_file_path = visualize_knowledge_graph(
             graph=self.knowledge_graph_instance,
             output_format="html",
-            filename_prefix=self.GRAPH_FILENAME,
-            output_directory=self.GRAPH_DOCUMENT_DIRECTORY, 
+            filename_prefix=current_graph_filename_prefix,
+            output_directory=self.GRAPH_DIRECTORY_ID, 
             show_in_browser_html=False,
             default_node_color="#A0A0A0",
             default_edge_color="#C0C0C0", 
@@ -441,12 +462,11 @@ class RAGSystem:
 
         if new_html_file_path and os.path.exists(new_html_file_path):
             print(f"Generated HTML at: {new_html_file_path}")
-            self.html_file_path = new_html_file_path # Update the instance's path
+            # self.html_file_path ya no se actualiza aquí globalmente, se devuelve la ruta específica
             return new_html_file_path
         else:
-            print(f"Failed to generate or find HTML at: {new_html_file_path}. Returning previous path: {self.html_file_path}")
-            return self.html_file_path # Return last known good path if new one fails
-
+            print(f"Failed to generate or find HTML at: {new_html_file_path}. Returning None.")
+            return None # Devolver None si la generación falla
 
     def is_initialized(self):
         """Check if the system is properly initialized"""
@@ -457,98 +477,3 @@ class RAGSystem:
             self.corpus_embeddings_tensor is not None
         ])
 
-
-def main():
-    print("Starting RAG program initialization...")
-    
-    # Create RAG system instance
-    rag_system = RAGSystem()
-    
-    # Initialize the system
-    try:
-        rag_system.initialize_models_and_data()
-    except Exception as e:
-        print(f"Critical error during initialization: {e}")
-        return
-
-    if not rag_system.is_initialized():
-        print("Critical error during initialization. Exiting.")
-        return
-        
-    # Launch Gradio interface
-    current_kg_html_path = rag_system.html_file_path
-    initial_html_content = "<p>El grafo de conocimiento aparecerá aquí después de la primera consulta.</p>"
-
-    if current_kg_html_path and os.path.exists(current_kg_html_path):
-        try:
-            abs_html_path = os.path.abspath(current_kg_html_path)
-            iframe_src = f"/file={abs_html_path}" 
-            initial_html_display = f'<iframe src="{iframe_src}" width="100%" height="{HTML_HEIGHT}px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
-            print(f"Initial graph HTML will be loaded via iframe from: {current_kg_html_path}")
-        except Exception as e:
-            print(f"Error preparing initial iframe for {current_kg_html_path}: {e}")
-            # initial_html_display remains the default message
-    else:
-        print(f"No se encontró el archivo HTML del grafo inicial en '{current_kg_html_path}' o la ruta es None. Se mostrará un mensaje predeterminado.")
-
-    print("Models and data loaded. Launching Gradio interface...")
-    
-    with gr.Blocks() as demo:
-        gr.Markdown("# Chatbot Histórico \nPregunta sobre documentos históricos. Las preguntas deben limitarse a consultas sobre personas o eventos especificos. Se mostrará todo el contexto usado para la respuesta.")
-        # State to store the chat history. For 'tuples' format: List[List[str, str]]
-        chat_history_state = gr.State([])
-
-        with gr.Row():
-            with gr.Column(scale=1):
-                chat_history_ui = gr.Chatbot(label="Historial de Conversaciones", bubble_full_width=False, height=HTML_HEIGHT)
-
-            with gr.Column(scale=3):
-                chatbot_ui = gr.Chatbot(label="Chat", bubble_full_width=False, height=HTML_HEIGHT)
-                input_text = gr.Textbox(placeholder="Escribe tu pregunta aquí...", show_label=False)
-
-            with gr.Column(scale=4):
-                # The HTML component for displaying the knowledge graph
-                html_graph_output = gr.HTML(value=initial_html_content, label="Grafo de Conocimiento Dinámico", min_height=HTML_HEIGHT)
-
-        def handle_chat_interaction(user_message, current_chat_history):
-            user_message = user_message.strip()
-            if not user_message:
-                # If input is empty, skip updating chatbot and HTML graph, just clear input text
-                return current_chat_history, gr.skip(), current_chat_history, ""
-
-            # 1. Get bot response and new HTML path from RAG system
-            bot_response_string, new_html_file_path = rag_system.chat_search(user_message, current_chat_history)
-
-            # 2. Update chat history
-            updated_history = current_chat_history + [[user_message, bot_response_string]]
-
-            # 3. Load HTML content for display
-            html_content_for_display = initial_html_display # Fallback to initial display
-            if new_html_file_path and os.path.exists(new_html_file_path):
-                try:
-                    abs_html_path = os.path.abspath(new_html_file_path)
-                    # Add a timestamp as a query parameter to the iframe src to help bust cache
-                    import time
-                    iframe_src = f"/gradio_api/file={abs_html_path}?v={time.time()}"
-                    html_content_for_display = f'<iframe src="{iframe_src}" width="100%" height="{HTML_HEIGHT}px" style="border:none;" sandbox="allow-scripts allow-same-origin"></iframe>'
-                except Exception as e:
-                    print(f"Error al crear el iframe para el grafo {new_html_file_path}: {e}")
-                    html_content_for_display = f"<p>Error al cargar el grafo desde {new_html_file_path}: {e}</p>"
-            elif new_html_file_path: # Path provided, but file does not exist
-                html_content_for_display = f"<p>No se encontró el archivo HTML del grafo en: {new_html_file_path}. Revisa los logs.</p>"
-            else: # No path provided (e.g., if chat_search had an issue returning a valid path)
-                 html_content_for_display = f"<p>No se generó una nueva ruta para el grafo. Mostrando estado anterior o mensaje.</p>"
-
-            return updated_history, html_content_for_display, updated_history, ""
-
-        # Wire up the input submission
-        input_text.submit(
-            fn=handle_chat_interaction,
-            inputs=[input_text, chat_history_state],
-            outputs=[chatbot_ui, html_graph_output, chat_history_state, input_text]
-        )
-
-    demo.launch(allowed_paths=[rag_system.GRAPH_DOCUMENT_DIRECTORY])
-
-if __name__ == "__main__":
-    main()

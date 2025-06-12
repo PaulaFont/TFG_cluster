@@ -3,9 +3,9 @@ from datetime import datetime
 import os
 import uuid 
 import time 
+from rag_core import RAGSystem
 
-from main import RAGSystem
-
+print("Starting RAG program initialization...")
 rag_system = RAGSystem()
 rag_system.initialize_models_and_data()
 HTML_HEIGHT=800
@@ -16,7 +16,6 @@ os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
 GLOBAL_GRAPH_FILENAME = "global_knowledge_graph.html"
 GLOBAL_GRAPH_PATH = None
 
-
 if rag_system.GRAPH_DOCUMENT_DIRECTORY and os.path.isdir(rag_system.GRAPH_DOCUMENT_DIRECTORY):
     GLOBAL_GRAPH_PATH = os.path.join(rag_system.GRAPH_DOCUMENT_DIRECTORY, GLOBAL_GRAPH_FILENAME)
     print(f"Global graph path set to: {GLOBAL_GRAPH_PATH}")
@@ -24,7 +23,7 @@ else:
     print(f"Warning: rag_system.GRAPH_DOCUMENT_DIRECTORY ('{rag_system.GRAPH_DOCUMENT_DIRECTORY}') is not set or not a directory. Global graph feature might not work if the file isn't found or the path isn't allowed.")
     # If GLOBAL_GRAPH_PATH remains None, get_graph_html will show "No hay grafo disponible."
 
-GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html"
+GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html" #TODO: It's hardcoded
 
 def create_new_conversation_entry(base_name):
     #TODO: Change name
@@ -208,7 +207,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         yield active_conv["history"], get_graph_html(active_conv["graph_path"]), "", updated_conversations_list, gr.update(value="Ver Grafo Global"), False
         
         try:
-            bot_response, new_graph_path = rag_system.chat_search(user_input, active_conv["history"])
+            bot_response, new_graph_path = rag_system.chat_search(user_input, active_conv["history"], conversation_id=active_conv_id)
 
             # Construir la respuesta enriquecida en Markdown
             markdown_response_parts = [bot_response]
@@ -216,25 +215,24 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             if context_txt_path:
                 txt_url = make_gradio_file_url(context_txt_path)
                 if txt_url:
-                    markdown_response_parts.append(f"\n\n**Contexto:** [Ver archivo de texto]({txt_url})")
+                    markdown_response_parts.append(f'\n\n**Contexto:** <a href="{txt_url}" target="_blank">Ver archivo de texto</a>')
             
-            image_doc_paths=["/data/users/pfont/input/rsc37_rsc176_278_0.jpg"] #TODO:change, needs to be a return from chat_search
+            image_doc_paths=["/data/users/pfont/input/rsc37_rsc176_278_0.jpg",
+            "/data/users/pfont/input/rsc37_rsc176_278_0.jpg",
+            "/data/users/pfont/input/rsc37_rsc176_278_0.jpg"] 
+           
+            #TODO:change, needs to be a return from chat_search
             # Añadir imagen(es) del documento si existen
             if image_doc_paths and len(image_doc_paths) > 0:
-                first_image_path = image_doc_paths[0]
-                first_image_url = make_gradio_file_url(first_image_path)
-                if first_image_url:
-                    # Puedes ajustar el tamaño de la imagen con HTML si es necesario, ej: <img src='...' width='300'/>
-                    markdown_response_parts.append(f"\n\n**Documento (Página 1):**\n![Página 1 del documento]({first_image_url})")
-                
-                if len(image_doc_paths) > 1:
-                    page_links = []
-                    for i, img_path in enumerate(image_doc_paths[1:], start=2):
-                        img_url = make_gradio_file_url(img_path)
-                        if img_url:
-                            page_links.append(f"[Página {i}]({img_url})")
-                    if page_links:
-                        markdown_response_parts.append(f"Otras páginas: " + " ".join(page_links))
+                markdown_response_parts.append("\n\n**Documento:**")
+                markdown_response_parts.append('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-items: center; max-width: 100%; overflow-x: auto;">')  # Start a flex container for images
+                for i, img_path in enumerate(image_doc_paths, start=1):
+                    img_url = make_gradio_file_url(img_path)
+                    if img_url:
+                        # Mostrar todas las imágenes del documento en línea con enlaces para abrir en otra pestaña
+                        markdown_response_parts.append(
+                            f'<a href="{img_url}" target="_blank" style="flex-shrink: 0;"><img src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: cover; display: block;"/></a>')
+                markdown_response_parts.append("</div>")  # Close the flex container
             
             bot_response = "".join(markdown_response_parts)
 
@@ -248,8 +246,6 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         
         # Final yield: bot response, updated graph for current conversation, toggle button reset
         yield active_conv["history"], get_graph_html(active_conv["graph_path"]), "", updated_conversations_list, gr.update(value="Ver Grafo Global"), False
-
-        
 
 
     def load_initial_ui(active_id, conversations):
