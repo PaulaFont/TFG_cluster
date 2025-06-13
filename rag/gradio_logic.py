@@ -6,6 +6,7 @@ import uuid
 import time 
 from rag_core import RAGSystem
 from pathlib import Path
+import html
 
 print("Starting RAG program initialization...")
 rag_system = RAGSystem()
@@ -27,6 +28,13 @@ else:
 
 GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html" #TODO: It's hardcoded
 
+def clean_text_context(text):
+    # We convert some characters to HTML to improve visualization
+    context_text = html.escape(text)
+    context = context_text.replace('*', '&#42;') 
+    context = context.replace('-', '&#45;')   
+    context = context.replace('\n', '&#10;')
+    return context
 
 def get_images(document_id):
     folder = Path(INPUT_FOLDER)
@@ -255,10 +263,10 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
            
             if context_text:
                 markdown_response_parts.append(
-                    f'\n\n**Contexto:**\n<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #f9f9f9; color: #333;">{context_text}</div>'
+                    f'\n\n**Contexto:**\n <pre style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;">{clean_text_context(context_text)}</pre>'
                 )
 
-                markdown_response_parts.append(f"\nContexto recuperado del documento {answer_info['filename']} utilizando la versión {answer_info['processing_version']}")
+                markdown_response_parts.append(f"\n*Contexto recuperado del documento {answer_info['id']} utilizando la versión {answer_info['processing_version']}*")
                 
                 image_doc_paths = get_images(str(answer_info["id"]))
                 

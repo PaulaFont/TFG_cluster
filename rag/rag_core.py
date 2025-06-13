@@ -430,7 +430,7 @@ class RAGSystem:
                 full_document_for_llm_data = {'filename': fname, 'processing_version': p_version, 'text': full_text}
                 return_info = full_document_for_llm_data
                 return_info["id"] = top_conceptual_id_for_full_doc
-                print(f"Loaded full text: {fname} (V: {p_version})")
+                print(f"Loaded full text from document: {top_conceptual_id_for_full_doc}")
             else: 
                 print(f"Failed to load full text: {fname} (V: {p_version})")
         
