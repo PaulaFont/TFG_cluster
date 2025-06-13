@@ -154,14 +154,9 @@ def evaluate_all_transcriptions():
     visualize_summary_by_key(csv_file)
 
 
-def main(args):    
-    """input_folder = args.output_binary_1 + '_hisam' + '_inverted'
-    apply_layout_module(args, input_folder, layout_analysis = False)
-    tesseract_merge_all(input_folder, args)
-    apply_llm(input_folder, args)
-    evaluate_all_transcriptions()"""
-    harmonized_folder="/data/users/pfont/out_harmonized_ocr/"
-    filename_json="llm_versions.json"
+def main_harmonized(args):    
+    harmonized_folder="/data/users/pfont/final_documents"
+    
     # Start LLM server
     start_llm_server(args.model_name, port=8000)
     client = OpenAI(
@@ -201,9 +196,60 @@ def main(args):
     # Save with new data
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data_dict, f, ensure_ascii=False, indent=2)
+    
 
-    
-    
+def main_final(args):    
+    if not os.path.exists(args.output_final):
+        os.makedirs(args.output_final)
+
+    # Start LLM server
+    start_llm_server(args.model_name, port=8000)
+    client = OpenAI(
+        base_url="http://localhost:8000/v1",
+        api_key="token-abc123"
+    )
+    system_prompt = "Eres un asistente de edición preciso, especializado en la consolidación de documentos históricos, específicamente sentencias de la Guerra Civil Española. Tu tarea es fusionar EQUITATIVAMENTE tres versiones de un texto en castellano, corrigiendo errores, eliminando redundancias y mejorando la legibilidad del formato, pero sin alterar la redacción original ni añadir información externa. Devuelve solo el texto final."
+
+    indexes = []
+    final_folder="/data/users/pfont/final_documents"
+    for filename in os.listdir(final_folder):
+        file_path = os.path.join(final_folder, filename)
+        if os.path.isfile(file_path):
+            index = filename.split("_")[2]
+            if index not in indexes:
+                indexes.append(index)
+                print(f"Processing file id: {index}")
+                base_filename = "_".join(filename.split("_")[0:3])
+                file_paths = {
+                    "general": os.path.join(final_folder, base_filename + "_all.txt"),
+                    "layout": os.path.join(final_folder, base_filename + "_layout.txt"),
+                    "no_layout": os.path.join(final_folder, base_filename + "_no_layout.txt"),
+                }
+                file_contents = {key: open(path, "r", encoding="utf-8").read() for key, path in file_paths.items()}
+
+                # PROMPT: 
+                prompt = f"""
+                Fusiona y pule las siguientes tres versiones de texto:
+
+                INSTRUCCIONES:
+                1.  Unifica las tres versiones en un solo texto. Si hay dudas/variaciones entre versiones, usa el contexto (sentencias Guerra Civil Española) para elegir la opción más coherente de entre las opciones provistas. MUY IMPORTANTE: NUNCA añadas información, nombres o detalles que no estén en los textos originales.
+                2.  Corrige errores ortográficos y gramaticales.
+                3.  Asegura la legibilidad en el formato: Elimina caracteres decorativos o de formato innecesarios (ej. asteriscos * usados como separadores) presentes en los textos originales. Asegura saltos de línea lógicos. 
+                4.  Elimina repeticiones obvias de palabras o frases.
+                5.  **CRÍTICO: NO ALTERES LA REDACCIÓN ORIGINAL.** No reordenes palabras, no cambies frases, no resumas. Solo aplica los puntos 2, 3 y 4.
+                6.  Usa solo la información de los textos. No añadas nada nuevo.
+                7.  Respuesta: ÚNICAMENTE el texto final, sin explicaciones.
+
+                VERSIONES:
+                General version: {file_contents["general"]}
+                Version with layout: {file_contents["layout"]}
+                Version without layout: {file_contents["no_layout"]}
+                """
+                final_text = query_llm(client, "microsoft/phi-4", prompt, system_prompt, temperature = 0)
+                filename = base_filename + ".txt"
+                # Save with new data
+                save_final_output(final_text, filename, args.output_final)
+                 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -217,9 +263,10 @@ if __name__ == "__main__":
     parser.add_argument("--output_surya", type=str, default="/data/users/pfont/layout_data")
     parser.add_argument("--output_folder_llm", type=str, default="/data/users/pfont/out_llm", help="Folder path containing the output files after LLM")
     parser.add_argument("--output_transcriptions", type=str, default="/data/users/pfont/out_transcription", help="Folder path containing the output files after LLM")
+    parser.add_argument("--output_final", type=str, default="/data/users/pfont/processed_final", help="Folder path containing the final files")
     parser.add_argument("--model_name", type=str, default="microsoft/phi-4", help="LLM model name")
     args = parser.parse_args()
 
-    main(args)
+    main_final(args)
 
 

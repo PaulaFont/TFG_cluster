@@ -2,6 +2,7 @@ import os
 import requests
 import time
 import subprocess
+from openai import OpenAI
 
 HF_CACHE_DIR = "/data/users/pfont/models" 
 
@@ -60,7 +61,7 @@ def end_llm_server():
     os.system("screen -XS llm_server quit")
     print("Experiment completed.")
 
-def query_llm(client, model, prompt, system_prompt=None):
+def query_llm(client, model, prompt, system_prompt=None, temperature=0.5):
     messages = []
     
     if system_prompt:
@@ -70,23 +71,23 @@ def query_llm(client, model, prompt, system_prompt=None):
     
     response = client.chat.completions.create(
         model=model,
-        messages=messages
+        messages=messages,
+        temperature=temperature
     )
     return response.choices[0].message.content
 
 
-def query_llm(client, model, prompt=None, temperature=0.2, messages=None):
-    if messages:
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature
-        )
-    else:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=temperature
-        )
-    return response.choices[0].message.content
-
+# def query_llm(client, model, prompt=None, temperature=0.2, messages=None):
+#     if messages:
+#         response = client.chat.completions.create(
+#             model=model,
+#             messages=messages,
+#             temperature=temperature
+#         )
+#     else:
+#         response = client.chat.completions.create(
+#             model=model,
+#             messages=[{"role": "user", "content": prompt}],
+#             temperature=temperature
+#         )
+#     return response.choices[0].message.content

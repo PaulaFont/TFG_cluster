@@ -70,9 +70,20 @@ def end_llm_server():
     os.system("screen -XS llm_server quit")
     print("Experiment completed.")
 
-def query_llm(client, model, prompt):
+def query_llm(client, model, prompt, system_prompt=None, temperature=0.5):
+    messages = []
+    
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    
+    messages.append({"role": "user", "content": prompt})
+    
     response = client.chat.completions.create(
         model=model,
-        messages=[{"role": "user", "content": prompt}]
+        messages=messages,
+        temperature=temperature
     )
     return response.choices[0].message.content
+
+
+
