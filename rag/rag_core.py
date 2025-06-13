@@ -17,7 +17,7 @@ os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
 PORT=8000
 LLM_HOSTING = f"http://localhost:{PORT}/v1"
 BASE_DIRECTORY = "/data/users/pfont/"
-DOCUMENTS_PATH = "/data/users/pfont/final_documents"
+DOCUMENTS_PATH = "/data/users/pfont/processed_final"
 HTML_HEIGHT=800
 
 
@@ -33,7 +33,7 @@ class RAGSystem:
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
         self.GRAPH_DOCUMENT_DIRECTORY = os.path.realpath(graph_document_directory or os.path.join(base_document_directory, "graph/"))
         self.GRAPH_DIRECTORY_ID = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, "graph_ids/")
-        self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_2.pt" # Saved in /data
+        self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_3.pt" # Saved in /data
         self.SAVED_PASSAGES_DATA = "passages_data.json"  # Saved locally
         self.LLM_MODEL_NAME = "microsoft/phi-4"
         self.GRAPH_FILENAME_BASE = "online_graph"
@@ -88,13 +88,13 @@ class RAGSystem:
             )
             print("LLM Client initialized.")
         
-        # TEXT CHUNKS
+        # TEXT CHUNKS (passage data)
         self._load_or_create_passages(passages_filename)
         
         # EMBEDDING MODELS
         self._initialize_embedding_models(bi_encoder_name, cross_encoder_name)
         
-        # CORPUS EMBEDDINGS
+        # CORPUS EMBEDDINGS (embeddings)
         self._load_or_create_embeddings()
         
         print("Initialization complete.")
@@ -167,19 +167,14 @@ class RAGSystem:
             except Exception as e:
                 print(f"Error saving new corpus embeddings: {e}")
 
-    def load_full_document_by_details(self, filename, processing_version):
-        #TODO: Manage versions. At the moment just returns the one with more score
-        """Load the full text content of a document"""
-        if not filename or not processing_version:
-            print("Error: Filename or processing_version missing.")
-            return None
-
+    # Returns the text for the processed version of that id
+    def load_full_document_by_details(self, document_id):
+        filename = f"rsc37_rsc176_{document_id}.txt"
         filepath = os.path.join(DOCUMENTS_PATH, filename)
 
         if not os.path.exists(filepath):
             print(f"Error: Document file '{filepath}' not found.")
             return None
-
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -189,7 +184,6 @@ class RAGSystem:
 
     def analyze_query_with_llm(self, user_query):
         """Analyze query with LLM to extract entities"""
-        #TODO: I changed the prompt asking it to be more specific. Check
         prompt = f"""
         Analiza la siguiente consulta en español e identifica las entidades clave.
         Ten en cuenta que se usaran para Retrieval, no añadas conceptos generales. 
@@ -237,8 +231,11 @@ class RAGSystem:
             return {"quien": [], "cuando": [], "donde": [], "que": [user_query], "consulta_refinada": user_query}
 
     def generate_answer_with_llm(self, user_query, full_doc_context):
+        #TODO: test new prompt
         """Generate answer using LLM with provided context"""
-        # Make sure it returns "0" when there is no context. 
+        default_no_info_response = (False, "No se proporcionó contexto para procesar la pregunta.")
+        default_llm_error_response = (False, "Error al procesar la respuesta del LLM o formato JSON inválido.")
+         
         contexts_for_prompt = []
         if full_doc_context and full_doc_context.get('text'):
             contexts_for_prompt.append(
@@ -248,44 +245,84 @@ class RAGSystem:
             )
         
         if not contexts_for_prompt:
-            return "0" 
+            return default_no_info_response
 
         context_str = "\n\n".join(contexts_for_prompt)
         
         prompt = f"""
         Eres un asistente de IA experto en documentos históricos en español.
-        Responde a la pregunta del usuario basándote *únicamente* en el contexto del "DOCUMENTO COMPLETO PRINCIPAL".
-        Sé conciso y responde directamente. Sintetiza la información. No inventes nada.
-        Si la información no está en los textos, indícalo contestando un "0" y nada más.  
-        No menciones "DOCUMENTO COMPLETO PRINCIPAL" o "FRAGMENTOS ADICIONALES" en tu respuesta final.
+        Tu tarea es responder a la pregunta del usuario basándote *únicamente* en el contexto del "DOCUMENTO COMPLETO PRINCIPAL".
+        Debes ser conciso, responder directamente y sintetizar la información. No inventes información que no esté explícitamente en el texto.
+        No menciones "DOCUMENTO COMPLETO PRINCIPAL" en tu respuesta final.
+
+        Tu respuesta DEBE ser un objeto JSON válido. ASEGÚRATE de que la salida sea *únicamente* el JSON y nada más.
+        El JSON debe tener la siguiente estructura:
+        {{
+            "informacion_encontrada": <boolean>, // true si la respuesta se basa en el contexto y la información fue hallada, false en caso contrario.
+            "respuesta": "<string>" // La respuesta a la pregunta. Si informacion_encontrada es false, este campo debe indicar que la información no fue encontrada o el contexto no es relevante.
+        }}
 
         Pregunta del Usuario: "{user_query}"
 
         Contextos Proporcionados:
         {context_str}
 
-        Respuesta Concisa:
+        Respuesta JSON:
         """
         if self.llm_client_instance:
-            return query_llm(self.llm_client_instance, self.LLM_MODEL_NAME, prompt)
+            try:
+                llm_response_str = query_llm(self.llm_client_instance, self.LLM_MODEL_NAME, prompt)
+                json_start = llm_response_str.find('{')
+                json_end = llm_response_str.rfind('}')
+                
+                if json_start != -1 and json_end != -1 and json_end > json_start:
+                    json_str_cleaned = llm_response_str[json_start : json_end+1]
+                    parsed_json = json.loads(json_str_cleaned)
+                    if "informacion_encontrada" in parsed_json and "respuesta" in parsed_json and \
+                       isinstance(parsed_json["informacion_encontrada"], bool) and \
+                       isinstance(parsed_json["respuesta"], str):
+                        return parsed_json["informacion_encontrada"], parsed_json["respuesta"]
+                    else:
+                        print(f"Error: El JSON devuelto no tiene la estructura o tipos esperados. Respuesta LLM: {llm_response_str}")
+                        return default_llm_error_response
+                else:
+                    print(f"Error: No se pudo extraer un JSON válido de la respuesta del LLM. Respuesta LLM: {llm_response_str}")
+                    return default_llm_error_response 
+                    
+            except json.JSONDecodeError as e:
+                print(f"Error al decodificar JSON de la respuesta del LLM: {e}. Respuesta LLM: {llm_response_str}")
+                return default_llm_error_response 
+            except Exception as e:
+                print(f"Error inesperado al interactuar con el LLM: {e}")
+                return default_llm_error_response 
         else:
-            return "0"
+            return default_no_info_response 
 
     def manage_search_terms(self, analyzed_query_dict):
         """Extract and manage search terms from analyzed query"""
         search_terms = []
-        refined_query = analyzed_query_dict.get("consulta_refinada")
-        if refined_query and isinstance(refined_query, str) and refined_query.strip(): 
-            search_terms.append(refined_query.strip())
-        
-        for key_type in ["quien", "cuando", "donde", "que"]:
-            keywords = analyzed_query_dict.get(key_type, [])
-            if isinstance(keywords, list): 
-                search_terms.extend(k for k in keywords if isinstance(k, str) and k.strip())
-            elif isinstance(keywords, str) and keywords.strip(): 
-                search_terms.append(keywords.strip())
-        
-        return sorted(list(set(search_terms))) if search_terms else []
+
+        # Add "quien" terms first
+        quien_terms = analyzed_query_dict.get("quien", [])
+        if isinstance(quien_terms, list):
+            search_terms.extend(k for k in quien_terms if isinstance(k, str) and k.strip())
+        elif isinstance(quien_terms, str) and quien_terms.strip():
+            search_terms.append(quien_terms.strip())
+
+        # Add "consulta_refinada" next
+        consulta_refinada = analyzed_query_dict.get("consulta_refinada", "")
+        if isinstance(consulta_refinada, str) and consulta_refinada.strip():
+            search_terms.append(consulta_refinada.strip())
+
+        # If no "quien" terms, add other categories
+        if not quien_terms:
+            for key_type in ["cuando", "donde", "que"]:
+                keywords = analyzed_query_dict.get(key_type, [])
+                if isinstance(keywords, list):
+                    search_terms.extend(k for k in keywords if isinstance(k, str) and k.strip())
+                elif isinstance(keywords, str) and keywords.strip():
+                    search_terms.append(keywords.strip())
+        return search_terms
 
     def chat_search(self, message, history, conversation_id=None):
         html_path_for_graph = None 
@@ -333,13 +370,13 @@ class RAGSystem:
         response_parts.append("")
 
         # Stage 2: Retrieval
-        search_terms = self.manage_search_terms(analyzed_query_dict) #TODO: add something to order them by more relevant ??
-        if not search_terms: 
-            search_terms = [user_query_mejorado]
-
+        search_terms_essential = self.manage_search_terms(analyzed_query_dict)
+        if not search_terms_essential: 
+            search_terms_essential = [user_query_mejorado]
+        
         all_candidate_chunks_scored = []
 
-        for term in search_terms[:self.MAX_SEARCH_TERMS]:
+        for term in search_terms_essential[:self.MAX_SEARCH_TERMS]:
             q_embedding = self.bi_encoder_model.encode(term, convert_to_tensor=True)
             
             if q_embedding.device != self.corpus_embeddings_tensor.device:
@@ -388,7 +425,7 @@ class RAGSystem:
         if sorted_conceptual_docs:
             top_conceptual_id_for_full_doc, (score, fname, p_version, _) = sorted_conceptual_docs[0] 
             print(f"Top conceptual: '{top_conceptual_id_for_full_doc}' (File: {fname}, V: {p_version}), Score: {score}")
-            full_text = self.load_full_document_by_details(fname, p_version)
+            full_text = self.load_full_document_by_details(str(top_conceptual_id_for_full_doc))
             if full_text:
                 full_document_for_llm_data = {'filename': fname, 'processing_version': p_version, 'text': full_text}
                 return_info = full_document_for_llm_data
@@ -399,17 +436,13 @@ class RAGSystem:
         
                 
         # Stage 4: Generate LLM Answer
-        llm_answer = self.generate_answer_with_llm(
+        (self.RAG_ANSWER, llm_answer) = self.generate_answer_with_llm(
             user_query_mejorado,
             full_document_for_llm_data
         )
-        # Is there context? Returns "0" when there is no satisfactory answer. 
-        if llm_answer == "0":
-            print("LLM returned '0'")
-            llm_answer = "No se ha encontrado contexto suficientemente relevante para contestar esta pregunta."
-            self.RAG_ANSWER = False
-        else: 
-            self.RAG_ANSWER = True
+        # Is there context? 
+        if not self.RAG_ANSWER:
+            print("LLM identified no relevant context")
 
         response_parts.append(f"\n\n**Respuesta:**\n {llm_answer}\n")
 
@@ -418,12 +451,10 @@ class RAGSystem:
             newly_generated_html_path = self.answer_to_graph(llm_answer, conversation_id=conversation_id) # PASAR conversation_id
             if newly_generated_html_path and os.path.exists(newly_generated_html_path):
                  html_path_for_graph = newly_generated_html_path
-            # else: html_path_for_graph remains None, Gradio mostrará "No hay grafo"
 
         # Stage 5: Full Transparency Output
-        
         if not full_document_for_llm_data: 
-            response_parts.append("\nNo se utilizó un documento completo principal. Reescribir la pregunta")
+            response_parts.append("\nNo se identificó un documento principal como contexto. Reescribir la pregunta")
 
         return_info["llm_answer"] = response_parts
         return return_info, html_path_for_graph
