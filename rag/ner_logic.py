@@ -1,6 +1,5 @@
 # ner_logic.py
 # Utilities for extracting named entities and relevant phrases from Spanish text using spaCy and custom patterns.
-
 import re
 import spacy
 from spacy.matcher import Matcher
@@ -8,6 +7,18 @@ from spacy.matcher import Matcher
 nlp = spacy.load("es_core_news_lg")  
 
 STOP_WORDS_CHUNKS = ["el", "la", "los", "las", "un", "una", "unos", "unas"]
+
+# For global
+def filter_nodes_global(text):
+    "Returns True if we keep it the same, returns False if it's specific"
+    global nlp
+    doc = nlp(text)
+    for ent in doc.ents:
+        label = ent.label_
+        if ent.label_ in ["PER", "PERSON", "LOC", "GPE", "DATE"]:
+            return True
+    return False
+
 
 def extract_spacy_ents(doc):
     return {ent.text.strip() for ent in doc.ents}

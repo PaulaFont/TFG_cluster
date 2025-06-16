@@ -91,7 +91,7 @@ def extract_triplets(text_content, client, model="microsoft/phi-4"):
 
     return extracted_triples
 
-def add_triplets(current_graph, extracted_triples, filepath):
+def add_triplets(current_graph, extracted_triples, filepath, tag=False):
     knowledge_graph = current_graph
     if extracted_triples:
         print(f"Extracted {len(extracted_triples)} triples.")
@@ -104,6 +104,13 @@ def add_triplets(current_graph, extracted_triples, filepath):
                 if not knowledge_graph.has_edge(s, o, key=p): 
                     knowledge_graph.add_edge(s, o, key=p, predicate_label=p) 
                     new_triples_added += 1
+                if tag:
+                    for node in [s,o]:
+                        node_str = str(node)
+                        if re.search(r'_\d+$', node_str):
+                            knowledge_graph.nodes[node]['node_type'] = 'id_specific'
+                        else:
+                            knowledge_graph.nodes[node]['node_type'] = 'general'
         if new_triples_added > 0:
             print(f"Added {new_triples_added} new unique triples to the knowledge graph.")
             print(f"KG now has {len(knowledge_graph.nodes)} nodes and {len(knowledge_graph.edges)} edges.")
@@ -118,7 +125,7 @@ def update_graph(text_content, current_graph, client, filepath, model="microsoft
     initial_triplets = extract_triplets(text_content, client, model)
     new_triplets = filter_and_fix_triplets(current_graph, initial_triplets)
     add_triplets(current_graph, new_triplets, filepath) # Adds processed triplets and saves graph
-    return current_graph
+    return current_graph, new_triplets
 
 def visualize_knowledge_graph(
     graph: nx.MultiDiGraph, 
@@ -130,6 +137,7 @@ def visualize_knowledge_graph(
     html_height: str = "800px", # Increased height slightly
     html_width: str = "100%",
     default_node_color: str = "#97C2FC", # Light blue
+    extra_node_color: str = "#A0A0A0", #  Grey
     default_edge_color: str = "#848484", # Grey
 ):
     """
@@ -164,8 +172,21 @@ def visualize_knowledge_graph(
             # --- Manually add nodes and edges for more control ---
             for node, node_attrs in graph.nodes(data=True):
                 title = f"Node: {node}\nAttributes: {node_attrs}" # Tooltip
-                color = default_node_color
-                net.add_node(node, label=str(node), title=title, color=color)
+                node_str = str(node) # Ensure node is a string for regex fallback
+                
+                current_node_color = default_node_color # Default
+                node_type = node_attrs.get('node_type')
+
+                if node_type == 'id_specific':
+                    current_node_color = extra_node_color
+                elif node_type == 'general':
+                    current_node_color = default_node_color
+                else: # Fallback if 'node_type' attribute is not present or has an unexpected value
+                    if re.search(r'_\d+$', node_str):
+                        current_node_color = extra_node_color
+                    # else it remains default_node_color (already set as default)
+                
+                net.add_node(node, label=str(node), title=title, color=current_node_color)
 
             for u, v, key, edge_attrs in graph.edges(data=True, keys=True):
                 edge_label = edge_attrs.get('predicate_label', edge_attrs.get('predicate', str(key)))
@@ -229,8 +250,22 @@ def visualize_knowledge_graph(
                 print(f"Spring layout failed ({layout_err}), trying simpler layout.")
                 pos = nx.circular_layout(graph) # circular_layout is deterministic and often okay
 
-            node_colors = [default_node_color for _ in graph.nodes()] # Basic coloring
-            nx.draw_networkx_nodes(graph, pos, node_size=70, node_color=node_colors, alpha=0.9)
+            node_colors_list = [] # Renamed to avoid conflict
+            for node_item, attrs in graph.nodes(data=True):
+                node_str = str(node_item)
+                current_node_color = default_node_color # Default
+                
+                node_type = attrs.get('node_type')
+                if node_type == 'id_specific':
+                    current_node_color = extra_node_color
+                elif node_type == 'general':
+                    current_node_color = default_node_color
+                else: # Fallback
+                    if re.search(r'_\d+$', node_str):
+                        current_node_color = extra_node_color
+                node_colors_list.append(current_node_color)
+
+            nx.draw_networkx_nodes(graph, pos, node_size=70, node_color=node_colors_list, alpha=0.9)
             nx.draw_networkx_edges(graph, pos, alpha=0.6, width=1.0, arrowsize=12, edge_color=default_edge_color)
             nx.draw_networkx_labels(graph, pos, font_size=9)
             

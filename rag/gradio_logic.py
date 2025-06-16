@@ -14,19 +14,7 @@ rag_system.initialize_models_and_data()
 HTML_HEIGHT=800
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
-
 INPUT_FOLDER = "/data/users/pfont/input"
-GLOBAL_GRAPH_FILENAME = "global_knowledge_graph.html"
-GLOBAL_GRAPH_PATH = None
-
-if rag_system.GRAPH_DOCUMENT_DIRECTORY and os.path.isdir(rag_system.GRAPH_DOCUMENT_DIRECTORY):
-    GLOBAL_GRAPH_PATH = os.path.join(rag_system.GRAPH_DOCUMENT_DIRECTORY, GLOBAL_GRAPH_FILENAME)
-    print(f"Global graph path set to: {GLOBAL_GRAPH_PATH}")
-else:
-    print(f"Warning: rag_system.GRAPH_DOCUMENT_DIRECTORY ('{rag_system.GRAPH_DOCUMENT_DIRECTORY}') is not set or not a directory. Global graph feature might not work if the file isn't found or the path isn't allowed.")
-    # If GLOBAL_GRAPH_PATH remains None, get_graph_html will show "No hay grafo disponible."
-
-GLOBAL_GRAPH_PATH = "/data/users/pfont/graph/online_knowledge_graph_alsasua.html" #TODO: It's hardcoded
 
 def clean_text_context(text):
     # We convert some characters to HTML to improve visualization
@@ -122,7 +110,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         </style>
     """)
     gr.Markdown(
-        "<h1 style='text-align: center;'>Chatbot Histórico con Visualización de Conocimiento</h1>\n<p style='text-align: center;'>Pregunta sobre documentos históricos.</p>",
+        "<h1 style='text-align: center; font-size: 3em;'>DocumentAI</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Enhancing Historical Document Accessibility Through a Hybrid RAG and Knowledge Graph System</h2>\n<p style='text-align: center; font-size: 1em;'>Pregunta sobre personas de la guerra cívil.</p>",
         elem_id="title"
     )
 
@@ -172,7 +160,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         
         graph_html_content = ""
         if new_showing_global: #If we change to showing global, show global
-            graph_html_content = get_graph_html(GLOBAL_GRAPH_PATH)
+            graph_html_content = get_graph_html(rag_system.session_global_graph_html_path)
         else:
             active_conv = get_conversation_by_id(active_conv_id, all_conversations)
             if active_conv:
@@ -354,15 +342,10 @@ if __name__ == "__main__":
         if not os.path.exists(graph_doc_dir):
             os.makedirs(graph_doc_dir, exist_ok=True)
         allowed_paths_list.append(graph_doc_dir)
-        print(f"Graph document directory '{graph_doc_dir}' will be allowed for serving files.")
-        if GLOBAL_GRAPH_PATH: # Check if global graph path was successfully determined
-             if not os.path.exists(GLOBAL_GRAPH_PATH):
-                print(f"Warning: Global graph file '{GLOBAL_GRAPH_PATH}' does not exist. Please create it.")
-        else:
-            print(f"Warning: GLOBAL_GRAPH_PATH is not set, likely because GRAPH_DOCUMENT_DIRECTORY was not valid.")
-
+        print(f"Graph document directory '{graph_doc_dir}' will be allowed for serving files (including session global graphs).")
     else:
-        print("Warning: rag_system.GRAPH_DOCUMENT_DIRECTORY is not set. Graphs (including global) may not be served correctly unless their directories are manually added to allowed_paths.")
+        print("Warning: rag_system.GRAPH_DOCUMENT_DIRECTORY is not set. Graphs may not be served correctly.")
+
 
     # If GLOBAL_GRAPH_PATH is outside graph_doc_dir and needs its own directory to be allowed:
     # global_graph_dir = os.path.dirname(GLOBAL_GRAPH_PATH)

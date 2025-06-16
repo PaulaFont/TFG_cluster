@@ -106,6 +106,21 @@ def find_similars(lst, word):
     return None
   
 def filter_and_fix_triplets(current_graph, initial_triplets):
+    """
+    Filters and processes a list of triplets to add to a graph, ensuring compatibility with existing nodes and edges.
+    Args:
+        current_graph (networkx.MultiDiGraph): The current graph structure containing nodes and edges.
+        initial_triplets (list of tuple): A list of triplets (subject, predicate, object) to be added to the graph.
+    Returns:
+        list of tuple: A list of processed triplets that are ready to be added to the graph.
+    Functionality:
+        - Filters out triplets with predicates that are too long or unwanted based on custom filtering logic.
+        - Matches new nodes to existing nodes in the graph using similarity checks.
+        - Decomposes overly long nodes into components using Named Entity Recognition (NER) and links them internally.
+        - Re-links decomposed nodes to existing nodes in the graph when possible.
+        - Ensures that no triplets contain nodes longer than a predefined maximum length (MAX_LEN_NODE).
+        - Logs detailed information about the filtering and processing steps for debugging purposes.
+    """
 
     existing_triplets = current_graph.edges(keys=True) 
     existing_nodes = current_graph.nodes()

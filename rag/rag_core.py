@@ -4,6 +4,7 @@ from openai import OpenAI
 from llm_utils import * 
 from pre_processing import *
 from graph_logic import update_graph, visualize_knowledge_graph, load_knowledge_graph
+from global_graph import update_global_graph
 import torch 
 import json
 from sentence_transformers import SentenceTransformer, util
@@ -11,6 +12,7 @@ from sentence_transformers.cross_encoder import CrossEncoder
 import pandas as pd
 import gradio as gr
 import networkx as nx
+import datetime, uuid
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
 
@@ -39,6 +41,13 @@ class RAGSystem:
         self.GRAPH_FILENAME_BASE = "online_graph"
         self.BI_ENCODER_NAME="msmarco-bert-base-dot-v5"
         self.CROSS_ENCODER_NAME='cross-encoder/ms-marco-MiniLM-L6-v2'
+
+        # Session Information, global graph
+        self.session_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + str(uuid.uuid4())[:8]
+        self.SESSION_GLOBAL_GRAPH_FILENAME_BASE = f"global_graph_session_{self.session_id}"
+        self.session_global_graph_pkl_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.pkl")
+        self.session_global_graph_html_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.html")
+
         
         # Create directories
         os.makedirs(self.GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
@@ -53,7 +62,7 @@ class RAGSystem:
         self.corpus_embeddings_tensor = None
         self.llm_client_instance = None
         self.knowledge_graph_instance = nx.MultiDiGraph()
-        self.html_file_path = "/data/users/pfont/graph/online_knowledge_graph.html"
+        self.knowledge_graph_global = nx.MultiDiGraph() 
         
         # Search configuration
         self.MAX_SEARCH_TERMS = 5
@@ -63,6 +72,7 @@ class RAGSystem:
         # Answer Flags
         self.RAG_ANSWER = False
         self.GRAPH_ANSWER = False
+        self.return_info = {}
 
     def initialize_models_and_data(self, 
                                  bi_encoder_name=None, 
@@ -73,7 +83,7 @@ class RAGSystem:
         cross_encoder_name = self.CROSS_ENCODER_NAME if not cross_encoder_name else cross_encoder_name
         passages_filename = self.SAVED_PASSAGES_DATA if not passages_filename else passages_filename
         
-        # GRAPH
+        # DEFAULT CONVERSATION GRAPH (can be overridden by conversation_id later)
         kg_filepath = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, self.GRAPH_FILENAME_BASE + ".pkl")
         self.knowledge_graph_instance = load_knowledge_graph(kg_filepath)
 
@@ -327,13 +337,13 @@ class RAGSystem:
     def chat_search(self, message, history, conversation_id=None):
         html_path_for_graph = None 
         response_parts = []
-        return_info = {}
+        self.return_info = {}
 
         # Make sure everything is loaded
         if not self.is_initialized():
             response_parts.append("Error: Modelos o datos no inicializados. Revisa la consola.")
-            return_info["llm_answer"] = response_parts
-            return return_info, html_path_for_graph # Return current/last known path
+            self.return_info["llm_answer"] = response_parts
+            return self.return_info, html_path_for_graph # Return current/last known path
 
         # MANAGE CHANGING THE GRAPH INSTANCE TO THE ONE FOR THE CONVERSATION
         if conversation_id:
@@ -350,8 +360,8 @@ class RAGSystem:
         user_query = message.strip()
         if not user_query:
             response_parts.append("Introduce una consulta.")
-            return_info["llm_answer"] = response_parts
-            return return_info, html_path_for_graph # Return current/last known path
+            self.return_info["llm_answer"] = response_parts
+            return self.return_info, html_path_for_graph # Return current/last known path
 
         # Stage 1: Query Analysis
         analyzed_query_dict = self.analyze_query_with_llm(user_query)
@@ -428,8 +438,8 @@ class RAGSystem:
             full_text = self.load_full_document_by_details(str(top_conceptual_id_for_full_doc))
             if full_text:
                 full_document_for_llm_data = {'filename': fname, 'processing_version': p_version, 'text': full_text}
-                return_info = full_document_for_llm_data
-                return_info["id"] = top_conceptual_id_for_full_doc
+                self.return_info = full_document_for_llm_data
+                self.return_info["id"] = top_conceptual_id_for_full_doc
                 print(f"Loaded full text from document: {top_conceptual_id_for_full_doc}")
             else: 
                 print(f"Failed to load full text: {fname} (V: {p_version})")
@@ -448,17 +458,54 @@ class RAGSystem:
 
         # Generate triples to graph
         if self.RAG_ANSWER: # Only add triplets if there is an answer
-            newly_generated_html_path = self.answer_to_graph(llm_answer, conversation_id=conversation_id) # PASAR conversation_id
+            # NORMAL:
+            newly_generated_html_path, triplets_added = self.answer_to_graph(llm_answer, conversation_id=conversation_id) # PASAR conversation_id
             if newly_generated_html_path and os.path.exists(newly_generated_html_path):
                  html_path_for_graph = newly_generated_html_path
+
+            # ADD TO GLOBAL:
+            document_id_for_global_graph = self.return_info.get("id")
+            if triplets_added and document_id_for_global_graph:
+                self.update_global_knowledge_graph(triplets_added, str(document_id_for_global_graph))
+            elif not triplets_added:
+                print("No processed triplets from answer_to_graph to add to global graph.")
+            elif not document_id_for_global_graph:
+                print("No document_id available for global graph update.")
 
         # Stage 5: Full Transparency Output
         if not full_document_for_llm_data: 
             response_parts.append("\nNo se identificó un documento principal como contexto. Reescribir la pregunta")
 
-        return_info["llm_answer"] = response_parts
-        return return_info, html_path_for_graph
+        self.return_info["llm_answer"] = response_parts
+        return self.return_info, html_path_for_graph
 
+    def update_global_knowledge_graph(self, processed_triplets, document_id):
+        """Updates the global knowledge graph with the given triplets and document ID."""
+        if not processed_triplets:
+            print("Global Graph Update: No triplets provided.")
+            return
+        if not document_id:
+            print("Global Graph Update: No document_id provided.")
+            return
+
+        print(f"Updating global graph with {len(processed_triplets)} triplets. Document ID: {document_id}")
+        
+        self.knowledge_graph_global = update_global_graph(
+            processed_triplets=processed_triplets,
+            global_graph=self.knowledge_graph_global,
+            document_id=str(document_id),
+            filepath=self.session_global_graph_pkl_path
+        )
+
+        visualize_knowledge_graph(
+            graph=self.knowledge_graph_global,
+            output_format="html",
+            filename_prefix=self.SESSION_GLOBAL_GRAPH_FILENAME_BASE, # This will create "global_knowledge_graph.html"
+            output_directory=self.GRAPH_DOCUMENT_DIRECTORY,
+            show_in_browser_html=False, # Set to True if you want it to pop up, False for server use
+            html_height=str(HTML_HEIGHT)+"px"
+        )
+    
     def answer_to_graph(self, llm_answer, conversation_id=None):
         """Add answer information to knowledge graph"""
         print(f"Initial KG: {len(self.knowledge_graph_instance.nodes)} nodes, {len(self.knowledge_graph_instance.edges)} edges")
@@ -470,7 +517,7 @@ class RAGSystem:
         filepath = os.path.join(self.GRAPH_DIRECTORY_ID, f"{current_graph_filename_prefix}.pkl")
 
         # Extract triples, process them and save new graph
-        self.knowledge_graph_instance = update_graph( 
+        self.knowledge_graph_instance, triplets_added = update_graph( 
             text_content=llm_answer,
             current_graph=self.knowledge_graph_instance,
             client=self.llm_client_instance,
@@ -491,11 +538,10 @@ class RAGSystem:
 
         if new_html_file_path and os.path.exists(new_html_file_path):
             print(f"Generated HTML at: {new_html_file_path}")
-            # self.html_file_path ya no se actualiza aquí globalmente, se devuelve la ruta específica
-            return new_html_file_path
+            return new_html_file_path, triplets_added
         else:
             print(f"Failed to generate or find HTML at: {new_html_file_path}. Returning None.")
-            return None # Devolver None si la generación falla
+            return None, triplets_added # Devolver None si la generación falla
 
     def is_initialized(self):
         """Check if the system is properly initialized"""
