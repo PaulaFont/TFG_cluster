@@ -9,8 +9,20 @@ nlp = spacy.load("es_core_news_lg")
 STOP_WORDS_CHUNKS = ["el", "la", "los", "las", "un", "una", "unos", "unas"]
 
 # For global
+"Returns True if we keep it the same, returns False if it's specific"
 def filter_nodes_global(text):
-    "Returns True if we keep it the same, returns False if it's specific"
+    def is_date(text):
+        year_pattern = r"^[12]\d{3}$"
+        date_month_year_pattern = r"^\d{1,2}\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+de\s+\d{4}$"
+        if re.fullmatch(year_pattern, text):
+            return True
+        if re.fullmatch(date_month_year_pattern, text, re.IGNORECASE):
+            return True
+        return False
+
+    if is_date(text):
+        return True
+
     global nlp
     doc = nlp(text)
     for ent in doc.ents:
