@@ -7,6 +7,8 @@ import time
 from rag_core import RAGSystem
 from pathlib import Path
 import html
+from graph_search import get_centrality_measures
+
 
 print("Starting RAG program initialization...")
 rag_system = RAGSystem()
@@ -161,6 +163,20 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         graph_html_content = ""
         if new_showing_global: #If we change to showing global, show global
             graph_html_content = get_graph_html(rag_system.session_global_graph_html_path)
+            centrality_texts = get_centrality_measures(rag_system.knowledge_graph_global)
+
+            centrality_info_html = "<div style='margin-top: 15px; padding: 10px; border: 1px solid #e0e0e0; background-color: #f9f9f9; border-radius: 5px;'>"
+            if centrality_texts:
+                centrality_info_html += "<h4 style='margin-top:0; margin-bottom: 8px; color: #333;'>Métricas de Centralidad del Grafo Global:</h4><ul style='color: #333; list-style-type: disc; margin-left: 20px;'>"
+                centrality_info_html += "".join(centrality_texts)
+                centrality_info_html += "</ul>"
+            elif not rag_system.knowledge_graph_global or not rag_system.knowledge_graph_global.nodes:
+                    centrality_info_html += "<p style='margin:0; color: #333;'><i>El grafo global está vacío o no contiene nodos para calcular métricas de centralidad.</i></p>"
+            else:
+                centrality_info_html += "<p style='margin:0; color: #333;'><i>No se encontraron entidades específicas (personas/ubicaciones) o datos suficientes para calcular todas las métricas de centralidad en el grafo global.</i></p>"
+            centrality_info_html += "</div>"
+            
+            graph_html_content += centrality_info_html
         else:
             active_conv = get_conversation_by_id(active_conv_id, all_conversations)
             if active_conv:
@@ -269,6 +285,19 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                                 f'''<a href="{img_url}" target="_blank" style="flex-shrink: 0;"><img onmouseover="this.style.transform='scale(4)'" onmouseout="this.style.transform='scale(1)'" src="{img_url}" alt="Página {i}" style="width: 80px; height: auto; object-fit: contain; display: block;"/></a>''')
 
                     markdown_response_parts.append("</div>")  # Close the flex container
+            
+            if rag_system.GRAPH_ANSWER:
+                graph_llm_answer_text = answer_info.get("graph_answer")
+                graph_context_list = answer_info.get("graph_context") # This is a list of strings
+
+                if graph_llm_answer_text:
+                    markdown_response_parts.append(f"\n\n<hr style='border-top: 1px dashed #ccc;'>\n") # Visual separator
+                    markdown_response_parts.append(f"**Respuesta (basada en grafo global):**\n{html.escape(graph_llm_answer_text)}")
+                
+                if graph_context_list:
+                    # Join the list of context strings into a single block for display
+                    graph_context_str_display = "\n\n---\n\n".join(graph_context_list) # Separator between contexts
+                    markdown_response_parts.append(f"\n\n**Contexto del Grafo Global Utilizado:**\n<pre style='max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #f0f0f0; white-space: pre-wrap;'>{html.escape(graph_context_str_display)}</pre>")
             
             bot_response = "".join(markdown_response_parts)
 

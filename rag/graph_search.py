@@ -1,4 +1,5 @@
 import networkx as nx
+import html
 
 def get_shortest_path_context(graph, node1, node2):
     """
@@ -30,13 +31,12 @@ def get_shortest_path_context(graph, node1, node2):
 def get_all_paths_context(graph, node1, node2, max_paths=10, max_length=6):
     """
     Returns up to `max_paths` paths (as context strings) between node1 and node2 in the graph.
-    Treats all edges as undirected. Each path is limited to `max_length` nodes.
-    Paths are ordered from shortest to longest.
+    Treats all edges as undirected for path finding, but displays the relation in the direction of the actual edge.
+    Each path is limited to `max_length` nodes. Paths are ordered from shortest to longest.
     """
     try:
         undirected_graph = graph.to_undirected()
         paths = list(nx.all_simple_paths(undirected_graph, source=node1, target=node2, cutoff=max_length))
-        # Sort paths by length (shortest first)
         paths.sort(key=len)
         context_strings = []
         for idx, path in enumerate(paths):
@@ -46,13 +46,21 @@ def get_all_paths_context(graph, node1, node2, max_paths=10, max_length=6):
             for i in range(len(path) - 1):
                 src = path[i]
                 tgt = path[i + 1]
-                edges = graph.get_edge_data(src, tgt) or graph.get_edge_data(tgt, src)
+                # Check direction: src -> tgt
+                edges = graph.get_edge_data(src, tgt)
                 if edges:
                     for key, edge_attr in edges.items():
                         relation = key if key is not None else "related_to"
-                        context_lines.append(f"{src} --[{relation}]-- {tgt}")
+                        context_lines.append(f"{src} --[{relation}]--> {tgt}")
                 else:
-                    context_lines.append(f"{src} --[related_to]-- {tgt}")
+                    # Check direction: tgt -> src
+                    edges_rev = graph.get_edge_data(tgt, src)
+                    if edges_rev:
+                        for key, edge_attr in edges_rev.items():
+                            relation = key if key is not None else "related_to"
+                            context_lines.append(f"{tgt} --[{relation}]--> {src}")
+                    else:
+                        context_lines.append(f"{src} --[related_to]-- {tgt}")
             context_strings.append("\n".join(context_lines))
         if not context_strings:
             return f"No paths found between '{node1}' and '{node2}'.", False
@@ -76,12 +84,7 @@ def get_neighborhood_subgraph(graph, start_node, hops=1):
     if not neighborhood_subgraph.nodes:
         return f"Neighborhood for '{start_node}' ({hops}-hop) is empty or the node is isolated.", False
 
-    context_lines = [f"Neighborhood context for '{start_node}' ({hops}-hop):"]
-    context_lines.append("Nodes:")
-    for node in neighborhood_subgraph.nodes():
-        context_lines.append(f"- {node}")
-
-    context_lines.append("\nEdges:")
+    context_lines = [].
     if neighborhood_subgraph.edges:
         for u, v, data in neighborhood_subgraph.edges(data=True):
             edge_keys_data = graph.get_edge_data(u, v)
@@ -98,7 +101,7 @@ def get_neighborhood_subgraph(graph, start_node, hops=1):
     return "\n".join(context_lines), True
 
 def get_common_neighbors_context(graph, node1, node2):
-
+    #TODO: not using, decide if I want to use it
     """
     Finds common neighbors between node1 and node2 and returns them as a context string.
     Considers directed relationships (successors).
@@ -133,6 +136,27 @@ def get_common_neighbors_context(graph, node1, node2):
                 relation = key if key is not None else "related_to"
                 context_lines.append(f"  {node2} --[{relation}]--> {neighbor}")
     return "\n".join(context_lines), True
+
+
+def search_graph(global_graph, entity_list):
+    # Returns (list of context strings, bool: whether any context was found)
+    results = []
+    overall_success = False
+    if len(entity_list) == 1:
+        context, success = get_neighborhood_subgraph(global_graph, entity_list[0], hops=1)
+        if success:
+            results.append(context)
+            overall_success = True
+    else:
+        for i in range(len(entity_list)):
+            for j in range(i + 1, len(entity_list)):
+                node1 = entity_list[i]
+                node2 = entity_list[j]
+                context, success = get_all_paths_context(global_graph, node1, node2)
+                if success:
+                    results.append(context)
+                    overall_success = True
+    return results, overall_success
 
 # ======== QUESTIONS ==================
 
@@ -310,3 +334,26 @@ def get_most_centrally_located_entity_by_closeness(graph):
 #     print(f"The most centrally located entity is '{central_entity}' (Type: {ner_tag_central_entity}) with a closeness centrality score of {score_cc:.4f}.")
 # else:
 #     print("Could not determine the most centrally located entity.")
+
+def get_centrality_measures(global_graph):
+    centrality_texts = []
+
+    if global_graph and global_graph.nodes: 
+        loc, score = get_most_central_location_by_degree(global_graph)
+        if loc:
+            centrality_texts.append(f"<li style='margin:0; color: #333;'><b style='margin:0; color: #333;'>Ubicación más central (grado):</b> {html.escape(str(loc))}</li>") # (Puntuación: {score:.2f})</li>")
+
+        person_infl, score_betw = get_most_influential_person_by_betweenness(global_graph)
+        if person_infl:
+            centrality_texts.append(f"<li style='margin:0; color: #333;'><b style='margin:0; color: #333;'>Persona más influyente (intermediación):</b> {html.escape(str(person_infl))}</li>") # (Puntuación: {score_betw:.2f})</li>")
+
+        person_conn, score_deg = get_most_connected_person_by_degree(global_graph)
+        if person_conn:
+            centrality_texts.append(f"<li style='margin:0; color: #333;'><b style='margin:0; color: #333;'>Persona más conectada (grado):</b> {html.escape(str(person_conn))}</li>") # (Puntuación: {score_deg:.2f})</li>")
+
+        entity_close, score_close = get_most_centrally_located_entity_by_closeness(global_graph)
+        if entity_close:
+            ner_tag = global_graph.nodes[entity_close].get('ner_tag', 'N/A')
+            centrality_texts.append(f"<li style='margin:0; color: #333;'><b style='margin:0; color: #333;'>Entidad más central (cercanía):</b> {html.escape(str(entity_close))} (Tipo: {html.escape(str(ner_tag))})</li>") #, Puntuación: {score_close:.2f})</li>")
+
+    return centrality_texts

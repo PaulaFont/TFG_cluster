@@ -13,6 +13,7 @@ import pandas as pd
 import gradio as gr
 import networkx as nx
 import datetime, uuid
+from graph_search import search_graph
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
 
@@ -240,8 +241,76 @@ class RAGSystem:
         else:
             return {"quien": [], "cuando": [], "donde": [], "que": [user_query], "consulta_refinada": user_query}
 
+    def generate_answer_from_graph(self, user_query, graph_triplets: list[str]):
+        default_no_info_response = (False, "No se proporcionó contexto del grafo para procesar la pregunta.")
+        default_llm_error_response = (False, "Error al procesar la respuesta del LLM o formato JSON inválido.")
+        
+        if not graph_triplets or not isinstance(graph_triplets, list):
+            return default_no_info_response
+
+        context_str = "\n".join(graph_triplets)
+
+        prompt = f"""
+        Eres un asistente de IA experto en razonamiento sobre grafos de conocimiento extraídos de documentos históricos en español.
+        Tu tarea es responder a la pregunta del usuario basándote *únicamente* en los hechos proporcionados en el "CONTEXTO DEL GRAFO".
+        El contexto se presenta como una lista de tripletas con el formato: Sujeto --[Relación]--> Objeto.
+
+        Debes ser conciso y responder directamente. No infieras ni inventes información que no esté explícitamente en las tripletas.
+        Si la información no se puede deducir directamente de las tripletas, debes indicarlo.
+
+        Tu respuesta DEBE ser un objeto JSON válido. ASEGÚRATE de que la salida sea *únicamente* el JSON y nada más.
+        El JSON debe tener la siguiente estructura:
+        {{
+            "informacion_encontrada": <boolean>, // true si la respuesta se basa en los hechos del grafo, false si el contexto no es relevante o no contiene la respuesta.
+            "respuesta": "<string>" // La respuesta a la pregunta. Si informacion_encontrada es false, este campo debe indicar que la información no fue encontrada en los hechos proporcionados.
+        }}
+
+        Pregunta del Usuario: "{user_query}"
+
+        CONTEXTO DEL GRAFO:
+        ---
+        {context_str}
+        ---
+
+        Respuesta JSON:
+        """
+
+        # 3. LLM call and JSON parsing (this logic remains the same as it's robust)
+        if self.llm_client_instance:
+            try:
+                llm_response_str = query_llm(self.llm_client_instance, self.LLM_MODEL_NAME, prompt)
+                
+                # Robust JSON extraction
+                json_start = llm_response_str.find('{')
+                json_end = llm_response_str.rfind('}')
+                
+                if json_start != -1 and json_end != -1 and json_end > json_start:
+                    json_str_cleaned = llm_response_str[json_start : json_end+1]
+                    parsed_json = json.loads(json_str_cleaned)
+                    
+                    # Validate JSON structure and types
+                    if "informacion_encontrada" in parsed_json and "respuesta" in parsed_json and \
+                       isinstance(parsed_json["informacion_encontrada"], bool) and \
+                       isinstance(parsed_json["respuesta"], str):
+                        return parsed_json["informacion_encontrada"], parsed_json["respuesta"]
+                    else:
+                        print(f"Error: El JSON devuelto no tiene la estructura o tipos esperados. Respuesta LLM: {llm_response_str}")
+                        return default_llm_error_response
+                else:
+                    print(f"Error: No se pudo extraer un JSON válido de la respuesta del LLM. Respuesta LLM: {llm_response_str}")
+                    return default_llm_error_response
+                    
+            except json.JSONDecodeError as e:
+                print(f"Error al decodificar JSON de la respuesta del LLM: {e}. Respuesta LLM: {llm_response_str}")
+                return default_llm_error_response
+            except Exception as e:
+                print(f"Error inesperado al interactuar con el LLM: {e}")
+                return default_llm_error_response
+        else:
+            # This case handles if self.llm_client_instance is not set
+            return default_no_info_response
+
     def generate_answer_with_llm(self, user_query, full_doc_context):
-        #TODO: test new prompt
         """Generate answer using LLM with provided context"""
         default_no_info_response = (False, "No se proporcionó contexto para procesar la pregunta.")
         default_llm_error_response = (False, "Error al procesar la respuesta del LLM o formato JSON inválido.")
@@ -263,6 +332,7 @@ class RAGSystem:
         Eres un asistente de IA experto en documentos históricos en español.
         Tu tarea es responder a la pregunta del usuario basándote *únicamente* en el contexto del "DOCUMENTO COMPLETO PRINCIPAL".
         Debes ser conciso, responder directamente y sintetizar la información. No inventes información que no esté explícitamente en el texto.
+        Puedes asumir pequeñas discrepancias tipográficas (por ejemplo, errores comunes de OCR en nombres propios), pero no debes inferir ni inventar nada fuera del texto.
         No menciones "DOCUMENTO COMPLETO PRINCIPAL" en tu respuesta final.
 
         Tu respuesta DEBE ser un objeto JSON válido. ASEGÚRATE de que la salida sea *únicamente* el JSON y nada más.
@@ -337,6 +407,8 @@ class RAGSystem:
     def chat_search(self, message, history, conversation_id=None):
         response_parts = []
         self.return_info = {}
+        self.RAG_ANSWER = False
+        self.GRAPH_ANSWER = False
 
         graph_file_suffix = f"_{conversation_id}" if conversation_id else ""
         expected_html_path_for_graph = os.path.join(self.GRAPH_DIRECTORY_ID, f"{self.GRAPH_FILENAME_BASE}{graph_file_suffix}.html")
@@ -461,6 +533,25 @@ class RAGSystem:
             print("LLM identified no relevant context")
 
         response_parts.append(f"\n\n**Respuesta:**\n {llm_answer}\n")
+
+        # NEW STAGE: GRAPH SEARCH
+        if keywords_display_list and self.knowledge_graph_global and self.knowledge_graph_global.number_of_nodes() > 0:
+            context, graph_search_success = search_graph(self.knowledge_graph_global, keywords_display_list)
+            if graph_search_success:
+                print(f"Graph search successful. Context found: {len(context)} snippets.")
+
+                graph_answer_found_flag, graph_llm_answer_text = self.generate_answer_from_graph(
+                    user_query_mejorado, 
+                    context
+                )
+
+                if graph_answer_found_flag:
+                    print(f"Graph-based LLM answer generated: {graph_llm_answer_text}")
+                    self.GRAPH_ANSWER = True # Set the flag
+                    self.return_info["graph_answer"] = graph_llm_answer_text
+                    self.return_info["graph_context"] = context # Store the list of contexts
+            else:
+                print("Graph-based LLM found no relevant information in the provided graph context.")
 
         # Generate triples to graph
         if self.RAG_ANSWER: # Only add triplets if there is an answer
