@@ -21,15 +21,19 @@ def filter_nodes_global(text):
         return False
 
     if is_date(text):
-        return True
+        return True, "DATE"
 
     global nlp
     doc = nlp(text)
     for ent in doc.ents:
         label = ent.label_
-        if ent.label_ in ["PER", "PERSON", "LOC", "GPE", "DATE"]:
-            return True
-    return False
+        if label in ["PER", "PERSON"]:
+            return True, "PERSON"
+        elif label in ["LOC", "GPE"]:
+            return True, "LOCATION"
+        elif label == "DATE":
+            return True, "DATE"
+    return False, "OTHER"
 
 
 def extract_spacy_ents(doc):

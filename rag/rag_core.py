@@ -335,9 +335,15 @@ class RAGSystem:
         return search_terms
 
     def chat_search(self, message, history, conversation_id=None):
-        html_path_for_graph = None 
         response_parts = []
         self.return_info = {}
+
+        graph_file_suffix = f"_{conversation_id}" if conversation_id else ""
+        expected_html_path_for_graph = os.path.join(self.GRAPH_DIRECTORY_ID, f"{self.GRAPH_FILENAME_BASE}{graph_file_suffix}.html")
+        if os.path.exists(expected_html_path_for_graph):
+            html_path_for_graph = expected_html_path_for_graph
+        else:
+            html_path_for_graph = None
 
         # Make sure everything is loaded
         if not self.is_initialized():
@@ -489,7 +495,7 @@ class RAGSystem:
             return
 
         print(f"Updating global graph with {len(processed_triplets)} triplets. Document ID: {document_id}")
-        
+
         self.knowledge_graph_global = update_global_graph(
             processed_triplets=processed_triplets,
             global_graph=self.knowledge_graph_global,

@@ -91,7 +91,7 @@ def extract_triplets(text_content, client, model="microsoft/phi-4"):
 
     return extracted_triples
 
-def add_triplets(current_graph, extracted_triples, filepath, tag=False):
+def add_triplets(current_graph, extracted_triples, filepath, tag=False, attributes=None):
     knowledge_graph = current_graph
     if extracted_triples:
         print(f"Extracted {len(extracted_triples)} triples.")
@@ -111,6 +111,11 @@ def add_triplets(current_graph, extracted_triples, filepath, tag=False):
                             knowledge_graph.nodes[node]['node_type'] = 'id_specific'
                         else:
                             knowledge_graph.nodes[node]['node_type'] = 'general'
+        if attributes:
+            for node, att in attributes.items():
+                if node in knowledge_graph.nodes:
+                    knowledge_graph.nodes[node]["ner_tag"] = att
+                    
         if new_triples_added > 0:
             print(f"Added {new_triples_added} new unique triples to the knowledge graph.")
             print(f"KG now has {len(knowledge_graph.nodes)} nodes and {len(knowledge_graph.edges)} edges.")

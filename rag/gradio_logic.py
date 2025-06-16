@@ -110,7 +110,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         </style>
     """)
     gr.Markdown(
-        "<h1 style='text-align: center; font-size: 3em;'>DocumentAI</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Enhancing Historical Document Accessibility Through a Hybrid RAG and Knowledge Graph System</h2>\n<p style='text-align: center; font-size: 1em;'>Pregunta sobre personas de la guerra cívil.</p>",
+        "<h1 style='text-align: center; font-size: 3em;'>DocumentAI</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Enhancing Historical Document Accessibility Through a Hybrid RAG and Knowledge Graph System</h2>\n<p style='text-align: center; font-size: 1em;'>Pregunta sobre personas, sitios y lugares relacionados con la Guerra Civil Española</p>",
         elem_id="title"
     )
 
