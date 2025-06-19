@@ -35,7 +35,7 @@ def filter_nodes_global(text):
             return True, "DATE"
     return False, "OTHER"
 
-
+# In general
 def extract_spacy_ents(doc):
     return {ent.text.strip() for ent in doc.ents}
 

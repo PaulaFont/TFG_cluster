@@ -1,32 +1,37 @@
 import networkx as nx
 import html
+from graph_utils import find_similars
 
 def get_shortest_path_context(graph, node1, node2):
     """
     Returns the shortest path between node1 and node2 in the graph as a context string for LLMs.
     Treats all edges as undirected links. The context includes the sequence of nodes and the edge keys (relation) if available.
     """
-    try:
-        undirected_graph = graph.to_undirected()
-        path = nx.shortest_path(undirected_graph, source=node1, target=node2)
-        context_lines = []
-        for i in range(len(path) - 1):
-            src = path[i]
-            tgt = path[i + 1]
-            # Get all edges between src and tgt (in either direction)
-            edges = graph.get_edge_data(src, tgt) or graph.get_edge_data(tgt, src)
-            if edges:
-                # Use the key as the relation
-                for key, edge_attr in edges.items():
-                    relation = key if key is not None else "related_to"
-                    context_lines.append(f"{src} --[{relation}]-- {tgt}")
-            else:
-                context_lines.append(f"{src} --[related_to]-- {tgt}")
-        return "\n".join(context_lines), True
-    except nx.NetworkXNoPath:
-        return f"No path found between '{node1}' and '{node2}'.", False
-    except nx.NodeNotFound as e:
-        return str(e), False
+    node1_new = find_similars(graph.nodes, node1, graph)
+    node2_new = find_similars(graph.nodes, node2, graph)
+    if node1_new and node2_new: 
+        try:
+            undirected_graph = graph.to_undirected()
+            path = nx.shortest_path(undirected_graph, source=node1_new, target=node2_new)
+            context_lines = []
+            for i in range(len(path) - 1):
+                src = path[i]
+                tgt = path[i + 1]
+                # Get all edges between src and tgt (in either direction)
+                edges = graph.get_edge_data(src, tgt) or graph.get_edge_data(tgt, src)
+                if edges:
+                    # Use the key as the relation
+                    for key, edge_attr in edges.items():
+                        relation = key if key is not None else "related_to"
+                        context_lines.append(f"{src} --[{relation}]-- {tgt}")
+                else:
+                    context_lines.append(f"{src} --[related_to]-- {tgt}")
+            return "\n".join(context_lines), True
+        except nx.NetworkXNoPath:
+            return f"No path found between '{node1_new}' and '{node2_new}'.", False
+        except nx.NodeNotFound as e:
+            return str(e), False
+    return "Couldn't find nodes", False
 
 def get_all_paths_context(graph, node1, node2, max_paths=10, max_length=6):
     """
@@ -34,39 +39,43 @@ def get_all_paths_context(graph, node1, node2, max_paths=10, max_length=6):
     Treats all edges as undirected for path finding, but displays the relation in the direction of the actual edge.
     Each path is limited to `max_length` nodes. Paths are ordered from shortest to longest.
     """
-    try:
-        undirected_graph = graph.to_undirected()
-        paths = list(nx.all_simple_paths(undirected_graph, source=node1, target=node2, cutoff=max_length))
-        paths.sort(key=len)
-        context_strings = []
-        for idx, path in enumerate(paths):
-            if idx >= max_paths:
-                break
-            context_lines = []
-            for i in range(len(path) - 1):
-                src = path[i]
-                tgt = path[i + 1]
-                # Check direction: src -> tgt
-                edges = graph.get_edge_data(src, tgt)
-                if edges:
-                    for key, edge_attr in edges.items():
-                        relation = key if key is not None else "related_to"
-                        context_lines.append(f"{src} --[{relation}]--> {tgt}")
-                else:
-                    # Check direction: tgt -> src
-                    edges_rev = graph.get_edge_data(tgt, src)
-                    if edges_rev:
-                        for key, edge_attr in edges_rev.items():
+    node1_new = find_similars(graph.nodes, node1, graph)
+    node2_new = find_similars(graph.nodes, node2, graph)
+    if node1_new and node2_new: 
+        try:
+            undirected_graph = graph.to_undirected()
+            paths = list(nx.all_simple_paths(undirected_graph, source=node1_new, target=node2_new, cutoff=max_length))
+            paths.sort(key=len)
+            context_strings = []
+            for idx, path in enumerate(paths):
+                if idx >= max_paths:
+                    break
+                context_lines = []
+                for i in range(len(path) - 1):
+                    src = path[i]
+                    tgt = path[i + 1]
+                    # Check direction: src -> tgt
+                    edges = graph.get_edge_data(src, tgt)
+                    if edges:
+                        for key, edge_attr in edges.items():
                             relation = key if key is not None else "related_to"
-                            context_lines.append(f"{tgt} --[{relation}]--> {src}")
+                            context_lines.append(f"{src} --[{relation}]--> {tgt}")
                     else:
-                        context_lines.append(f"{src} --[related_to]-- {tgt}")
-            context_strings.append("\n".join(context_lines))
-        if not context_strings:
-            return f"No paths found between '{node1}' and '{node2}'.", False
-        return "\n\n---\n\n".join(context_strings), True
-    except nx.NodeNotFound as e:
-        return str(e), False
+                        # Check direction: tgt -> src
+                        edges_rev = graph.get_edge_data(tgt, src)
+                        if edges_rev:
+                            for key, edge_attr in edges_rev.items():
+                                relation = key if key is not None else "related_to"
+                                context_lines.append(f"{tgt} --[{relation}]--> {src}")
+                        else:
+                            context_lines.append(f"{src} --[related_to]-- {tgt}")
+                context_strings.append("\n".join(context_lines))
+            if not context_strings:
+                return f"No paths found between '{node1_new}' and '{node2_new}'.", False
+            return "\n\n---\n\n".join(context_strings), True
+        except nx.NodeNotFound as e:
+            return str(e), False
+    return "Couldn't find nodes", False
 
 
 def get_neighborhood_subgraph(graph, start_node, hops=1):
@@ -75,16 +84,17 @@ def get_neighborhood_subgraph(graph, start_node, hops=1):
     as context for LLMs.
     Returns a tuple: (context_string, True) if successful, or (error_message, False) if the node is not found.
     """
-    if not graph.has_node(start_node):
-        return f"Node '{start_node}' not found in the graph.", False
+    node_new = find_similars(graph.nodes, start_node, graph)
+    if not graph.has_node(node_new):
+        return f"Node '{node_new}' not found in the graph.", False
 
-    nodes_in_neighborhood = set(nx.ego_graph(graph.to_undirected(), start_node, radius=hops).nodes())
+    nodes_in_neighborhood = set(nx.ego_graph(graph.to_undirected(), node_new, radius=hops).nodes())
     neighborhood_subgraph = graph.subgraph(nodes_in_neighborhood)
 
     if not neighborhood_subgraph.nodes:
-        return f"Neighborhood for '{start_node}' ({hops}-hop) is empty or the node is isolated.", False
+        return f"Neighborhood for '{node_new}' ({hops}-hop) is empty or the node is isolated.", False
 
-    context_lines = [].
+    context_lines = []
     if neighborhood_subgraph.edges:
         for u, v, data in neighborhood_subgraph.edges(data=True):
             edge_keys_data = graph.get_edge_data(u, v)
@@ -150,12 +160,13 @@ def search_graph(global_graph, entity_list):
     else:
         for i in range(len(entity_list)):
             for j in range(i + 1, len(entity_list)):
-                node1 = entity_list[i]
-                node2 = entity_list[j]
-                context, success = get_all_paths_context(global_graph, node1, node2)
-                if success:
-                    results.append(context)
-                    overall_success = True
+                if i != j:
+                    node1 = entity_list[i]
+                    node2 = entity_list[j]
+                    context, success = get_all_paths_context(global_graph, node1, node2)
+                    if success:
+                        results.append(context)
+                        overall_success = True
     return results, overall_success
 
 # ======== QUESTIONS ==================

@@ -193,7 +193,21 @@ class RAGSystem:
             print(f"Error reading document file '{filepath}': {e}")
             return None
 
-    def analyze_query_with_llm(self, user_query):
+    def analyze_query_with_llm(self, user_query, history=None):
+        # TODO:  Allow to go back deeper (not only last)
+        # Give only history in case RAG_ANSWER was True
+        add_history = False
+        if history and len(history) > 1:
+            question = history[-2][0]
+            answer = history[-2][1]
+            if question and answer: 
+                answer = answer.split('\n\n**Respuesta:**\n')[0].strip() 
+                answer = answer.replace("\n", " ")
+                formatted_history = f"{answer}"
+                add_history = True
+                history_prompt = f"""Solo en caso EXTREMADAMENTE necesario, puedes usar el historial de antiguas entidades clave: {formatted_history}\n"""
+                print(f"Adding to prompt {history_prompt}")
+
         """Analyze query with LLM to extract entities"""
         prompt = f"""
         Analiza la siguiente consulta en español e identifica las entidades clave.
@@ -202,7 +216,7 @@ class RAGSystem:
         Consulta del usuario: "{user_query}"
 
         Extrae y clasifica las siguientes entidades:
-        1. QUIÉN (Personas): Nombres de personas, grupos, organizaciones, etc.
+        1. QUIÉN (Personas): Nombres de personas, grupos, organizaciones, etc. LA MAS IMPORTANTE
         2. CUÁNDO (Tiempo): Fechas, períodos, siglos, años, meses, días, etc.
         3. DÓNDE (Lugar): Ubicaciones geográficas, países, ciudades, regiones, etc.
         4. QUÉ (Tema): El tema principal, eventos, conceptos, términos específicos, etc.
@@ -218,7 +232,10 @@ class RAGSystem:
 
         Solo devuelve el JSON, sin comentarios ni explicaciones adicionales.
         """
+        if add_history:
+            prompt += history_prompt
         
+        print(f"USING PROMPT {prompt}")
         if self.llm_client_instance:
             response_text = query_llm(self.llm_client_instance, self.LLM_MODEL_NAME, prompt)
             try:
@@ -442,7 +459,7 @@ class RAGSystem:
             return self.return_info, html_path_for_graph # Return current/last known path
 
         # Stage 1: Query Analysis
-        analyzed_query_dict = self.analyze_query_with_llm(user_query)
+        analyzed_query_dict = self.analyze_query_with_llm(user_query, history)
         user_query_mejorado = analyzed_query_dict.get("consulta_refinada", user_query)
         if not user_query_mejorado.strip(): 
             user_query_mejorado = user_query

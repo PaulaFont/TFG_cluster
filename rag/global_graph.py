@@ -27,7 +27,7 @@ def update_triplets_id(triplets, document_id):
     return new_triplets, attributes
 
 
-def get_triplets_to_add(global_nodes, triplets, document_id):
+def get_triplets_to_add(global_nodes, triplets, document_id, graph):
     new_triplets, attributes = update_triplets_id(triplets, document_id)
 
     # We add global nodes that don't have an ID
@@ -44,14 +44,14 @@ def get_triplets_to_add(global_nodes, triplets, document_id):
         current_o = o
         if not re.search(r'_\d+$', s):
             # Try to find a similar node among the existing global nodes
-            s_match = find_similars(existing_global_nodes_list, s)
+            s_match = find_similars(existing_global_nodes_list, s, graph)
             if s_match:
                 current_s = s_match
                 attributes[s_match] = attributes[current_s]
 
         if not re.search(r'_\d+$', o):
             # Try to find a similar node among the existing global nodes
-            o_match = find_similars(existing_global_nodes_list, o)
+            o_match = find_similars(existing_global_nodes_list, o, graph)
             if o_match:
                 current_o = o_match
                 attributes[o_match] = attributes[current_o]
@@ -62,6 +62,6 @@ def get_triplets_to_add(global_nodes, triplets, document_id):
 
 def update_global_graph(processed_triplets, global_graph, document_id, filepath): 
     existing_nodes = global_graph.nodes()
-    triplets_to_add, attributes = get_triplets_to_add(existing_nodes, processed_triplets, document_id)
+    triplets_to_add, attributes = get_triplets_to_add(existing_nodes, processed_triplets, document_id, global_graph)
     add_triplets(global_graph, triplets_to_add, filepath, tag=True, attributes=attributes) # Adds processed triplets and saves graph
     return global_graph

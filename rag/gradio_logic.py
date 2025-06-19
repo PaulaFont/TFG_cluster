@@ -18,7 +18,7 @@ HTML_HEIGHT=800
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
 INPUT_FOLDER = "/data/users/pfont/input"
 
-def clean_text_context(text):
+def html_text_context(text):
     # We convert some characters to HTML to improve visualization
     context_text = html.escape(text)
     context = context_text.replace('*', '&#42;') 
@@ -85,32 +85,6 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
     all_conversations_state = gr.State([initial_conversation])
     active_conversation_id_state = gr.State(initial_conversation["id"])
     showing_global_graph_state = gr.State(False) # False = current graph, True = global graph
-    gr.HTML("""
-        <style>
-            .image-wrapper {
-                position: relative;
-                display: inline-block;
-                overflow: visible;
-            }
-
-            .hover-image {
-                width: 80px;
-                height: auto;
-                object-fit: contain;
-                display: block;
-                transition: transform 0.2s ease, z-index 0.2s ease;
-                z-index: 1;
-            }
-
-            .image-wrapper:hover .hover-image {
-                position: absolute;
-                transform: scale(2); /* Ajusta el zoom */
-                z-index: 10;
-                background: white;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            }
-        </style>
-    """)
     gr.Markdown(
         "<h1 style='text-align: center; font-size: 3em;'>DocumentAI</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Enhancing Historical Document Accessibility Through a Hybrid RAG and Knowledge Graph System</h2>\n<p style='text-align: center; font-size: 1em;'>Pregunta sobre personas, sitios y lugares relacionados con la Guerra Civil Española</p>",
         elem_id="title"
@@ -132,17 +106,19 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             chatbot = gr.Chatbot(
                 label="Chat", 
                 show_label=False,
-                height=HTML_HEIGHT
+                height=HTML_HEIGHT,
+                type="tuples"
             )
-            with gr.Row():  # Place input and send button in the same row
-                msg_input = gr.Textbox(
-                    placeholder="Escribe tu pregunta aquí...",
-                    label="Tu Pregunta",
-                    show_label=False,
-                    lines=2,
-                    interactive=True  # Ensure the textbox is interactive
-                )
-                # send_btn = gr.Button("➤", elem_id="send_button", variant="primary", scale=1)  # Smaller scale for button #TODO: Decide to put it or not
+            with gr.Group():
+                with gr.Row(equal_height=True):
+                    msg_input = gr.Textbox(
+                        placeholder="Escribe tu pregunta aquí...",
+                        label="Tu Pregunta",
+                        show_label=False,
+                        lines=2,
+                        interactive=True  # Ensure the textbox is interactive
+                    )
+                    send_btn = gr.Button("➤", elem_id="send_button", variant="primary", size="sm", scale=0)
 
         with gr.Column(scale=2, min_width=300): # Graph display area
             with gr.Row():
@@ -267,7 +243,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
            
             if context_text:
                 markdown_response_parts.append(
-                    f'\n\n**Contexto:**\n <pre style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;">{clean_text_context(context_text)}</pre>'
+                    f'\n\n**Contexto:**\n <pre style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;">{html_text_context(context_text)}</pre>'
                 )
 
                 markdown_response_parts.append(f"\n*Contexto recuperado del documento {answer_info['id']} utilizando la versión {answer_info['processing_version']}*")
@@ -291,13 +267,13 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                 graph_context_list = answer_info.get("graph_context") # This is a list of strings
 
                 if graph_llm_answer_text:
-                    markdown_response_parts.append(f"\n\n<hr style='border-top: 1px dashed #ccc;'>\n") # Visual separator
-                    markdown_response_parts.append(f"**Respuesta (basada en grafo global):**\n{html.escape(graph_llm_answer_text)}")
+                    markdown_response_parts.append(f"\n<hr style='border-top: 1px dashed #ccc;'>") # Visual separator
+                    markdown_response_parts.append(f"\n\n**Respuesta (basada en grafo global):**\n {html.escape(graph_llm_answer_text)}")
                 
                 if graph_context_list:
                     # Join the list of context strings into a single block for display
                     graph_context_str_display = "\n\n---\n\n".join(graph_context_list) # Separator between contexts
-                    markdown_response_parts.append(f"\n\n**Contexto del Grafo Global Utilizado:**\n<pre style='max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #f0f0f0; white-space: pre-wrap;'>{html.escape(graph_context_str_display)}</pre>")
+                    markdown_response_parts.append(f"\n\n**Contexto del grafo global:**\n <pre style='max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;'>{html.escape(graph_context_str_display)}</pre>")
             
             bot_response = "".join(markdown_response_parts)
 
@@ -352,11 +328,11 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
     )
     
-    # send_btn.click(
-    #     fn=on_send_message_submit,
-    #     inputs=[msg_input, active_conversation_id_state, all_conversations_state],
-    #     outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
-    # )
+    send_btn.click(
+        fn=on_send_message_submit,
+        inputs=[msg_input, active_conversation_id_state, all_conversations_state],
+        outputs=[chatbot, graph_output, msg_input, all_conversations_state, toggle_graph_btn, showing_global_graph_state]
+    )
 
     toggle_graph_btn.click(
         fn=handle_toggle_graph_view,

@@ -45,6 +45,32 @@ def filter_triplet(triplet):
 # Apply string edit distance
 # ------------------------------------------------------------------------
 
+def get_most_important(graph, nodes):
+    """
+    Returns the node from the given list that has the most neighbors in the graph.
+
+    Args:
+        graph (networkx.Graph): The graph to analyze.
+        nodes (list): A list of nodes to check.
+
+    Returns:
+        str: The node with the most neighbors, or None if the list is empty.
+    """
+    if not nodes:
+        return None
+
+    max_neighbors = -1
+    most_important_node = None
+
+    for node in nodes:
+        if graph.has_node(node):
+            num_neighbors = len(list(graph.neighbors(node)))
+            if num_neighbors > max_neighbors:
+                max_neighbors = num_neighbors
+                most_important_node = node
+
+    return most_important_node
+
 def are_strings_similar(word1, word2):
     """
     Determines whether two strings are similar based on a normalized Levenshtein distance.
@@ -92,16 +118,19 @@ def are_strings_similar(word1, word2):
     dist = levenshtein.distance(s1, s2) / max_len
     return dist <= threshold
 
-def find_similars(lst, word):
+def find_similars(lst, word, graph):
     """
     Finds the first string in lst that is similar to word using are_strings_similar.
     If more than one match is found, prints the first match.
-    Returns the first similar string, or None if no match is found.
+    Returns the most important similar string, or None if no match is found.
     """
     matches = [item for item in lst if are_strings_similar(item, word)]
     if matches:
         if len(matches) > 1:
-            print(f"Multiple similar strings found. Returning the first: {matches[0]}")
+            node_important = get_most_important(graph, matches)
+            if node_important:
+                print(f"Multiple similar strings found. Returning most relevant one {node_important}.")
+                return node_important
         return matches[0]
     return None
   
@@ -141,8 +170,8 @@ def filter_and_fix_triplets(current_graph, initial_triplets):
             continue
 
         # 1. Match nodes to existing ones in the graph
-        sub_match = find_similars(existing_nodes, s)
-        ob_match = find_similars(existing_nodes, o)
+        sub_match = find_similars(existing_nodes, s, current_graph)
+        ob_match = find_similars(existing_nodes, o, current_graph)
 
         subj_final = sub_match if sub_match else s
         obj_final = ob_match if ob_match else o
@@ -178,7 +207,7 @@ def filter_and_fix_triplets(current_graph, initial_triplets):
         if sub_ner_triplets:
             # Try to match the last component of the subject chain
             last_sub_component = sub_components[-1]
-            sub_match2 = find_similars(existing_nodes, last_sub_component)
+            sub_match2 = find_similars(existing_nodes, last_sub_component, current_graph)
             linking_subj = sub_match2 if sub_match2 else last_sub_component
         else:
             linking_subj = subj_final
@@ -187,7 +216,7 @@ def filter_and_fix_triplets(current_graph, initial_triplets):
         if obj_ner_triplets:
             # Try to match the first component of the object chain
             first_obj_component = obj_components[0]
-            ob_match2 = find_similars(existing_nodes, first_obj_component)
+            ob_match2 = find_similars(existing_nodes, first_obj_component, current_graph)
             linking_obj = ob_match2 if ob_match2 else first_obj_component
         else:
             linking_obj = obj_final
