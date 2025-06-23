@@ -46,15 +46,15 @@ def get_triplets_to_add(global_nodes, triplets, document_id, graph):
             # Try to find a similar node among the existing global nodes
             s_match = find_similars(existing_global_nodes_list, s, graph)
             if s_match:
-                current_s = s_match
                 attributes[s_match] = attributes[current_s]
+                current_s = s_match
 
         if not re.search(r'_\d+$', o):
             # Try to find a similar node among the existing global nodes
             o_match = find_similars(existing_global_nodes_list, o, graph)
             if o_match:
-                current_o = o_match
                 attributes[o_match] = attributes[current_o]
+                current_o = o_match
         
         final_triplets.append((current_s, p, current_o))
     return final_triplets, attributes

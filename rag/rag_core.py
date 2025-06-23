@@ -24,7 +24,7 @@ LLM_HOSTING = f"http://localhost:{PORT}/v1"
 BASE_DIRECTORY = "/data/users/pfont/"
 DOCUMENTS_PATH = "/data/users/pfont/processed_final"
 HTML_HEIGHT=800
-
+LOG_BASE_DIRECTORY = "/data/users/pfont/final_logs"
 
 class RAGSystem:
     """
@@ -33,10 +33,11 @@ class RAGSystem:
     """
     
     def __init__(self, base_document_directory=BASE_DIRECTORY, 
-                 graph_document_directory=None):
+                 graph_document_directory=None, conv_directory="conversations/"):
         # Configuration
         self.BASE_DOCUMENT_DIRECTORY = base_document_directory
-        self.GRAPH_DOCUMENT_DIRECTORY = os.path.realpath(graph_document_directory or os.path.join(base_document_directory, "graph/"))
+        self.GRAPH_DOCUMENT_DIRECTORY = os.path.realpath(graph_document_directory or os.path.join(LOG_BASE_DIRECTORY, "graph/"))
+        self.CONV_DIRECTORY = os.path.join(LOG_BASE_DIRECTORY, conv_directory)
         self.GRAPH_DIRECTORY_ID = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, "graph_ids/")
         self.SAVED_EMBEDDINGS_FILENAME = "corpus_embeddings_3.pt" # Saved in /data
         self.SAVED_PASSAGES_DATA = "passages_data.json"  # Saved locally
@@ -53,7 +54,7 @@ class RAGSystem:
 
         # Conversation logging
         self.CONVERSATIONS_LOG_FILENAME = f"conversations_log_{self.session_id}.csv"
-        self.conversations_log_path = os.path.join(self.BASE_DOCUMENT_DIRECTORY, self.CONVERSATIONS_LOG_FILENAME)
+        self.conversations_log_path = os.path.join(self.CONV_DIRECTORY, self.CONVERSATIONS_LOG_FILENAME)
         
         # Create directories
         os.makedirs(self.GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
@@ -117,17 +118,6 @@ class RAGSystem:
         self._load_or_create_embeddings()
         
         print("Initialization complete.")
-
-    def _save_conversations_to_disk(conversations):
-        os.makedirs(os.path.dirname(CONVERSATIONS_SAVE_PATH), exist_ok=True)
-        with open(CONVERSATIONS_SAVE_PATH, "w", encoding="utf-8") as f:
-            json.dump(conversations, f, ensure_ascii=False, indent=2)
-
-    def _load_conversations_from_disk():
-        if os.path.exists(CONVERSATIONS_SAVE_PATH):
-            with open(CONVERSATIONS_SAVE_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return None
 
     def _load_or_create_passages(self, passages_filename):
         """Load or create passage data"""
@@ -239,7 +229,11 @@ class RAGSystem:
         2. CUÁNDO (Tiempo): Fechas, períodos, siglos, años, meses, días, etc.
         3. DÓNDE (Lugar): Ubicaciones geográficas, países, ciudades, regiones, etc.
         4. QUÉ (Tema): El tema principal, eventos, conceptos, términos específicos, etc.
-
+        """
+        if add_history:
+            prompt += history_prompt
+        
+        prompt += """
         Responde en el siguiente formato JSON:
         {{
         "quien": ["entidad1", "entidad2", ...] o [],
@@ -251,8 +245,6 @@ class RAGSystem:
 
         Solo devuelve el JSON, sin comentarios ni explicaciones adicionales.
         """
-        if add_history:
-            prompt += history_prompt
         
         print(f"USING PROMPT {prompt}")
         if self.llm_client_instance:
@@ -620,11 +612,8 @@ class RAGSystem:
             search_terms=search_terms_essential,
             refined_query=user_query_mejorado,
             document_info=full_document_for_llm_data,
-            cross_score=sorted_conceptual_docs[0][1][0] if sorted_conceptual_docs else None,
-            graph_context=self.return_info.get("graph_context")
+            cross_score=sorted_conceptual_docs[0][1][0] if sorted_conceptual_docs else None
         )
-        
-        self.export_conversation_log_as_json()
 
         return self.return_info, html_path_for_graph
 
@@ -695,7 +684,7 @@ class RAGSystem:
     def _initialize_conversation_log(self):
         """Initialize the conversation log CSV file with headers"""
         headers = [
-            'timestamp',
+            'session_id',
             'conversation_id', 
             'question',
             'answer',
@@ -726,8 +715,7 @@ class RAGSystem:
                 print(f"Error initializing conversation log: {e}")
 
     def _log_conversation(self, conversation_id, question, answer_parts, analyzed_query_dict, 
-                         search_terms, refined_query, document_info=None, cross_score=None, 
-                         graph_context=None):
+                         search_terms, refined_query, document_info=None, cross_score=None):
         """Log conversation details to CSV file"""        
         try:
             # Extract answer text from response_parts
@@ -754,9 +742,10 @@ class RAGSystem:
             
             # Graph answer info
             graph_answer_text = self.return_info.get("graph_answer", "")
-            graph_context_str = ""
-            if graph_context and isinstance(graph_context, list):
-                graph_context_str = " | ".join(graph_context)
+            graph_context_list = self.return_info.get("graph_context", "")
+            graph_context_str= " | ".join(graph_context_list)
+            graph_context_str = graph_context_str.replace("---", " | ")
+            graph_context_str = graph_context_str.replace("\n", " | ")
             
             # Document info
             doc_id = document_info.get("id", "") if document_info else ""
@@ -764,7 +753,7 @@ class RAGSystem:
             proc_version = document_info.get("processing_version", "") if document_info else ""
             
             row_data = [
-                datetime.datetime.now().isoformat(),
+                self.session_id,
                 conversation_id or "",
                 question,
                 answer_text,
@@ -793,34 +782,6 @@ class RAGSystem:
             
         except Exception as e:
             print(f"Error logging conversation: {e}")
-
-    def export_conversation_log_as_json(self, output_path=None):
-        """Export conversation log as JSON format"""        
-        if not output_path:
-            json_filename = f"conversations_log_{self.session_id}.json"
-            output_path = os.path.join(self.BASE_DOCUMENT_DIRECTORY, json_filename)
-        
-        try:
-            conversations = []
-            if os.path.exists(self.conversations_log_path):
-                with open(self.conversations_log_path, 'r', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        conversations.append(dict(row))
-                
-                with open(output_path, 'w', encoding='utf-8') as jsonfile:
-                    json.dump(conversations, jsonfile, indent=2, ensure_ascii=False)
-                
-                print(f"Exported conversation log to JSON: {output_path}")
-                return output_path
-            else:
-                print(f"No conversation log file found at: {self.conversations_log_path}")
-                return None
-                
-        except Exception as e:
-            print(f"Error exporting conversation log to JSON: {e}")
-            return None
-
 
     def is_initialized(self):
         """Check if the system is properly initialized"""

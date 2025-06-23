@@ -81,15 +81,19 @@ def get_graph_html(graph_file_path):
         return f"<p>Error al cargar el grafo: {str(e)}</p>"
 
 # Gradio UI
-with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
+with gr.Blocks(title="ArchiText", theme='default') as demo:
     # --- State Variables ---
     initial_conversation = create_new_conversation_entry("Conversación") # Crea nueva conversación
     all_conversations_state = gr.State([initial_conversation])
     active_conversation_id_state = gr.State(initial_conversation["id"])
     showing_global_graph_state = gr.State(False) # False = current graph, True = global graph
     gr.Markdown(
-        "<h1 style='text-align: center; font-size: 3em;'>DocumentAI</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Enhancing Historical Document Accessibility Through a Hybrid RAG and Knowledge Graph System</h2>\n<p style='text-align: center; font-size: 1em;'>Pregunta sobre personas, sitios y lugares relacionados con la Guerra Civil Española</p>",
+        "<h1 style='text-align: center; font-size: 3em;'>ArchiText</h1>\n<h2 style='text-align: center; font-size: 1.5em;'>Conversational Retrieval and Knowledge Modeling from Historical Documents</h2>",
         elem_id="title"
+    )
+    current_conv_id_display = gr.Markdown(
+        f"<div style='text-align: center;'><strong>ID de sesión:</strong> <code onclick='navigator.clipboard.writeText(\"{rag_system.session_id}\");' style='cursor: pointer;'>{rag_system.session_id}</code></div>",
+        elem_id="session_id"
     )
 
     with gr.Row(equal_height=False):
@@ -97,7 +101,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             gr.Markdown(
                 "<h3 style='text-align: center; color: #4CAF50;'>Conversaciones</h3>")
             current_conv_id_display = gr.Markdown(
-                f"**ID Actual:** `{initial_conversation['id']}`",
+                f"<div style='text-align: center;'><strong>ID Actual:</strong> <code onclick='navigator.clipboard.writeText(\"{initial_conversation['id']}\");' style='cursor: pointer;'>{initial_conversation['id']}</code></div>",
                 elem_id="current_conv_id"
             )
             conversation_selector = gr.Radio(
@@ -119,19 +123,18 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             with gr.Group():
                 with gr.Row(equal_height=True):
                     msg_input = gr.Textbox(
-                        placeholder="Escribe tu pregunta aquí...",
+                        placeholder="Pregunta sobre personas, sitios y lugares relacionados con la Guerra Civil Española",
                         label="Tu Pregunta",
                         show_label=False,
                         lines=2,
                         interactive=True  # Ensure the textbox is interactive
                     )
-                    send_btn = gr.Button("➤", elem_id="send_button", variant="primary", size="sm", scale=0)
+                    send_btn = gr.Button("Shift ↵", elem_id="send_button", variant="primary", size="lg", scale=0)
 
         with gr.Column(scale=2, min_width=300): # Graph display area
-            with gr.Row():
-                gr.Markdown(
+            gr.Markdown(
                 "<h3 style='text-align: center; color: #4CAF50;'>Grafo de Conocimiento</h3>")
-                toggle_graph_btn = gr.Button("Ver Grafo Global", scale=1)
+            toggle_graph_btn = gr.Button("Ver Grafo Global", scale=1)
             graph_output = gr.HTML()
 
 
@@ -281,8 +284,8 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                 
                 if graph_context_list:
                     # Join the list of context strings into a single block for display
-                    graph_context_str_display = "\n\n---\n\n".join(graph_context_list) # Separator between contexts
-                    markdown_response_parts.append(f"\n\n**Contexto del grafo global:**\n <pre style='max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;'>{html.escape(graph_context_str_display)}</pre>")
+                    graph_context_str_display = "---".join(graph_context_list) # Separator between contexts
+                    markdown_response_parts.append(f"\n\n**Contexto del grafo global:**\n <pre style='max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; background-color: #333; white-space: pre-line;'>{html_text_context(graph_context_str_display)}</pre>")
             
             bot_response = "".join(markdown_response_parts)
 
