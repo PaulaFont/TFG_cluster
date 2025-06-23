@@ -13,7 +13,7 @@ from graph_search import get_centrality_measures
 print("Starting RAG program initialization...")
 rag_system = RAGSystem()
 rag_system.initialize_models_and_data()
-HTML_HEIGHT=800
+HTML_HEIGHT=600
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0" #TODO: Check, doesn't work
 INPUT_FOLDER = "/data/users/pfont/input"
@@ -41,6 +41,8 @@ def create_new_conversation_entry(base_name):
     #TODO: Change name
     """Helper to create a new conversation dictionary."""
     id_actual = str(uuid.uuid4())
+    # Show first 8 characters of ID for readability
+    short_id = id_actual[:8]
     return {
         "id": id_actual,
         "name": f"{base_name}_{id_actual}",
@@ -94,6 +96,10 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
         with gr.Column(scale=1, min_width=250): # Sidebar for conversations
             gr.Markdown(
                 "<h3 style='text-align: center; color: #4CAF50;'>Conversaciones</h3>")
+            current_conv_id_display = gr.Markdown(
+                f"**ID Actual:** `{initial_conversation['id']}`",
+                elem_id="current_conv_id"
+            )
             conversation_selector = gr.Radio(
                 label="Selecciona una conversación",
                 choices=[(initial_conversation["name"], initial_conversation["id"])],
@@ -109,6 +115,7 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                 height=HTML_HEIGHT,
                 type="tuples"
             )
+            
             with gr.Group():
                 with gr.Row(equal_height=True):
                     msg_input = gr.Textbox(
@@ -176,7 +183,8 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
             updated_conversations, # Update all_conversations_state
             new_conv["id"],  # Update active_conversation_id_state
             gr.update(value="Ver Grafo Global"), # Reset toggle button text
-            False # Reset showing_global_graph_state
+            False, # Reset showing_global_graph_state
+            gr.update(value=f"**ID Actual:** `{new_conv['id']}`") # Update current conv ID display
         )
 
     def handle_switch_conversation_change(selected_conv_id, current_conversations):
@@ -192,11 +200,12 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
                 get_graph_html(active_conv_to_switch_to["graph_path"]),
                 active_conv_to_switch_to["id"],
                 gr.update(value="Ver Grafo Global"), # Reset toggle button text
-                False # Reset showing_global_graph_state
+                False, # Reset showing_global_graph_state
+                gr.update(value=f"**ID Actual:** `{active_conv_to_switch_to['id']}`") # Update current conv ID display
             )
         
         # Fallback
-        return [], get_graph_html(None), selected_conv_id, gr.update(value="Ver Grafo Global"), False
+        return [], get_graph_html(None), selected_conv_id, gr.update(value="Ver Grafo Global"), False, gr.update(value=f"**ID Actual:** `{selected_conv_id if selected_conv_id else 'N/A'}...`")
 
     def on_send_message_submit(user_input, active_conv_id, current_conversations_list_state):
         # This function is a generator
@@ -308,13 +317,13 @@ with gr.Blocks(title="Chatbot Histórico con Grafo", theme='default') as demo:
     new_conv_btn.click(
         fn=handle_new_conversation_click,
         inputs=[all_conversations_state],
-        outputs=[chatbot, graph_output, conversation_selector, all_conversations_state, active_conversation_id_state, toggle_graph_btn, showing_global_graph_state]
+        outputs=[chatbot, graph_output, conversation_selector, all_conversations_state, active_conversation_id_state, toggle_graph_btn, showing_global_graph_state, current_conv_id_display]
     )
 
     conversation_selector.change(
         fn=handle_switch_conversation_change,
         inputs=[conversation_selector, all_conversations_state],
-        outputs=[chatbot, graph_output, active_conversation_id_state, toggle_graph_btn, showing_global_graph_state]
+        outputs=[chatbot, graph_output, active_conversation_id_state, toggle_graph_btn, showing_global_graph_state, current_conv_id_display]
     )
     
     # For on_send_message_submit, inputs now include showing_global_graph_state,

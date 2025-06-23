@@ -14,6 +14,8 @@ import gradio as gr
 import networkx as nx
 import datetime, uuid
 from graph_search import search_graph
+import csv
+
 
 os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
 
@@ -49,6 +51,9 @@ class RAGSystem:
         self.session_global_graph_pkl_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.pkl")
         self.session_global_graph_html_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.html")
 
+        # Conversation logging
+        self.CONVERSATIONS_LOG_FILENAME = f"conversations_log_{self.session_id}.csv"
+        self.conversations_log_path = os.path.join(self.BASE_DOCUMENT_DIRECTORY, self.CONVERSATIONS_LOG_FILENAME)
         
         # Create directories
         os.makedirs(self.GRAPH_DOCUMENT_DIRECTORY, exist_ok=True)
@@ -74,6 +79,9 @@ class RAGSystem:
         self.RAG_ANSWER = False
         self.GRAPH_ANSWER = False
         self.return_info = {}
+
+        # Initialize conversation log file
+        self._initialize_conversation_log()
 
     def initialize_models_and_data(self, 
                                  bi_encoder_name=None, 
@@ -109,6 +117,17 @@ class RAGSystem:
         self._load_or_create_embeddings()
         
         print("Initialization complete.")
+
+    def _save_conversations_to_disk(conversations):
+        os.makedirs(os.path.dirname(CONVERSATIONS_SAVE_PATH), exist_ok=True)
+        with open(CONVERSATIONS_SAVE_PATH, "w", encoding="utf-8") as f:
+            json.dump(conversations, f, ensure_ascii=False, indent=2)
+
+    def _load_conversations_from_disk():
+        if os.path.exists(CONVERSATIONS_SAVE_PATH):
+            with open(CONVERSATIONS_SAVE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return None
 
     def _load_or_create_passages(self, passages_filename):
         """Load or create passage data"""
@@ -591,6 +610,22 @@ class RAGSystem:
             response_parts.append("\nNo se identificó un documento principal como contexto. Reescribir la pregunta")
 
         self.return_info["llm_answer"] = response_parts
+        
+        # Log conversation details to CSV
+        self._log_conversation(
+            conversation_id=conversation_id,
+            question=user_query,
+            answer_parts=response_parts,
+            analyzed_query_dict=analyzed_query_dict,
+            search_terms=search_terms_essential,
+            refined_query=user_query_mejorado,
+            document_info=full_document_for_llm_data,
+            cross_score=sorted_conceptual_docs[0][1][0] if sorted_conceptual_docs else None,
+            graph_context=self.return_info.get("graph_context")
+        )
+        
+        self.export_conversation_log_as_json()
+
         return self.return_info, html_path_for_graph
 
     def update_global_knowledge_graph(self, processed_triplets, document_id):
@@ -656,6 +691,136 @@ class RAGSystem:
         else:
             print(f"Failed to generate or find HTML at: {new_html_file_path}. Returning None.")
             return None, triplets_added # Devolver None si la generación falla
+
+    def _initialize_conversation_log(self):
+        """Initialize the conversation log CSV file with headers"""
+        headers = [
+            'timestamp',
+            'conversation_id', 
+            'question',
+            'answer',
+            'rag_answer_flag',
+            'graph_answer_flag',
+            'graph_answer_text',
+            'quien_entities',
+            'cuando_entities', 
+            'donde_entities',
+            'que_entities',
+            'search_terms',
+            'refined_query',
+            'document_id',
+            'document_filename',
+            'processing_version',
+            'cross_encoder_score',
+            'graph_context_snippets'
+        ]
+        
+        # Create file with headers if it doesn't exist
+        if not os.path.exists(self.conversations_log_path):
+            try:
+                with open(self.conversations_log_path, 'w', newline='', encoding='utf-8') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(headers)
+                print(f"Initialized conversation log at: {self.conversations_log_path}")
+            except Exception as e:
+                print(f"Error initializing conversation log: {e}")
+
+    def _log_conversation(self, conversation_id, question, answer_parts, analyzed_query_dict, 
+                         search_terms, refined_query, document_info=None, cross_score=None, 
+                         graph_context=None):
+        """Log conversation details to CSV file"""        
+        try:
+            # Extract answer text from response_parts
+            answer_text = ""
+            if isinstance(answer_parts, list):
+                # Join all parts and clean up the response formatting
+                full_response = "".join(answer_parts)
+                # Extract just the answer part, removing search info
+                if "**Respuesta:**" in full_response:
+                    answer_text = full_response.split("**Respuesta:**")[1].strip()
+                    if answer_text.startswith("\n"):
+                        answer_text = answer_text[1:].strip()
+                else:
+                    answer_text = full_response.strip()
+            else:
+                answer_text = str(answer_parts)
+
+            # Prepare entity lists
+            quien_entities = ", ".join(analyzed_query_dict.get("quien", []))
+            cuando_entities = ", ".join(analyzed_query_dict.get("cuando", []))
+            donde_entities = ", ".join(analyzed_query_dict.get("donde", []))
+            que_entities = ", ".join(analyzed_query_dict.get("que", []))
+            search_terms_str = ", ".join(search_terms) if search_terms else ""
+            
+            # Graph answer info
+            graph_answer_text = self.return_info.get("graph_answer", "")
+            graph_context_str = ""
+            if graph_context and isinstance(graph_context, list):
+                graph_context_str = " | ".join(graph_context)
+            
+            # Document info
+            doc_id = document_info.get("id", "") if document_info else ""
+            doc_filename = document_info.get("filename", "") if document_info else ""
+            proc_version = document_info.get("processing_version", "") if document_info else ""
+            
+            row_data = [
+                datetime.datetime.now().isoformat(),
+                conversation_id or "",
+                question,
+                answer_text,
+                self.RAG_ANSWER,
+                self.GRAPH_ANSWER,
+                graph_answer_text,
+                quien_entities,
+                cuando_entities,
+                donde_entities,
+                que_entities,
+                search_terms_str,
+                refined_query,
+                doc_id,
+                doc_filename,
+                proc_version,
+                cross_score if cross_score else "",
+                graph_context_str
+            ]
+            
+            # Append to CSV file
+            with open(self.conversations_log_path, 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(row_data)
+                
+            print(f"Logged conversation to: {self.conversations_log_path}")
+            
+        except Exception as e:
+            print(f"Error logging conversation: {e}")
+
+    def export_conversation_log_as_json(self, output_path=None):
+        """Export conversation log as JSON format"""        
+        if not output_path:
+            json_filename = f"conversations_log_{self.session_id}.json"
+            output_path = os.path.join(self.BASE_DOCUMENT_DIRECTORY, json_filename)
+        
+        try:
+            conversations = []
+            if os.path.exists(self.conversations_log_path):
+                with open(self.conversations_log_path, 'r', encoding='utf-8') as csvfile:
+                    reader = csv.DictReader(csvfile)
+                    for row in reader:
+                        conversations.append(dict(row))
+                
+                with open(output_path, 'w', encoding='utf-8') as jsonfile:
+                    json.dump(conversations, jsonfile, indent=2, ensure_ascii=False)
+                
+                print(f"Exported conversation log to JSON: {output_path}")
+                return output_path
+            else:
+                print(f"No conversation log file found at: {self.conversations_log_path}")
+                return None
+                
+        except Exception as e:
+            print(f"Error exporting conversation log to JSON: {e}")
+            return None
+
 
     def is_initialized(self):
         """Check if the system is properly initialized"""
