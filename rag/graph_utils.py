@@ -8,7 +8,7 @@ from num2words import num2words
 import math
 from ner_logic import ner_function, link_components_by_context
 
-MAX_LEN_NODE = 6 #(words)
+MAX_LEN_NODE = 4 #(words)
 MAX_LEN_EDGE = 5 #(words)
 
 def filter_edge(edge):

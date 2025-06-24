@@ -110,6 +110,57 @@ def get_neighborhood_subgraph(graph, start_node, hops=1):
 
     return "\n".join(context_lines), True
 
+def get_relevant_neighborhood_subgraph(graph, start_node, max_hops=3):
+    """
+    Expands the neighborhood search around a start_node until it finds a relevant node
+    (PERSON, LOCATION, or DATE) or reaches max_hops.
+    A relevant node is one with a 'ner_tag' of 'PERSON', 'LOCATION', or 'DATE'.
+    Returns a string representation of the final subgraph as context for LLMs.
+    Returns a tuple: (context_string, True) if successful, or (error_message, False).
+    """
+    node_new = find_similars(graph.nodes, start_node, graph)
+    if not graph.has_node(node_new):
+        return f"Node '{node_new}' not found in the graph.", False
+
+    relevant_tags = {'PERSON', 'LOCATION', 'DATE'}
+    final_hops = 0
+
+    for hops in range(1, max_hops + 1):
+        final_hops = hops
+        nodes_in_neighborhood = set(nx.ego_graph(graph.to_undirected(), node_new, radius=hops).nodes())
+        
+        # Check if any node in the current neighborhood is relevant
+        has_relevant_node = any(
+            graph.nodes[node].get('ner_tag') in relevant_tags
+            for node in nodes_in_neighborhood
+        )
+        
+        if has_relevant_node:
+            break  # Stop expanding once a relevant node is found
+
+    # Build the subgraph for the final hop count
+    nodes_in_final_neighborhood = set(nx.ego_graph(graph.to_undirected(), node_new, radius=final_hops).nodes())
+    neighborhood_subgraph = graph.subgraph(nodes_in_final_neighborhood)
+
+    if not neighborhood_subgraph.nodes:
+        return f"Neighborhood for '{node_new}' ({final_hops}-hop) is empty or the node is isolated.", False
+
+    context_lines = []
+    if neighborhood_subgraph.edges:
+        for u, v, data in neighborhood_subgraph.edges(data=True):
+            edge_keys_data = graph.get_edge_data(u, v)
+            if edge_keys_data:
+                for key, attr in edge_keys_data.items():
+                    relation = key if key is not None else "related_to"
+                    if graph.is_directed():
+                        context_lines.append(f"{u} --[{relation}]--> {v}")
+                    else:
+                        context_lines.append(f"{u} --[{relation}]-- {v}")
+    else:
+        context_lines.append(f"No edges in the neighborhood for '{node_new}' up to {final_hops} hops.")
+
+    return "\n".join(context_lines), True
+
 def get_common_neighbors_context(graph, node1, node2):
     #TODO: not using, decide if I want to use it
     """
@@ -147,26 +198,33 @@ def get_common_neighbors_context(graph, node1, node2):
                 context_lines.append(f"  {node2} --[{relation}]--> {neighbor}")
     return "\n".join(context_lines), True
 
+def get_nodes_in_graph(global_graph, entity_list):
+    actual_nodes_graph = []
+    for entity in entity_list:
+        node_new = find_similars(global_graph.nodes, entity, global_graph)
+        if global_graph.has_node(node_new):
+            actual_nodes_graph.append(node_new)
+    return actual_nodes_graph
 
 def search_graph(global_graph, entity_list):
     # Returns (list of context strings, bool: whether any context was found)
+    real_entity_list = get_nodes_in_graph(global_graph, entity_list) #Get entities that are actually in the graph
     results = []
     overall_success = False
-    if len(entity_list) == 1:
-        context, success = get_neighborhood_subgraph(global_graph, entity_list[0], hops=1)
+    if len(real_entity_list) == 1:
+        context, success = get_relevant_neighborhood_subgraph(global_graph, real_entity_list[0])
         if success:
             results.append(context)
             overall_success = True
-    else:
-        for i in range(len(entity_list)):
-            for j in range(i + 1, len(entity_list)):
-                if i != j:
-                    node1 = entity_list[i]
-                    node2 = entity_list[j]
-                    context, success = get_all_paths_context(global_graph, node1, node2)
-                    if success:
-                        results.append(context)
-                        overall_success = True
+    elif len(real_entity_list) > 1:
+        for i in range(len(real_entity_list)):
+            for j in range(i + 1, len(real_entity_list)):
+                node1 = real_entity_list[i]
+                node2 = real_entity_list[j]
+                context, success = get_all_paths_context(global_graph, node1, node2)
+                if success:
+                    results.append(context)
+                    overall_success = True
     return results, overall_success
 
 # ======== QUESTIONS ==================

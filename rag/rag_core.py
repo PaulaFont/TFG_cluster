@@ -283,7 +283,7 @@ class RAGSystem:
         Tu tarea es responder a la pregunta del usuario basándote *únicamente* en los hechos proporcionados en el "CONTEXTO DEL GRAFO".
         El contexto se presenta como una lista de tripletas con el formato: Sujeto --[Relación]--> Objeto.
 
-        Debes ser conciso y responder directamente. No infieras ni inventes información que no esté explícitamente en las tripletas.
+        Debes responder directamente. No infieras ni inventes información que no esté explícitamente en las tripletas.
         Si la información no se puede deducir directamente de las tripletas, debes indicarlo.
 
         Tu respuesta DEBE ser un objeto JSON válido. ASEGÚRATE de que la salida sea *únicamente* el JSON y nada más.
