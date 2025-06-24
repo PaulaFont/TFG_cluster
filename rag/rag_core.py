@@ -51,6 +51,7 @@ class RAGSystem:
         self.SESSION_GLOBAL_GRAPH_FILENAME_BASE = f"global_graph_session_{self.session_id}"
         self.session_global_graph_pkl_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.pkl")
         self.session_global_graph_html_path = os.path.join(self.GRAPH_DOCUMENT_DIRECTORY, f"{self.SESSION_GLOBAL_GRAPH_FILENAME_BASE}.html")
+        self.last_context_per_conversation = {}
 
         # Conversation logging
         self.CONVERSATIONS_LOG_FILENAME = f"conversations_log_{self.session_id}.csv"
@@ -283,7 +284,7 @@ class RAGSystem:
         Tu tarea es responder a la pregunta del usuario basándote *únicamente* en los hechos proporcionados en el "CONTEXTO DEL GRAFO".
         El contexto se presenta como una lista de tripletas con el formato: Sujeto --[Relación]--> Objeto.
 
-        Debes responder directamente. No infieras ni inventes información que no esté explícitamente en las tripletas.
+        No infieras ni inventes información que no esté explícitamente en las tripletas.
         Si la información no se puede deducir directamente de las tripletas, debes indicarlo.
 
         Tu respuesta DEBE ser un objeto JSON válido. ASEGÚRATE de que la salida sea *únicamente* el JSON y nada más.
@@ -547,10 +548,21 @@ class RAGSystem:
                 self.return_info = full_document_for_llm_data
                 self.return_info["id"] = top_conceptual_id_for_full_doc
                 print(f"Loaded full text from document: {top_conceptual_id_for_full_doc}")
+                if conversation_id:
+                    self.last_context_per_conversation[conversation_id] = full_document_for_llm_data
             else: 
                 print(f"Failed to load full text: {fname} (V: {p_version})")
         
-                
+        # TODO: For future implementations
+        """# Stage 3.5: In case no context was found, give the last context provided in that conversation (if exists)
+        if not full_document_for_llm_data and conversation_id:
+            last_ctx = self.last_context_per_conversation.get(conversation_id)
+            if last_ctx:
+                print("No new context found. Using last context from conversation.")
+                full_document_for_llm_data = last_ctx
+                self.return_info = full_document_for_llm_data
+                self.return_info["id"] = top_conceptual_id_for_full_doc"""
+
         # Stage 4: Generate LLM Answer
         (self.RAG_ANSWER, llm_answer) = self.generate_answer_with_llm(
             user_query_mejorado,

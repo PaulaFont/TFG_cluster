@@ -199,4 +199,40 @@ def link_components_by_context(original_phrase: str, substrings: list[str]) -> l
     return triplets
 
 
-# print(link_components_by_context( 'delito de auxilio a la Rebelión', ['Rebelión', 'auxilio', 'delito']))
+# print(link_components_by_context( '', ['Rebelión', 'auxilio', 'delito']))
+
+def separate_node_y(ent):
+    ent = re.sub(r'\s*\([^)]*\)$', '', ent).strip()
+    if ' y ' in ent:
+        parts = ent.split(' y ')
+        if all(p[0].isupper() for p in parts):
+            # Batch process all parts at once
+            doc = nlp('. '.join(parts))
+            person_set = {ent.text for ent in doc.ents if ent.label_ in ["PER", "PERSON", "LOC", "GPE"]}
+            if all(p in person_set for p in parts):
+                return parts
+    return [ent]
+
+def preprocess_triplets(triplets):
+    """
+    Expande nodos compuestos (como 'Juan y Sara') en todas las tripletas,
+    propagando los cambios a todas las tripletas que los referencian.
+    """
+    # 1. Mapping all nodes to the new ones
+    node_map = {}
+    for s, p, o in triplets:
+        for node in [s, o]:
+            if node not in node_map:
+                split = separate_node_y(node)
+                node_map[node] = split
+
+    # 2. Expand nodes using mapping
+    new_triplets = []
+    for s, p, o in triplets:
+        subjects = node_map.get(s, [s])
+        objects = node_map.get(o, [o])
+        for subj in subjects:
+            for obj in objects:
+                new_triplets.append((subj, p, obj))
+    return new_triplets
+

@@ -6,7 +6,7 @@ import spacy
 import Levenshtein as levenshtein
 from num2words import num2words
 import math
-from ner_logic import ner_function, link_components_by_context
+from ner_logic import ner_function, link_components_by_context, preprocess_triplets
 
 MAX_LEN_NODE = 4 #(words)
 MAX_LEN_EDGE = 5 #(words)
@@ -155,10 +155,11 @@ def filter_and_fix_triplets(current_graph, initial_triplets):
     existing_nodes = current_graph.nodes()
 
     print(f"Orignal triplets to add: {initial_triplets}")
-
+    # 0. Preprocess: separate entities by " y "
+    preprocessed_triplets = preprocess_triplets(initial_triplets)
     final_triplets_to_add = []
 
-    for s, p, o in initial_triplets:
+    for s, p, o in preprocessed_triplets:
         # Filter out too long edges
         if not filter_edge(p):
             print(f"Skipping triplet for LONG PREDICATE: ('{s}', '{p}', '{o}')")
