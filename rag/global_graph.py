@@ -6,6 +6,11 @@ import re
 def add_tag(text, document_id):
     return f"{text}_{str(document_id)}"
 
+def remove_tag(text):
+    if re.search(r'_\d+$', text):
+        return re.sub(r'_\d+$', '', text)
+    return text
+
 def update_triplets_id(triplets, document_id):
     nodes = set(node for s, _, o in triplets for node in (s, o))
     references = {}

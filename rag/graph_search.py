@@ -1,6 +1,7 @@
 import networkx as nx
 import html
 from graph_utils import find_similars
+from global_graph import remove_tag
 
 def get_shortest_path_context(graph, node1, node2):
     """
@@ -23,9 +24,9 @@ def get_shortest_path_context(graph, node1, node2):
                     # Use the key as the relation
                     for key, edge_attr in edges.items():
                         relation = key if key is not None else "related_to"
-                        context_lines.append(f"{src} --[{relation}]-- {tgt}")
+                        context_lines.append(f"{remove_tag(src)} --[{relation}]-- {remove_tag(tgt)}")
                 else:
-                    context_lines.append(f"{src} --[related_to]-- {tgt}")
+                    context_lines.append(f"{remove_tag(src)} --[related_to]-- {remove_tag(tgt)}")
             return "\n".join(context_lines), True
         except nx.NetworkXNoPath:
             return f"No path found between '{node1_new}' and '{node2_new}'.", False
@@ -59,16 +60,16 @@ def get_all_paths_context(graph, node1, node2, max_paths=10, max_length=6):
                     if edges:
                         for key, edge_attr in edges.items():
                             relation = key if key is not None else "related_to"
-                            context_lines.append(f"{src} --[{relation}]--> {tgt}")
+                            context_lines.append(f"{remove_tag(src)} --[{relation}]--> {remove_tag(tgt)}")
                     else:
                         # Check direction: tgt -> src
                         edges_rev = graph.get_edge_data(tgt, src)
                         if edges_rev:
                             for key, edge_attr in edges_rev.items():
                                 relation = key if key is not None else "related_to"
-                                context_lines.append(f"{tgt} --[{relation}]--> {src}")
+                                context_lines.append(f"{remove_tag(tgt)} --[{relation}]--> {remove_tag(src)}")
                         else:
-                            context_lines.append(f"{src} --[related_to]-- {tgt}")
+                            context_lines.append(f"{remove_tag(src)} --[related_to]-- {remove_tag(tgt)}")
                 context_strings.append("\n".join(context_lines))
             if not context_strings:
                 return f"No paths found between '{node1_new}' and '{node2_new}'.", False
@@ -153,9 +154,9 @@ def get_relevant_neighborhood_subgraph(graph, start_node, max_hops=3):
                 for key, attr in edge_keys_data.items():
                     relation = key if key is not None else "related_to"
                     if graph.is_directed():
-                        context_lines.append(f"{u} --[{relation}]--> {v}")
+                        context_lines.append(f"{remove_tag(u)} --[{relation}]--> {remove_tag(v)}")
                     else:
-                        context_lines.append(f"{u} --[{relation}]-- {v}")
+                        context_lines.append(f"{remove_tag(u)} --[{relation}]-- {remove_tag(v)}")
     else:
         context_lines.append(f"No edges in the neighborhood for '{node_new}' up to {final_hops} hops.")
 
