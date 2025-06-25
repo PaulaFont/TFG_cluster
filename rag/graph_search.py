@@ -132,7 +132,7 @@ def get_relevant_neighborhood_subgraph(graph, start_node, max_hops=3):
         
         # Check if any node in the current neighborhood is relevant
         has_relevant_node = any(
-            graph.nodes[node].get('ner_tag') in relevant_tags
+            node != node_new and graph.nodes[node].get('ner_tag') in relevant_tags
             for node in nodes_in_neighborhood
         )
         

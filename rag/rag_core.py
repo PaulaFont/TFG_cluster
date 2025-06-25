@@ -565,7 +565,7 @@ class RAGSystem:
 
         # Stage 4: Generate LLM Answer
         (self.RAG_ANSWER, llm_answer) = self.generate_answer_with_llm(
-            user_query_mejorado,
+            user_query,
             full_document_for_llm_data
         )
         # Is there context? 
@@ -581,7 +581,7 @@ class RAGSystem:
                 print(f"Graph search successful. Context found: {len(context)} snippets.")
 
                 graph_answer_found_flag, graph_llm_answer_text = self.generate_answer_from_graph(
-                    user_query_mejorado, 
+                    user_query, 
                     context
                 )
 
